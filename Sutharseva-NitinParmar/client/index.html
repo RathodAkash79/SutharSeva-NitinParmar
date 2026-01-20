@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>સુથાર સેવા - Carpenter Services</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Google Fonts for Gujarati -->
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Vadodara:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="app-header">
+        <div onclick="window.location.href='admin.html'" style="cursor: pointer;" class="logo">
+            <i class="fa-solid fa-hammer"></i>
+            <h1>સુથાર સેવા (નિતિન પરમાર)</h1>
+        </div>
+        <a href="tel:+918160911612" class="call-btn-small"><i class="fa-solid fa-phone"></i></a>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h2>નિતિન પરમાર - તમારા ઘર માટે શ્રેષ્ઠ ફર્નિચર</h2>
+        <p>અનુભવી સુથાર, વ્યાજબી ભાવ</p>
+        <div class="hero-buttons">
+            <a href="tel:+918160911612" class="btn btn-primary"><i class="fa-solid fa-phone"></i> ફોન કરો</a>
+            <a href="https://wa.me/918160911612" class="btn btn-success"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>
+        </div>
+    </section>
+
+    <!-- Calculator Section -->
+    <section class="calculator-section card">
+        <h3><i class="fa-solid fa-calculator"></i> ખર્ચ ગણતરી (અંદાજ)</h3>
+
+        <div class="input-group">
+            <label>કેટલા ફૂટ કામ છે?</label>
+            <div class="input-wrapper">
+                <input type="number" id="feetInput" placeholder="0">
+                <span>ft</span>
+            </div>
+            <p class="hint">લંબાઈ x પહોળાઈ દાખલ કરો (sq. ft)</p>
+        </div>
+
+        <div class="rate-display">
+            ભાવ: ₹<span id="currentRate">0</span> / sq ft
+        </div>
+
+        <div class="result-box">
+            <p>અંદાજિત ખર્ચ</p>
+            <h2 id="totalCost">₹0</h2>
+            <small>*આ માત્ર અંદાજ છે</small>
+        </div>
+
+        <button onclick="sendEstimateToWhatsapp()" class="btn btn-success full-width">
+            <i class="fa-brands fa-whatsapp"></i> WhatsApp પર મોકલો
+        </button>
+    </section>
+
+    <!-- Work Locations -->
+    <section class="locations-section">
+        <h3>અમારું કામ (ગામો)</h3>
+        <div id="villageList" class="chips-container">
+            <!-- Loaded from Firestore -->
+            <span class="chip">લોડ થઈ રહ્યું છે...</span>
+        </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section class="gallery-section">
+        <h3>કામની ગેલેરી</h3>
+        <div id="galleryGrid" class="gallery-grid">
+            <!-- Images loaded from Firebase -->
+            <div class="gallery-placeholder">તસ્વીરો લોડ થઈ રહી છે...</div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>© 2024 સુથાર સેવા</p>
+        <a href="admin.html" class="admin-link">એડમિન લોગિન</a>
+    </footer>
+
+    <!-- Firebase SDKs (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
+
+    <!-- App Scripts -->
+    <script src="js/firebase.js"></script>
+    <script src="js/calculator.js"></script>
+</body>
+</html>
