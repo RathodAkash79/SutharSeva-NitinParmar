@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>એડમિન પેનલ - Admin Panel</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Vadodara:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="admin-body">
+
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-container">
+        <div class="card login-card">
+            <h2>એડમિન લોગિન</h2>
+            <form id="loginForm">
+                <div class="input-group">
+                    <label>ઈમેલ</label>
+                    <input type="email" id="email" required placeholder="admin@example.com">
+                </div>
+                <div class="input-group">
+                    <label>પાસવર્ડ</label>
+                    <input type="password" id="password" required placeholder="******">
+                </div>
+                <button type="submit" class="btn btn-primary full-width">લોગિન</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard (Hidden by default) -->
+    <div id="adminDashboard" style="display: none;">
+
+        <!-- Header -->
+        <header class="admin-header">
+            <h3>સ્વાગત છે, નિતિનભાઈ</h3>
+            <button onclick="logout()" class="btn-text"><i class="fa-solid fa-right-from-bracket"></i></button>
+        </header>
+
+        <!-- Summary Cards -->
+        <section class="summary-section">
+            <div class="summary-card income">
+                <p>આજનો નફો</p>
+                <h2 id="todayIncome">₹0</h2>
+            </div>
+            <div class="summary-card pending">
+                <p>બાકી લેણાં</p>
+                <h2 id="totalPending">₹0</h2>
+            </div>
+        </section>
+
+        <!-- Quick Actions -->
+        <section class="quick-actions">
+            <h3>ઝડપી ક્રિયાઓ</h3>
+            <div class="action-buttons">
+                <button onclick="showModal('addProjectModal')" class="btn btn-primary"><i class="fa-solid fa-plus"></i> નવું કામ</button>
+                <button onclick="showSection('attendanceSection')" class="btn btn-outline"><i class="fa-solid fa-clipboard-user"></i> હાજરી ભરો</button>
+                <button onclick="showModal('rateModal')" class="btn btn-outline"><i class="fa-solid fa-indian-rupee-sign"></i> રેટ બદલો</button>
+                <button onclick="showModal('addWorkerModal')" class="btn btn-outline"><i class="fa-solid fa-user-plus"></i> કારીગર ઉમેરો</button>
+            </div>
+        </section>
+
+        <!-- Navigation Tabs -->
+        <nav class="admin-nav">
+            <button onclick="showSection('projectsSection')" class="active" id="nav-projects">પ્રોજેક્ટ્સ</button>
+            <button onclick="showSection('attendanceSection')" id="nav-attendance">હાજરી</button>
+            <button onclick="showSection('workersSection')" id="nav-workers">કારીગરો</button>
+        </nav>
+
+        <!-- CONTENT SECTIONS -->
+
+        <!-- 1. Projects Section -->
+        <section id="projectsSection" class="content-section active">
+            <div id="projectsList" class="list-container">
+                <!-- Projects injected here -->
+                <p class="text-center">પ્રોજેક્ટ્સ લોડ થઈ રહ્યા છે...</p>
+            </div>
+        </section>
+
+        <!-- 2. Attendance Section -->
+        <section id="attendanceSection" class="content-section" style="display: none;">
+            <div class="date-picker-row">
+                <button onclick="changeDate(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+                <span id="attendanceDate">આજે</span>
+                <button onclick="changeDate(1)"><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+            <div id="attendanceList" class="list-container">
+                <!-- Workers for attendance injected here -->
+            </div>
+        </section>
+
+        <!-- 3. Workers List Section -->
+        <section id="workersSection" class="content-section" style="display: none;">
+            <div id="workersList" class="list-container">
+                <!-- Workers list injected here -->
+            </div>
+        </section>
+
+    </div>
+
+    <!-- MODALS -->
+
+    <!-- Rate Modal -->
+    <div id="rateModal" class="modal">
+        <div class="modal-content">
+            <h3>રેટ સેટિંગ્સ</h3>
+            <div class="input-group">
+                <label>પ્રતિ ફૂટ ભાવ (₹)</label>
+                <input type="number" id="newRateInput">
+            </div>
+            <button onclick="updateRate()" class="btn btn-primary full-width">સાચવો</button>
+            <button onclick="closeModal('rateModal')" class="btn btn-text full-width">બંધ કરો</button>
+        </div>
+    </div>
+
+    <!-- Add Project Modal -->
+    <div id="addProjectModal" class="modal">
+        <div class="modal-content">
+            <h3>નવું કામ ઉમેરો</h3>
+            <input type="text" id="pName" placeholder="કામનું નામ (દા.ત. રમેશભાઈ ફર્નિચર)">
+            <input type="text" id="pVillage" placeholder="ગામ">
+            <select id="pCategory">
+                <option value="Furniture">ફર્નિચર</option>
+                <option value="Kitchen">રસોડું</option>
+                <option value="Door">દરવાજા</option>
+                <option value="Other">અન્ય</option>
+            </select>
+            <input type="number" id="pFeet" placeholder="કુલ ફૂટ">
+            <input type="number" id="pPrice" placeholder="કુલ કિંમત (₹)">
+            <button onclick="addProject()" class="btn btn-primary full-width">ઉમેરો</button>
+            <button onclick="closeModal('addProjectModal')" class="btn btn-text full-width">બંધ કરો</button>
+        </div>
+    </div>
+
+    <!-- Add Worker Modal -->
+    <div id="addWorkerModal" class="modal">
+        <div class="modal-content">
+            <h3>નવો કારીગર</h3>
+            <input type="text" id="wName" placeholder="નામ">
+            <input type="number" id="wWage" placeholder="રોજનો પગાર (₹)">
+            <select id="wRole">
+                <option value="Carpenter">સુથાર (Carpenter)</option>
+                <option value="Helper">હેલ્પર (Helper)</option>
+            </select>
+            <button onclick="addWorker()" class="btn btn-primary full-width">ઉમેરો</button>
+            <button onclick="closeModal('addWorkerModal')" class="btn btn-text full-width">બંધ કરો</button>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
+
+    <!-- Admin Scripts -->
+    <script src="js/firebase.js"></script>
+    <script src="js/admin.js"></script>
+    <script src="js/projects.js"></script>
+    <script src="js/workers.js"></script>
+    <script src="js/attendance.js"></script>
+
+</body>
+</html>
