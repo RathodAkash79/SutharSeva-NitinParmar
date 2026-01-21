@@ -1,0 +1,53 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 🔑 helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn()
+        && get(/databases/$(database)/documents/config/admin)
+           .data.uid == request.auth.uid;
+    }
+
+    // 🌍 PUBLIC DATA (Customer side)
+    match /public/{document=**} {
+      allow read: if true;          // anyone can read
+      allow write: if isAdmin();    // only Nitin
+    }
+
+    // 📦 PROJECTS
+    match /projects/{projectId} {
+      allow read: if true;          // customer can view work
+      allow create, update, delete: if isAdmin();
+    }
+
+    // 👷 WORKERS
+    match /workers/{workerId} {
+      allow read, write: if isAdmin();
+    }
+
+    // 🕒 ATTENDANCE
+    match /attendance/{attendanceId} {
+      allow read, write: if isAdmin();
+    }
+
+    // 💰 PAYMENTS
+    match /payments/{paymentId} {
+      allow read, write: if isAdmin();
+    }
+
+    // ⚙️ CONFIG (ADMIN UID etc)
+    match /config/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    // ❌ DEFAULT: BLOCK EVERYTHING ELSE
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+  

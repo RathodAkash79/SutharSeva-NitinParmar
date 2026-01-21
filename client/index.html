@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>સુથાર સેવા - શ્રેષ્ઠ ફર્નિચર અને સર્વિસ</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Vadodara:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="app-header">
+        <div onclick="window.location.href='index.html'" style="cursor: pointer;" class="logo">
+            <i class="fa-solid fa-hammer"></i>
+            <h1>સુથાર સેવા</h1>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <a href="tel:+918160911612" class="btn btn-primary" style="padding: 8px 16px; font-size: 14px;"><i class="fa-solid fa-phone"></i> ફોન</a>
+            <a href="admin.html" class="btn btn-outline" style="padding: 8px 16px; font-size: 14px;"><i class="fa-solid fa-user-gear"></i></a>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h2>નિતિન પરમાર - ફર્નિચર આર્ટિસ્ટ</h2>
+        <p>મજબૂત, સુંદર અને વ્યાજબી ફર્નિચર કામ માટે આજે જ સંપર્ક કરો.</p>
+        <div class="hero-buttons">
+            <a href="https://wa.me/918160911612" class="btn btn-success"><i class="fa-brands fa-whatsapp"></i> WhatsApp મેસેજ</a>
+            <a href="#calculator" class="btn btn-outline" style="background: white;"><i class="fa-solid fa-calculator"></i> ભાવ જાણો</a>
+        </div>
+    </section>
+
+    <!-- Search Bar -->
+    <div class="search-container">
+        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        <input type="text" id="searchInput" class="search-input" placeholder="ગામ, કામનો પ્રકાર શોધો..." maxlength="50">
+    </div>
+
+    <!-- Service Categories -->
+    <section class="p-20" style="background: #f5f5f5;">
+        <div style="font-size: 12px; color: #999; margin-bottom: 8px;">📁 કામના પ્રકાર</div>
+        <div id="serviceCategories" class="chips-container" style="gap: 8px;">
+            <span class="chip mini" onclick="filterGalleryByType('રસોડું')" style="cursor: pointer;">🔨 રસોડું</span>
+            <span class="chip mini" onclick="filterGalleryByType('દરવાજા')" style="cursor: pointer;">🚪 દરવાજા</span>
+            <span class="chip mini" onclick="filterGalleryByType('કપડાસ')" style="cursor: pointer;">👔 કપડાસ</span>
+            <span class="chip mini" onclick="filterGalleryByType('TV યુનિટ')" style="cursor: pointer;">📺 TV યુનિટ</span>
+            <span class="chip mini" onclick="filterGalleryByType('કસ્ટમ')" style="cursor: pointer;">✨ કસ્ટમ</span>
+            <span class="chip mini" onclick="loadGallery('બધા')" style="cursor: pointer;">બધા</span>
+        </div>
+    </section>
+
+    <!-- Calculator Section -->
+    <section id="calculator" class="calculator-section card">
+        <h3 class="section-title"><i class="fa-solid fa-calculator"></i> અંદાજિત ખર્ચ ગણો</h3>
+        
+        <div class="input-group">
+            <label>તમારા ફર્નિચરના કુલ ચોરસ ફૂટ (Sq. Ft)</label>
+            <div class="input-wrapper">
+                <input type="number" id="feetInput" placeholder="0">
+                <span>ફૂટ</span>
+            </div>
+        </div>
+
+        <div class="rate-display">
+            વર્તમાન રેટ: ₹<span id="currentRate">0</span> / ચોરસ ફૂટ
+        </div>
+
+        <div class="result-box">
+            <p>અંદાજિત કુલ ખર્ચ</p>
+            <h2 id="totalCost">₹0</h2>
+            <small>*કારીગરીના રેટ અને મટીરીયલ મુજબ ફેરફાર થઈ શકે છે.</small>
+        </div>
+
+        <button onclick="sendEstimateToWhatsapp()" class="btn btn-success full-width">
+            <i class="fa-brands fa-whatsapp"></i> આ ભાવ WhatsApp પર મોકલો
+        </button>
+    </section>
+
+    <!-- Work Locations -->
+    <section class="p-24">
+        <h3 class="section-title"><i class="fa-solid fa-location-dot"></i> પ્રખ્યાત ગામો</h3>
+        <div id="villageList" class="chips-container">
+            <span class="chip active">લોડ થઈ રહ્યું છે...</span>
+        </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section class="gallery-section mb-30">
+        <h3 class="section-title p-24"><i class="fa-solid fa-images"></i> અમારું કામ (ગેલેરી)</h3>
+        <div id="galleryGrid" class="gallery-grid">
+            <div class="gallery-placeholder">લોડ થઈ રહ્યું છે...</div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="text-center p-24" style="background: white; border-top: 1px solid #efebe9;">
+        <h4 class="mb-10">નિતિનભાઈ પરમાર</h4>
+        <p class="text-light mb-20">મોબાઈલ: 8160911612</p>
+        <p class="text-light" style="font-size: 12px;">© 2026 સુથાર સેવા - નિતિનભાઈ દ્વારા નિર્મિત</p>
+    </footer>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="js/firebase.js"></script>
+    <script src="js/calculator.js"></script>
+</body>
+</html>
