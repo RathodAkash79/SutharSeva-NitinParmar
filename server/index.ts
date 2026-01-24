@@ -12,6 +12,11 @@ declare module "http" {
   }
 }
 
+// Health check route for Railway - responds immediately with no middleware
+app.get("/", (req, res) => {
+  res.status(200).send("OK");
+});
+
 // CORS configuration for frontend
 app.use(cors({
   origin: process.env.FRONTEND_URL || "http://localhost:5173",
@@ -65,11 +70,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// Health check route for Railway and browser requests
-app.get("/", (req, res) => {
-  res.json({ status: "ok", message: "SutharSeva API is running" });
-});
-
 (async () => {
   // Register API routes
   await registerRoutes(httpServer, app);
@@ -88,7 +88,7 @@ app.get("/", (req, res) => {
     return res.status(status).json({ message });
   });
 
-  const port = parseInt(process.env.PORT || "5000", 10);
+  const port = parseInt(process.env.PORT || "8080", 10);
   httpServer.listen(
     {
       port,
