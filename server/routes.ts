@@ -1,6 +1,6 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import { storage } from "./storage.js";
 import multer from "multer";
 import { v2 as cloudinary } from "cloudinary";
 import path from "path";
