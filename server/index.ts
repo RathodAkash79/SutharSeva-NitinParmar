@@ -88,15 +88,19 @@ app.use((req, res, next) => {
     return res.status(status).json({ message });
   });
 
-  const port = parseInt(process.env.PORT || "8080", 10);
+  const port = process.env.PORT;
+  if (!port) {
+    throw new Error("PORT environment variable is required");
+  }
+  const portNumber = parseInt(port, 10);
   httpServer.listen(
     {
-      port,
+      port: portNumber,
       host: "0.0.0.0",
       reusePort: true,
     },
     () => {
-      log(`serving on port ${port}`);
+      log(`serving on port ${portNumber}`);
     },
   );
 })();
