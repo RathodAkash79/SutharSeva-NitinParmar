@@ -68,6 +68,11 @@ export async function registerRoutes(
   app: Express
 ): Promise<Server> {
   
+  // Health check endpoint
+  app.get("/api/health", (req, res) => {
+    res.json({ status: "ok", message: "API is running" });
+  });
+
   // SECURITY: Upload endpoint now requires authentication
   app.post("/api/upload", requireAuth, upload.single("image"), async (req, res) => {
     try {
