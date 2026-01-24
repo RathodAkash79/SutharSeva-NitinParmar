@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Plus, Trash2, Edit2, Upload, X } from "lucide-react";
 import { subscribeToProjects, loadProjects, WorkProject } from "@/lib/firebase";
 import { db } from "@/lib/firebase";
+import { apiUrl } from "@/lib/api";
 import {
   collection,
   addDoc,
@@ -73,7 +74,7 @@ export default function AdminProjects() {
       const formData = new FormData();
       formData.append("file", imageFile);
 
-      const uploadResponse = await fetch("/api/upload", {
+      const uploadResponse = await fetch(apiUrl("/api/upload"), {
         method: "POST",
         body: formData,
       });

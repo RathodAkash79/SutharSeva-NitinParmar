@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Upload, Trash2 } from "lucide-react";
 import { subscribeToProjects, WorkProject } from "@/lib/firebase";
+import { apiUrl } from "@/lib/api";
 import { db } from "@/lib/firebase";
 import {
   collection,
@@ -79,7 +80,7 @@ export default function AdminPhotos() {
       const formData = new FormData();
       formData.append("file", imageFile);
 
-      const uploadResponse = await fetch("/api/upload", {
+      const uploadResponse = await fetch(apiUrl("/api/upload"), {
         method: "POST",
         body: formData,
       });
