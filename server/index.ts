@@ -1,7 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
-import { serveStatic } from "./static";
 import { createServer } from "http";
+import cors from "cors";
 
 const app = express();
 const httpServer = createServer(app);
@@ -11,6 +11,12 @@ declare module "http" {
     rawBody?: Buffer;
   }
 }
+
+// CORS configuration for frontend
+app.use(cors({
+  origin: process.env.FRONTEND_URL || "http://localhost:5173",
+  credentials: true,
+}));
 
 // Body parsing with raw body capture for webhooks
 app.use(
@@ -60,9 +66,7 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // Serve static assets BEFORE API routes so they're not caught by catch-alls
-  serveStatic(app);
-
+  // Register API routes
   await registerRoutes(httpServer, app);
 
   // Error handler
