@@ -1,15 +1,22 @@
+import { useEffect } from "react";
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
+import Home from "@/pages/home";
+import WorkGallery from "@/pages/work-gallery";
+import Admin from "@/pages/admin";
+import { db } from "@/lib/firebase";
+import { collection, getDocs, query, limit } from "firebase/firestore";
 
 function Router() {
   return (
     <Switch>
-      {/* Add pages below */}
-      {/* <Route path="/" component={Home}/> */}
+      <Route path="/" component={Home} />
+      <Route path="/work-gallery" component={WorkGallery} />
+      <Route path="/admin/:section?" component={Admin} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>
@@ -17,6 +24,27 @@ function Router() {
 }
 
 function App() {
+  useEffect(() => {
+    // Test Firebase connection on app mount
+    const testFirebaseConnection = async () => {
+      try {
+        console.log("🔥 Testing Firebase connection...");
+        const projectsRef = collection(db, "projects");
+        const q = query(projectsRef, limit(1));
+        const snapshot = await getDocs(q);
+        console.log("✅ Firestore connected successfully");
+        console.log(`📊 Found ${snapshot.size} document(s) in projects collection`);
+        if (snapshot.size > 0) {
+          console.log("📄 Sample project:", snapshot.docs[0].data());
+        }
+      } catch (error) {
+        console.error("❌ Firebase connection failed:", error);
+      }
+    };
+
+    testFirebaseConnection();
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>

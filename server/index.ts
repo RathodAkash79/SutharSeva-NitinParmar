@@ -2,17 +2,17 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
-import path from "path";
 
 const app = express();
 const httpServer = createServer(app);
 
 declare module "http" {
   interface IncomingMessage {
-    rawBody: unknown;
+    rawBody?: Buffer;
   }
 }
 
+// Body parsing with raw body capture for webhooks
 app.use(
   express.json({
     verify: (req, _res, buf) => {
@@ -20,7 +20,6 @@ app.use(
     },
   }),
 );
-
 app.use(express.urlencoded({ extended: false }));
 
 export function log(message: string, source = "express") {
@@ -34,6 +33,7 @@ export function log(message: string, source = "express") {
   console.log(`${formattedTime} [${source}] ${message}`);
 }
 
+// Simple API logging
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
@@ -52,7 +52,6 @@ app.use((req, res, next) => {
       if (capturedJsonResponse) {
         logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
       }
-
       log(logLine);
     }
   });
@@ -61,8 +60,12 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Serve static assets BEFORE API routes so they're not caught by catch-alls
+  serveStatic(app);
+
   await registerRoutes(httpServer, app);
 
+  // Error handler
   app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
@@ -76,25 +79,6 @@ app.use((req, res, next) => {
     return res.status(status).json({ message });
   });
 
-  // Serve admin.html explicitly
-  app.get("/admin.html", (req, res) => {
-    res.sendFile(path.resolve("client", "admin.html"));
-  });
-
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  if (process.env.NODE_ENV === "production") {
-    serveStatic(app);
-  } else {
-    const { setupVite } = await import("./vite");
-    await setupVite(httpServer, app);
-  }
-
-  // ALWAYS serve the app on the port specified in the environment variable PORT
-  // Other ports are firewalled. Default to 5000 if not specified.
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
   const port = parseInt(process.env.PORT || "5000", 10);
   httpServer.listen(
     {
