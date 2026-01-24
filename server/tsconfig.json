@@ -3,11 +3,15 @@
     "target": "ES2020",
     "module": "ES2020",
     "moduleResolution": "node",
+    "lib": ["ES2020"],
+    "types": ["node"],
     "outDir": "dist",
     "rootDir": ".",
     "esModuleInterop": true,
-    "strict": false
+    "resolveJsonModule": true,
+    "strict": false,
+    "skipLibCheck": true
   },
   "include": ["**/*.ts"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "dist"]
 }
