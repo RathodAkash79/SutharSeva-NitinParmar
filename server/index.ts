@@ -92,15 +92,7 @@ app.use((req, res, next) => {
   if (!port) {
     throw new Error("PORT environment variable is required");
   }
-  const portNumber = parseInt(port, 10);
-  httpServer.listen(
-    {
-      port: portNumber,
-      host: "0.0.0.0",
-      reusePort: true,
-    },
-    () => {
-      log(`serving on port ${portNumber}`);
-    },
-  );
+  app.listen(Number(port), "0.0.0.0", () => {
+    log(`serving on port ${port}`);
+  });
 })();
