@@ -65,6 +65,11 @@ app.use((req, res, next) => {
   next();
 });
 
+// Health check route for Railway and browser requests
+app.get("/", (req, res) => {
+  res.json({ status: "ok", message: "SutharSeva API is running" });
+});
+
 (async () => {
   // Register API routes
   await registerRoutes(httpServer, app);
