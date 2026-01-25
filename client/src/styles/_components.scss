@@ -629,6 +629,9 @@
   animation: slideUp $transition-base;
   box-shadow: $shadow-xl;
   position: relative;
+  z-index: $z-modal;
+  display: flex;
+  flex-direction: column;
   
   @include respond-md {
     max-width: $max-width-md;
@@ -648,6 +651,7 @@
   
   &__header {
     @include flex-between;
+    flex-shrink: 0;
     margin-bottom: $spacing-lg;
     padding-bottom: $spacing-md;
     border-bottom: $border-width solid $color-border;
@@ -657,6 +661,7 @@
     font-size: $font-size-xl;
     font-weight: $font-weight-bold;
     color: $color-primary-dark;
+    flex: 1;
   }
   
   &__close {
@@ -664,6 +669,8 @@
     padding: $spacing-xs;
     border-radius: $border-radius-full;
     min-width: auto;
+    flex-shrink: 0;
+    margin-left: $spacing-md;
     
     &:hover {
       background-color: $color-background;
@@ -671,6 +678,8 @@
   }
   
   &__body {
+    flex: 1;
+    overflow-y: auto;
     margin-bottom: $spacing-lg;
   }
   
@@ -679,6 +688,7 @@
     gap: $spacing-md;
     padding-top: $spacing-md;
     border-top: $border-width solid $color-border;
+    flex-shrink: 0;
   }
 }
 
