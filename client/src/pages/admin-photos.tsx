@@ -147,14 +147,16 @@ export default function AdminPhotos() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="d-flex flex-column gap-lg">
       {/* Project Selection */}
-      <div className="bg-white rounded-xl p-6 border border-border shadow-sm">
-        <h3 className="text-lg font-bold text-primary-dark mb-4">પ્રોજેક્ટ પસંદ કરો</h3>
+      <div className="card">
+        <div className="card__header">
+          <h3 className="card__title">પ્રોજેક્ટ પસંદ કરો</h3>
+        </div>
         <select
           value={selectedProjectId}
           onChange={(e) => setSelectedProjectId(e.target.value)}
-          className="w-full px-4 py-2 border border-border rounded-lg text-secondary"
+          className="input"
         >
           <option value="">-- પ્રોજેક્ટ પસંદ કરો --</option>
           {projects.map((project) => (
@@ -167,43 +169,43 @@ export default function AdminPhotos() {
 
       {/* Upload Form */}
       {selectedProject && (
-        <div className="bg-white rounded-xl p-6 border border-border shadow-sm">
-          <h3 className="text-lg font-bold text-primary-dark mb-4">ફોટો અપલોડ કરો</h3>
+        <div className="card">
+          <div className="card__header">
+            <h3 className="card__title">ફોટો અપલોડ કરો</h3>
+          </div>
 
-          <div className="space-y-4">
+          <div className="d-flex flex-column gap-md">
             {/* Image Preview */}
             {imagePreview && (
-              <div className="relative w-full h-64 bg-border rounded-lg overflow-hidden">
-                <img
-                  src={imagePreview}
-                  alt="Preview"
-                  className="w-full h-full object-contain"
-                />
+              <div className="card" style={{ minHeight: "200px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <img src={imagePreview} alt="Preview" className="w-full h-full" style={{ objectFit: "contain" }} />
               </div>
             )}
 
             {/* File Input */}
-            <div>
-              <label className="block text-sm font-semibold text-secondary mb-2">
+            <div className="form__group">
+              <label className="form__label" htmlFor="file-input-photo">
                 ફોટો પસંદ કરો
               </label>
               <input
+                id="file-input-photo"
                 type="file"
                 accept="image/*"
                 onChange={handleImageSelect}
-                className="w-full px-4 py-2 border border-border rounded-lg"
+                className="input"
               />
             </div>
 
             {/* Category Selection */}
-            <div>
-              <label className="block text-sm font-semibold text-secondary mb-2">
+            <div className="form__group">
+              <label className="form__label" htmlFor="category-select">
                 કામનો પ્રકાર
               </label>
               <select
+                id="category-select"
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full px-4 py-2 border border-border rounded-lg text-secondary"
+                className="input"
               >
                 {categories.map((cat) => (
                   <option key={cat} value={cat}>
@@ -217,9 +219,10 @@ export default function AdminPhotos() {
             <Button
               onClick={handleUpload}
               disabled={!imageFile || uploading}
-              className="w-full bg-primary text-white hover:bg-primary-dark"
+              variant="success"
+              className="btn--full-width"
             >
-              <Upload className="w-4 h-4 mr-2" />
+              <Upload className="w-4 h-4" />
               {uploading ? "અપલોડ થઈ રહ્યું છે..." : "અપલોડ કરો"}
             </Button>
           </div>
@@ -228,33 +231,36 @@ export default function AdminPhotos() {
 
       {/* Project Photos */}
       {selectedProject && (
-        <div className="bg-white rounded-xl p-6 border border-border shadow-sm">
-          <h3 className="text-lg font-bold text-primary-dark mb-4">
-            {selectedProject.name} - ફોટો
-          </h3>
+        <div className="card">
+          <div className="card__header">
+            <h3 className="card__title">
+              {selectedProject.name} - ફોટો
+            </h3>
+          </div>
 
           {!selectedProject.photos || selectedProject.photos.length === 0 ? (
-            <p className="text-center text-secondary py-8">
+            <p className="text-center text-secondary py-md">
               હજી કોઈ ફોટો નથી
             </p>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-3 md:grid-cols-4 gap-md">
               {selectedProject.photos.map((photo, idx) => (
-                <div key={idx} className="relative group">
+                <div key={idx} className="relative card card--hover" style={{ aspectRatio: "1/1", overflow: "hidden" }}>
                   <img
                     src={photo.url}
                     alt={`Photo ${idx + 1}`}
-                    className="w-full aspect-square object-cover rounded-lg"
+                    className="w-full h-full"
+                    style={{ objectFit: "cover" }}
                   />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition rounded-lg flex items-center justify-center">
-                    <button
-                      onClick={() => handleDeletePhoto(idx)}
-                      className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                  <div className="absolute bottom-1 left-1 text-xs bg-black/60 text-white px-2 py-1 rounded">
+                  <button
+                    onClick={() => handleDeletePhoto(idx)}
+                    className="btn btn-danger btn--icon"
+                    style={{ position: "absolute", top: "8px", right: "8px" }}
+                    aria-label="Delete photo"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                  <div className="badge badge--primary" style={{ position: "absolute", bottom: "8px", left: "8px" }}>
                     {photo.category}
                   </div>
                 </div>

@@ -107,7 +107,7 @@ export default function Home() {
         </div>
       </section>
 
-      <main className="page page--centered">
+      <div className="page page--centered">
         <WorkTypesSection />
 
         <section id="calculator" className="section">
@@ -210,7 +210,7 @@ export default function Home() {
             ))}
           </div>
         </section>
-      </main>
+      </div>
 
       <footer className="section section--compact text-center">
         <div className="page page--centered">
