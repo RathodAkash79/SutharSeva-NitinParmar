@@ -126,152 +126,158 @@ export default function Admin() {
   }
 
   return (
-    <div className="app">
-      <div className="layout">
-      <aside
-        className={cn(
-          "layout__sidebar",
-          sidebarOpen ? "is-open" : "is-hidden",
-          isMobile ? "is-drawer" : undefined
-        )}
-        aria-label="Admin navigation"
-      >
-        <div className="p-md border-b border-border">
-          <div className="d-flex items-center justify-between gap-sm">
-            {sidebarOpen && (
-              <Link href="/admin">
-                <a className="app-header__logo">
-                  <span className="app-header__logo-icon">🔨</span>
-                  <span className="app-header__logo-text">સુથાર સેવા</span>
-                </a>
-              </Link>
-            )}
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="btn btn-ghost btn--icon"
-              aria-label="Toggle sidebar"
-            >
-              {sidebarOpen ? (
-                <X className="w-4 h-4 text-secondary" />
-              ) : (
-                <Menu className="w-4 h-4 text-secondary" />
-              )}
-            </button>
+    <div className="app admin-shell">
+      <header className="admin-header">
+        <div className="admin-header__inner">
+          <button
+            className="btn btn-ghost btn--icon"
+            onClick={() => setSidebarOpen((prev) => !prev)}
+            aria-label="Toggle navigation"
+          >
+            {sidebarOpen ? <X className="w-4 h-4 text-secondary" /> : <Menu className="w-4 h-4 text-secondary" />}
+          </button>
+          <div className="d-flex items-center gap-sm">
+            <span className="text-xl">🔨</span>
+            <div className="leading-tight">
+              <p className="text-sm font-semibold text-primary-dark">સુથાર સેવા</p>
+              <p className="text-xs text-secondary">Admin Panel</p>
+            </div>
           </div>
-        </div>
-
-        <nav className="p-md d-flex flex-col gap-sm">
-          <Link href="/admin">
-            <a
-              className={`btn btn--full-width ${
-                currentSection === "dashboard" || currentSection === undefined
-                  ? "btn-primary"
-                  : "btn-ghost"
-              } d-flex items-center gap-md justify-start`}
-            >
-              <span className="text-xl">📊</span>
-              {sidebarOpen && <span className="font-semibold">ડેશબોર્ડ</span>}
-            </a>
-          </Link>
-
-          <Link href="/admin/projects">
-            <a
-              className={`btn btn--full-width d-flex items-center gap-md justify-start ${
-                currentSection === "projects" ? "btn-primary" : "btn-ghost"
-              }`}
-            >
-              <Plus className="w-5 h-5" />
-              {sidebarOpen && <span className="font-semibold">પ્રોજેક્ટ</span>}
-            </a>
-          </Link>
-
-          <Link href="/admin/workers">
-            <a
-              className={`btn btn--full-width d-flex items-center gap-md justify-start ${
-                currentSection === "workers" ? "btn-primary" : "btn-ghost"
-              }`}
-            >
-              <Users className="w-5 h-5" />
-              {sidebarOpen && <span className="font-semibold">કારીગરો</span>}
-            </a>
-          </Link>
-
-          <Link href="/admin/attendance">
-            <a
-              className={`btn btn--full-width d-flex items-center gap-md justify-start ${
-                currentSection === "attendance" ? "btn-primary" : "btn-ghost"
-              }`}
-            >
-              <Calendar className="w-5 h-5" />
-              {sidebarOpen && <span className="font-semibold">હાજરી</span>}
-            </a>
-          </Link>
-
-          <div className="border-t border-border pt-sm mt-sm">
-            <button
-              onClick={handleLogout}
-              className="btn btn--full-width btn-ghost d-flex items-center gap-md justify-start"
-            >
-              <LogOut className="w-5 h-5" />
-              {sidebarOpen && <span className="font-semibold">લોગ આઉટ</span>}
-            </button>
-          </div>
-        </nav>
-      </aside>
-      <div className={cn(
-        "layout__content",
-        sidebarOpen && !isMobile ? undefined : "is-overlay"
-      )}>
-        <header className="sticky top-0 z-30 bg-surface border-b border-border shadow-sm">
-          <div className="section section--compact d-flex items-center justify-between px-lg">
-            <button
-              className="btn btn-ghost btn--icon"
-              onClick={() => setSidebarOpen((prev) => !prev)}
-              aria-label="Toggle navigation"
-            >
-              {sidebarOpen ? <X className="w-4 h-4 text-secondary" /> : <Menu className="w-4 h-4 text-secondary" />}
-            </button>
-            <h2 className="text-2xl font-bold text-primary-dark">
-              {currentSection === "projects" && "પ્રોજેક્ટ્સ"}
-              {currentSection === "workers" && "કારીગરો"}
-              {currentSection === "attendance" && "હાજરી"}
-              {(!currentSection || currentSection === "dashboard") && "ડેશબોર્ડ"}
-            </h2>
-            <p className="text-sm text-secondary font-medium truncate max-w-xs" title={authUser?.email || ""}>
-              સ્વાગત છે{authUser?.email ? `, ${authUser.email}` : ""}
+          <div className="text-right truncate max-w-xs">
+            <p className="text-sm text-secondary" title={authUser?.email || ""}>
+              {authUser?.email || ""}
             </p>
           </div>
-        </header>
+        </div>
+      </header>
 
-        <main className="page page--centered">
-          {(!currentSection || currentSection === "dashboard") && (
-            <section className="section">
-              <div className="grid grid--3-col grid--responsive">
-                <div className="card">
-                  <p className="text-secondary font-semibold text-sm mb-sm">કુલ પ્રોજેક્ટ્સ</p>
-                  <h3 className="text-3xl font-bold text-primary-dark">0</h3>
-                </div>
-                <div className="card">
-                  <p className="text-secondary font-semibold text-sm mb-sm">કુલ કારીગરો</p>
-                  <h3 className="text-3xl font-bold text-primary-dark">0</h3>
-                </div>
-                <div className="card">
-                  <p className="text-secondary font-semibold text-sm mb-sm">આજનો હાજરી</p>
-                  <h3 className="text-3xl font-bold text-primary-dark">0</h3>
-                </div>
-              </div>
-            </section>
+      <div className="admin-body">
+        <aside
+          className={cn(
+            "layout__sidebar",
+            sidebarOpen ? "is-open" : "is-hidden",
+            isMobile ? "is-drawer" : undefined
           )}
+          aria-label="Admin navigation"
+        >
+          <div className="p-md border-b border-border">
+            <div className="d-flex items-center justify-between gap-sm">
+              {sidebarOpen && (
+                <Link href="/admin">
+                  <a className="app-header__logo">
+                    <span className="app-header__logo-icon">🔨</span>
+                    <span className="app-header__logo-text">સુથાર સેવા</span>
+                  </a>
+                </Link>
+              )}
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="btn btn-ghost btn--icon"
+                aria-label="Toggle sidebar"
+              >
+                {sidebarOpen ? (
+                  <X className="w-4 h-4 text-secondary" />
+                ) : (
+                  <Menu className="w-4 h-4 text-secondary" />
+                )}
+              </button>
+            </div>
+          </div>
 
-          {currentSection === "projects" && <AdminProjects isMobile={isMobile} />}
+          <nav className="p-md d-flex flex-col gap-sm">
+            <Link href="/admin">
+              <a
+                className={`btn btn--full-width ${
+                  currentSection === "dashboard" || currentSection === undefined
+                    ? "btn-primary"
+                    : "btn-ghost"
+                } d-flex items-center gap-md justify-start`}
+              >
+                <span className="text-xl">📊</span>
+                {sidebarOpen && <span className="font-semibold">ડેશબોર્ડ</span>}
+              </a>
+            </Link>
 
-          {currentSection === "workers" && <AdminWorkers isMobile={isMobile} />}
+            <Link href="/admin/projects">
+              <a
+                className={`btn btn--full-width d-flex items-center gap-md justify-start ${
+                  currentSection === "projects" ? "btn-primary" : "btn-ghost"
+                }`}
+              >
+                <Plus className="w-5 h-5" />
+                {sidebarOpen && <span className="font-semibold">પ્રોજેક્ટ</span>}
+              </a>
+            </Link>
 
-          {currentSection === "attendance" && <AdminAttendance isMobile={isMobile} />}
-        </main>
-        <ConnectionStatusBar />
+            <Link href="/admin/workers">
+              <a
+                className={`btn btn--full-width d-flex items-center gap-md justify-start ${
+                  currentSection === "workers" ? "btn-primary" : "btn-ghost"
+                }`}
+              >
+                <Users className="w-5 h-5" />
+                {sidebarOpen && <span className="font-semibold">કારીગરો</span>}
+              </a>
+            </Link>
+
+            <Link href="/admin/attendance">
+              <a
+                className={`btn btn--full-width d-flex items-center gap-md justify-start ${
+                  currentSection === "attendance" ? "btn-primary" : "btn-ghost"
+                }`}
+              >
+                <Calendar className="w-5 h-5" />
+                {sidebarOpen && <span className="font-semibold">હાજરી</span>}
+              </a>
+            </Link>
+
+            <div className="border-t border-border pt-sm mt-sm">
+              <button
+                onClick={handleLogout}
+                className="btn btn--full-width btn-ghost d-flex items-center gap-md justify-start"
+              >
+                <LogOut className="w-5 h-5" />
+                {sidebarOpen && <span className="font-semibold">લોગ આઉટ</span>}
+              </button>
+            </div>
+          </nav>
+        </aside>
+
+        <div
+          className={cn(
+            "admin-main",
+            sidebarOpen && !isMobile ? "with-sidebar" : "full"
+          )}
+        >
+          <div className="admin-main__content page page--centered">
+            {(!currentSection || currentSection === "dashboard") && (
+              <section className="section">
+                <div className="grid grid--3-col grid--responsive">
+                  <div className="card">
+                    <p className="text-secondary font-semibold text-sm mb-sm">કુલ પ્રોજેક્ટ્સ</p>
+                    <h3 className="text-3xl font-bold text-primary-dark">0</h3>
+                  </div>
+                  <div className="card">
+                    <p className="text-secondary font-semibold text-sm mb-sm">કુલ કારીગરો</p>
+                    <h3 className="text-3xl font-bold text-primary-dark">0</h3>
+                  </div>
+                  <div className="card">
+                    <p className="text-secondary font-semibold text-sm mb-sm">આજનો હાજરી</p>
+                    <h3 className="text-3xl font-bold text-primary-dark">0</h3>
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {currentSection === "projects" && <AdminProjects isMobile={isMobile} />}
+
+            {currentSection === "workers" && <AdminWorkers isMobile={isMobile} />}
+
+            {currentSection === "attendance" && <AdminAttendance isMobile={isMobile} />}
+          </div>
+          <ConnectionStatusBar />
+        </div>
       </div>
-    </div>
     </div>
   );
 }
@@ -291,7 +297,7 @@ function ConnectionStatusBar() {
 
     const checkApi = async (): Promise<StatusValue> => {
       try {
-        const response = await fetch(apiUrl("/health"), { method: "HEAD", signal: controller.signal });
+        const response = await fetch(apiUrl("/api/health"), { method: "GET", signal: controller.signal });
         return response.ok ? "ok" : "error";
       } catch (error) {
         console.error("API health check failed", error);

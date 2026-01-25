@@ -65,6 +65,10 @@ export default function AdminWorkers({ isMobile = false }: { isMobile?: boolean 
         });
         setWorkers(loadedWorkers.sort((a, b) => b.createdAt.toDate().getTime() - a.createdAt.toDate().getTime()));
         setLoading(false);
+      },
+      (error) => {
+        console.error("❌ Workers load error:", error);
+        setLoading(false);
       }
     );
 
@@ -166,6 +170,12 @@ export default function AdminWorkers({ isMobile = false }: { isMobile?: boolean 
           <Plus className="w-4 h-4" /> નવો કારીગર ઉમેરો
         </Button>
       </div>
+
+      {workers.length === 0 && !showForm && (
+        <div className="card text-center py-10">
+          <p className="text-secondary font-medium">હજી કોઈ કારીગર નથી</p>
+        </div>
+      )}
 
       {showForm && (
         <div className="card">

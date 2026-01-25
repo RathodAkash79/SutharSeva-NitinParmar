@@ -15,9 +15,8 @@ export function apiUrl(path: string): string {
 // Test API connectivity (call once on app start)
 export async function testApiHealth(): Promise<boolean> {
   try {
-    const response = await fetch(apiUrl("/health"), {
-      method: "HEAD",
-      timeout: 5000,
+    const response = await fetch(apiUrl("/api/health"), {
+      method: "GET",
     });
     const isOk = response.ok;
     console.log(isOk ? "✅ API is healthy" : "❌ API health check failed");

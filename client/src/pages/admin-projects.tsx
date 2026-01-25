@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Trash2, Edit2, Upload, X } from "lucide-react";
 import { subscribeToProjects, loadProjects, WorkProject } from "@/lib/firebase";
-import { db } from "@/lib/firebase";
+import { db, auth } from "@/lib/firebase";
 import { apiUrl } from "@/lib/api";
 import {
   collection,
@@ -78,10 +78,14 @@ export default function AdminProjects({ isMobile = false }: { isMobile?: boolean
     setUploadError(null);
     try {
       const formDataUpload = new FormData();
-      formDataUpload.append("file", imageFile);
+      formDataUpload.append("image", imageFile);
+
+      // Attach Firebase ID token for protected upload endpoint
+      const idToken = await auth.currentUser?.getIdToken();
 
       const uploadResponse = await fetch(apiUrl("/api/upload"), {
         method: "POST",
+        headers: idToken ? { Authorization: `Bearer ${idToken}` } : undefined,
         body: formDataUpload,
       });
 
@@ -380,72 +384,63 @@ function ProjectCard({
   onUploadPhoto: () => void;
 }) {
   return (
-    <div className="border border-border rounded-lg bg-surface hover:bg-background transition-colors overflow-hidden flex flex-col h-full">
-      {/* CARD HEADER */}
-      <div className="p-3 border-b border-border">
-        <div className="flex justify-between items-start gap-2 mb-2">
-          <h4 className="font-semibold text-sm text-primary-dark line-clamp-2 flex-1">
-            {project.name}
-          </h4>
-          <div className="flex gap-1 flex-shrink-0">
-            <button
-              onClick={() => onEdit(project)}
-              className="btn btn-ghost btn--icon text-xs p-1"
-              aria-label="Edit"
-              title="Edit project"
-            >
-              <Edit2 className="w-3 h-3" />
-            </button>
-            <button
-              onClick={() => onDelete(project.id)}
-              className="btn btn-ghost btn--icon text-xs p-1 text-danger"
-              aria-label="Delete"
-              title="Delete project"
-            >
-              <Trash2 className="w-3 h-3" />
-            </button>
+    <div className="card card--hover h-full flex flex-col gap-sm">
+      <div className="flex items-start justify-between gap-sm">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-xs">
+            <span className="badge badge--primary text-xxs">{project.status === "Completed" ? "પૂર્ણ" : "ચાલુ"}</span>
+            <p className="text-xs text-secondary truncate">📍 {project.village}</p>
+          </div>
+          <h4 className="text-base font-semibold text-primary-dark mt-1 line-clamp-2">{project.name}</h4>
+          <div className="flex flex-wrap gap-1 mt-2">
+            {project.workTypes?.slice(0, 3).map((type) => (
+              <span key={type} className="badge badge--primary text-xxs px-2 py-1">
+                {type}
+              </span>
+            ))}
+            {project.workTypes && project.workTypes.length > 3 && (
+              <span className="text-xxs text-secondary">+{project.workTypes.length - 3}</span>
+            )}
           </div>
         </div>
-
-        <p className="text-xs text-secondary">📍 {project.village}</p>
-
-        {/* TAGS */}
-        <div className="flex flex-wrap gap-1 mt-2">
-          {project.workTypes?.slice(0, 2).map((type) => (
-            <span key={type} className="badge badge--primary text-xs px-1.5">
-              {type.split(" ")[0]}
-            </span>
-          ))}
-          {project.workTypes && project.workTypes.length > 2 && (
-            <span className="text-xs text-secondary">+{project.workTypes.length - 2}</span>
-          )}
+        <div className="flex flex-col gap-1">
+          <button
+            onClick={() => onEdit(project)}
+            className="btn btn-ghost btn--icon"
+            aria-label="Edit"
+            title="Edit project"
+          >
+            <Edit2 className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => onDelete(project.id)}
+            className="btn btn-ghost btn--icon text-danger"
+            aria-label="Delete"
+            title="Delete project"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
         </div>
       </div>
 
-      {/* CARD BODY - AMOUNT & PHOTOS COUNT */}
-      <div className="p-3 flex-1 flex flex-col justify-between">
+      <div className="flex items-center justify-between text-sm bg-background p-2 rounded border border-border">
         <div>
-          <p className="text-xs text-secondary">રકમ</p>
-          <p className="text-sm font-bold text-primary">₹{project.totalAmount.toLocaleString("en-IN")}</p>
+          <p className="text-xxs text-secondary">રકમ</p>
+          <p className="font-bold text-primary">₹{project.totalAmount.toLocaleString("en-IN")}</p>
         </div>
-
-        <div className="mt-2">
-          <p className="text-xs text-secondary">ફોટો</p>
-          <p className="text-sm font-semibold text-primary-dark">{(project.photos || []).length}</p>
+        <div className="text-right">
+          <p className="text-xxs text-secondary">ફોટો</p>
+          <p className="font-semibold text-primary-dark">{(project.photos || []).length}</p>
         </div>
       </div>
 
-      {/* CARD FOOTER - ACTION BUTTON */}
-      <div className="p-2 border-t border-border">
-        <button
-          onClick={onUploadPhoto}
-          className="w-full px-2 py-1.5 bg-primary text-white text-xs font-medium rounded hover:bg-primary/90 transition-colors flex items-center justify-center gap-1"
-          title="Upload photos"
-        >
-          <Upload className="w-3 h-3" />
-          <span className="hidden sm:inline">અપલોડ</span>
-        </button>
-      </div>
+      <button
+        onClick={onUploadPhoto}
+        className="w-full btn btn-primary btn--small d-flex items-center justify-center gap-xs"
+        title="Upload photos"
+      >
+        <Upload className="w-4 h-4" /> ફોટો અપલોડ
+      </button>
     </div>
   );
 }
