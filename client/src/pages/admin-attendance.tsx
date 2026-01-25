@@ -29,7 +29,7 @@ interface Worker {
   name: string;
 }
 
-export default function AdminAttendance({ isMobile = false }: { isMobile?: boolean }) {
+export default function AdminAttendance() {
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [attendance, setAttendance] = useState<Attendance[]>([]);
   const [loading, setLoading] = useState(true);
@@ -181,26 +181,37 @@ export default function AdminAttendance({ isMobile = false }: { isMobile?: boole
   }
 
   return (
-    <div className="d-flex flex-column gap-lg">
-      <div className="card">
-        <div className="card__header">
-          <button onClick={handlePrevMonth} className="btn btn-ghost btn--icon" aria-label="Previous month">
+    <div className="space-y-6">
+      {/* Calendar */}
+      <div className="bg-white rounded-xl p-6 border border-border shadow-sm">
+        <div className="flex items-center justify-between mb-6">
+          <button
+            onClick={handlePrevMonth}
+            className="p-2 hover:bg-background rounded transition"
+          >
             <ChevronLeft className="w-5 h-5 text-secondary" />
           </button>
-          <h3 className="card__title">
+          <h3 className="text-lg font-bold text-primary-dark">
             {currentMonth.toLocaleDateString("gu-IN", {
               month: "long",
               year: "numeric",
             })}
           </h3>
-          <button onClick={handleNextMonth} className="btn btn-ghost btn--icon" aria-label="Next month">
+          <button
+            onClick={handleNextMonth}
+            className="p-2 hover:bg-background rounded transition"
+          >
             <ChevronRight className="w-5 h-5 text-secondary" />
           </button>
         </div>
 
-        <div className="grid grid--4-col gap-xs">
+        {/* Calendar Grid */}
+        <div className="grid grid-cols-7 gap-1 mb-4">
           {["સો", "સ", "બુ", "બ", "ગુ", "શુ", "રવિ"].map((day) => (
-            <div key={day} className="text-center p-xs text-sm font-bold text-primary">
+            <div
+              key={day}
+              className="text-center p-2 text-sm font-bold text-primary"
+            >
               {day}
             </div>
           ))}
@@ -214,17 +225,20 @@ export default function AdminAttendance({ isMobile = false }: { isMobile?: boole
             const isSelected = dateStr === selectedDate;
             const count = dateStr ? getAttendanceCount(dateStr) : 0;
 
-            let tone = "bg-border text-secondary";
-            if (isSelected) tone = "bg-primary text-white";
-            else if (count > 0) tone = "bg-success text-white";
-
             return (
               <button
                 key={idx}
                 onClick={() => dateStr && setSelectedDate(dateStr)}
                 disabled={!dateStr}
-                className={`d-flex flex-col items-center justify-center rounded-lg text-sm font-semibold ${tone}`}
-                style={{ aspectRatio: "1 / 1" }}
+                className={`aspect-square flex flex-col items-center justify-center rounded-lg text-sm font-semibold transition ${
+                  !dateStr
+                    ? "bg-transparent"
+                    : isSelected
+                      ? "bg-primary text-white"
+                      : count > 0
+                        ? "bg-success text-white"
+                        : "bg-border text-secondary hover:bg-border-dark"
+                }`}
               >
                 {day && (
                   <>
@@ -240,12 +254,13 @@ export default function AdminAttendance({ isMobile = false }: { isMobile?: boole
         </div>
       </div>
 
-      <div className="card">
-        <div className="card__header">
-          <h3 className="card__title">હાજરી - {formatDateForDisplay(selectedDate)}</h3>
-        </div>
+      {/* Selected Date Attendance */}
+      <div className="bg-white rounded-xl p-6 border border-border shadow-sm">
+        <h3 className="text-lg font-bold text-primary-dark mb-4">
+          હાજરી - {formatDateForDisplay(selectedDate)}
+        </h3>
 
-        <div className="d-flex flex-column gap-sm">
+        <div className="space-y-3">
           {workers.map((worker) => {
             const present = attendance.find(
               (a) =>
@@ -263,28 +278,34 @@ export default function AdminAttendance({ isMobile = false }: { isMobile?: boole
             return (
               <div
                 key={worker.id}
-                className="card card--hover"
+                className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-background transition"
               >
-                <div className="d-flex items-center justify-between">
-                  <span className="font-semibold text-primary-dark">{worker.name}</span>
-                  <div className="d-flex gap-xs">
-                    <button
-                      onClick={() =>
-                        handleMarkAttendance(worker.id, worker.name, "present")
-                      }
-                      className={`btn ${present ? "btn-success" : "btn-outline"}`}
-                    >
-                      ✓ હાજર
-                    </button>
-                    <button
-                      onClick={() =>
-                        handleMarkAttendance(worker.id, worker.name, "absent")
-                      }
-                      className={`btn ${absent ? "btn-danger" : "btn-outline"}`}
-                    >
-                      ✗ ગેરહાજર
-                    </button>
-                  </div>
+                <span className="font-semibold text-primary-dark">{worker.name}</span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() =>
+                      handleMarkAttendance(worker.id, worker.name, "present")
+                    }
+                    className={`px-4 py-2 rounded-lg font-semibold transition ${
+                      present
+                        ? "bg-success text-white"
+                        : "bg-border text-secondary hover:bg-border-dark"
+                    }`}
+                  >
+                    ✓ હાજર
+                  </button>
+                  <button
+                    onClick={() =>
+                      handleMarkAttendance(worker.id, worker.name, "absent")
+                    }
+                    className={`px-4 py-2 rounded-lg font-semibold transition ${
+                      absent
+                        ? "bg-danger text-white"
+                        : "bg-border text-secondary hover:bg-border-dark"
+                    }`}
+                  >
+                    ✗ ગેરહાજર
+                  </button>
                 </div>
               </div>
             );

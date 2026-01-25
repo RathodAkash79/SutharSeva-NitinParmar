@@ -6,18 +6,20 @@ import {
   Calendar, 
   LogOut,
   Menu,
-  X 
+  X,
+  DollarSign
 } from "lucide-react";
-import { collection, getDocs, limit, query } from "firebase/firestore";
+import { collection, getDocs, limit, query, doc, getDoc, setDoc } from "firebase/firestore";
 import { apiUrl } from "@/lib/api";
 import { db, auth } from "@/lib/firebase";
-import { cn } from "@/lib/utils";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import AdminProjects from "./admin-projects";
 import AdminWorkers from "./admin-workers";
 import AdminAttendance from "./admin-attendance";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
-// ALLOWED ADMIN EMAILS - ONLY NITIN
+// ALLOWED ADMIN EMAILS
 const ALLOWED_ADMIN_EMAILS = [
   "rathodakashr79@gmail.com",
   "admin@sutharseva.com",
@@ -27,8 +29,7 @@ const ALLOWED_ADMIN_EMAILS = [
 function isAllowedAdmin(userEmail: string | null): boolean {
   if (!userEmail) return false;
   return ALLOWED_ADMIN_EMAILS.some(
-    (allowedEmail) =>
-      userEmail.toLowerCase() === allowedEmail.toLowerCase()
+    (allowedEmail) => userEmail.toLowerCase() === allowedEmail.toLowerCase()
   );
 }
 
@@ -37,39 +38,32 @@ export default function Admin() {
   const [authUser, setAuthUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [isMobile, setIsMobile] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [, params] = useRoute("/admin/:section");
+  const [showRateModal, setShowRateModal] = useState(false);
+  const [rate, setRate] = useState("");
+  const [savingRate, setSavingRate] = useState(false);
   
   const currentSection = params?.section || "dashboard";
 
   useEffect(() => {
-    // Real Firebase Authentication Check with Admin Validation
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        // NOT LOGGED IN
         setAuthError("Not authenticated. Redirecting to login...");
         setLoading(false);
-        setTimeout(() => {
-          setLocation("/admin-login");
-        }, 800);
+        setTimeout(() => setLocation("/admin-login"), 800);
         return;
       }
 
-      // CHECK IF USER IS ALLOWED ADMIN
       if (!isAllowedAdmin(user.email)) {
-        // UNAUTHORIZED USER - LOGOUT IMMEDIATELY
         console.warn(`❌ Unauthorized admin access attempt: ${user.email}`);
         setAuthError(`Access denied. You are not authorized (${user.email})`);
         await signOut(auth);
         setLoading(false);
-        setTimeout(() => {
-          setLocation("/admin-login");
-        }, 1000);
+        setTimeout(() => setLocation("/admin-login"), 1000);
         return;
       }
 
-      // AUTHORIZED ADMIN
       setAuthUser(user);
       setLoading(false);
       setAuthError(null);
@@ -78,21 +72,6 @@ export default function Admin() {
 
     return () => unsubscribe();
   }, [setLocation]);
-
-  // Track viewport to handle responsive sidebar
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 767px)");
-    const handleMedia = (event: MediaQueryListEvent) => setIsMobile(event.matches);
-
-    setIsMobile(mq.matches);
-    mq.addEventListener("change", handleMedia);
-    return () => mq.removeEventListener("change", handleMedia);
-  }, []);
-
-  // Collapse sidebar on mobile by default, expand on desktop
-  useEffect(() => {
-    setSidebarOpen(!isMobile);
-  }, [isMobile]);
 
   const handleLogout = async () => {
     try {
@@ -105,7 +84,44 @@ export default function Admin() {
     }
   };
 
-  // Show auth error
+  const handleSaveRate = async () => {
+    if (!rate || isNaN(parseFloat(rate))) {
+      alert("કૃપા કરીને યોગ્ય રકમ દાખલ કરો");
+      return;
+    }
+
+    setSavingRate(true);
+    try {
+      const rateDocRef = doc(db, "settings", "rate");
+      await setDoc(rateDocRef, {
+        pricePerSqFt: parseFloat(rate),
+        updatedAt: new Date(),
+        updatedBy: authUser?.email || "unknown",
+      });
+      alert("રેટ સફળતાથી સાચવ્યો!");
+      setShowRateModal(false);
+      setRate("");
+    } catch (error) {
+      console.error("Error saving rate:", error);
+      alert("રેટ સાચવવામાં ભૂલ આવી");
+    } finally {
+      setSavingRate(false);
+    }
+  };
+
+  const handleOpenRateModal = async () => {
+    try {
+      const rateDocRef = doc(db, "settings", "rate");
+      const rateDoc = await getDoc(rateDocRef);
+      if (rateDoc.exists()) {
+        setRate(rateDoc.data().pricePerSqFt.toString());
+      }
+    } catch (error) {
+      console.error("Error loading rate:", error);
+    }
+    setShowRateModal(true);
+  };
+
   if (authError) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-red-50 px-4">
@@ -126,158 +142,211 @@ export default function Admin() {
   }
 
   return (
-    <div className="app admin-shell">
-      <header className="admin-header">
-        <div className="admin-header__inner">
-          <button
-            className="btn btn-ghost btn--icon"
-            onClick={() => setSidebarOpen((prev) => !prev)}
-            aria-label="Toggle navigation"
-          >
-            {sidebarOpen ? <X className="w-4 h-4 text-secondary" /> : <Menu className="w-4 h-4 text-secondary" />}
-          </button>
-          <div className="d-flex items-center gap-sm">
-            <span className="text-xl">🔨</span>
-            <div className="leading-tight">
-              <p className="text-sm font-semibold text-primary-dark">સુથાર સેવા</p>
-              <p className="text-xs text-secondary">Admin Panel</p>
-            </div>
-          </div>
-          <div className="text-right truncate max-w-xs">
-            <p className="text-sm text-secondary" title={authUser?.email || ""}>
-              {authUser?.email || ""}
-            </p>
-          </div>
-        </div>
-      </header>
-
-      <div className="admin-body">
-        <aside
-          className={cn(
-            "layout__sidebar",
-            sidebarOpen ? "is-open" : "is-hidden",
-            isMobile ? "is-drawer" : undefined
-          )}
-          aria-label="Admin navigation"
-        >
-          <div className="p-md border-b border-border">
-            <div className="d-flex items-center justify-between gap-sm">
-              {sidebarOpen && (
-                <Link href="/admin">
-                  <a className="app-header__logo">
-                    <span className="app-header__logo-icon">🔨</span>
-                    <span className="app-header__logo-text">સુથાર સેવા</span>
-                  </a>
-                </Link>
-              )}
-              <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="btn btn-ghost btn--icon"
-                aria-label="Toggle sidebar"
-              >
-                {sidebarOpen ? (
-                  <X className="w-4 h-4 text-secondary" />
-                ) : (
-                  <Menu className="w-4 h-4 text-secondary" />
-                )}
-              </button>
-            </div>
-          </div>
-
-          <nav className="p-md d-flex flex-col gap-sm">
-            <Link href="/admin">
-              <a
-                className={`btn btn--full-width ${
-                  currentSection === "dashboard" || currentSection === undefined
-                    ? "btn-primary"
-                    : "btn-ghost"
-                } d-flex items-center gap-md justify-start`}
-              >
-                <span className="text-xl">📊</span>
-                {sidebarOpen && <span className="font-semibold">ડેશબોર્ડ</span>}
-              </a>
-            </Link>
-
-            <Link href="/admin/projects">
-              <a
-                className={`btn btn--full-width d-flex items-center gap-md justify-start ${
-                  currentSection === "projects" ? "btn-primary" : "btn-ghost"
-                }`}
-              >
-                <Plus className="w-5 h-5" />
-                {sidebarOpen && <span className="font-semibold">પ્રોજેક્ટ</span>}
-              </a>
-            </Link>
-
-            <Link href="/admin/workers">
-              <a
-                className={`btn btn--full-width d-flex items-center gap-md justify-start ${
-                  currentSection === "workers" ? "btn-primary" : "btn-ghost"
-                }`}
-              >
-                <Users className="w-5 h-5" />
-                {sidebarOpen && <span className="font-semibold">કારીગરો</span>}
-              </a>
-            </Link>
-
-            <Link href="/admin/attendance">
-              <a
-                className={`btn btn--full-width d-flex items-center gap-md justify-start ${
-                  currentSection === "attendance" ? "btn-primary" : "btn-ghost"
-                }`}
-              >
-                <Calendar className="w-5 h-5" />
-                {sidebarOpen && <span className="font-semibold">હાજરી</span>}
-              </a>
-            </Link>
-
-            <div className="border-t border-border pt-sm mt-sm">
-              <button
-                onClick={handleLogout}
-                className="btn btn--full-width btn-ghost d-flex items-center gap-md justify-start"
-              >
-                <LogOut className="w-5 h-5" />
-                {sidebarOpen && <span className="font-semibold">લોગ આઉટ</span>}
-              </button>
-            </div>
-          </nav>
-        </aside>
-
-        <div
-          className={cn(
-            "admin-main",
-            sidebarOpen && !isMobile ? "with-sidebar" : "full"
-          )}
-        >
-          <div className="admin-main__content page page--centered">
-            {(!currentSection || currentSection === "dashboard") && (
-              <section className="section">
-                <div className="grid grid--3-col grid--responsive">
-                  <div className="card">
-                    <p className="text-secondary font-semibold text-sm mb-sm">કુલ પ્રોજેક્ટ્સ</p>
-                    <h3 className="text-3xl font-bold text-primary-dark">0</h3>
-                  </div>
-                  <div className="card">
-                    <p className="text-secondary font-semibold text-sm mb-sm">કુલ કારીગરો</p>
-                    <h3 className="text-3xl font-bold text-primary-dark">0</h3>
-                  </div>
-                  <div className="card">
-                    <p className="text-secondary font-semibold text-sm mb-sm">આજનો હાજરી</p>
-                    <h3 className="text-3xl font-bold text-primary-dark">0</h3>
-                  </div>
-                </div>
-              </section>
+    <div className="flex min-h-screen bg-background">
+      {/* Sidebar */}
+      <div
+        style={{
+          width: sidebarOpen ? "256px" : "80px",
+          transition: "all 300ms ease-in-out",
+        }}
+        className="bg-white border-r border-border fixed h-screen left-0 top-0 z-40 overflow-y-auto"
+      >
+        <div className="p-md border-b border-border">
+          <div className="flex items-center justify-between mb-md">
+            {sidebarOpen && (
+              <Link href="/admin">
+                <a className="flex items-center gap-sm cursor-pointer">
+                  <span className="text-2xl">🔨</span>
+                  <h1 className="text-lg font-bold text-primary-dark">સુથાર સેવા</h1>
+                </a>
+              </Link>
             )}
-
-            {currentSection === "projects" && <AdminProjects isMobile={isMobile} />}
-
-            {currentSection === "workers" && <AdminWorkers isMobile={isMobile} />}
-
-            {currentSection === "attendance" && <AdminAttendance isMobile={isMobile} />}
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="p-xs hover:bg-background rounded transition"
+            >
+              {sidebarOpen ? (
+                <X className="w-4 h-4 text-secondary" />
+              ) : (
+                <Menu className="w-4 h-4 text-secondary" />
+              )}
+            </button>
           </div>
-          <ConnectionStatusBar />
         </div>
+
+        <nav className="p-md space-y-sm">
+          <Link href="/admin">
+            <a
+              className={`flex items-center gap-md px-md py-md rounded-lg transition ${
+                currentSection === "dashboard" || currentSection === undefined
+                  ? "bg-primary text-white"
+                  : "text-secondary hover:bg-background"
+              }`}
+            >
+              <span className="text-xl">📊</span>
+              {sidebarOpen && <span className="font-semibold">ડેશબોર્ડ</span>}
+            </a>
+          </Link>
+
+          <Link href="/admin/projects">
+            <a
+              className={`flex items-center gap-md px-md py-md rounded-lg transition ${
+                currentSection === "projects"
+                  ? "bg-primary text-white"
+                  : "text-secondary hover:bg-background"
+              }`}
+            >
+              <Plus className="w-5 h-5" />
+              {sidebarOpen && <span className="font-semibold">પ્રોજેક્ટ</span>}
+            </a>
+          </Link>
+
+          <Link href="/admin/workers">
+            <a
+              className={`flex items-center gap-md px-md py-md rounded-lg transition ${
+                currentSection === "workers"
+                  ? "bg-primary text-white"
+                  : "text-secondary hover:bg-background"
+              }`}
+            >
+              <Users className="w-5 h-5" />
+              {sidebarOpen && <span className="font-semibold">કારીગરો</span>}
+            </a>
+          </Link>
+
+          <Link href="/admin/attendance">
+            <a
+              className={`flex items-center gap-md px-md py-md rounded-lg transition ${
+                currentSection === "attendance"
+                  ? "bg-primary text-white"
+                  : "text-secondary hover:bg-background"
+              }`}
+            >
+              <Calendar className="w-5 h-5" />
+              {sidebarOpen && <span className="font-semibold">હાજરી</span>}
+            </a>
+          </Link>
+
+          <button
+            onClick={handleOpenRateModal}
+            className="w-full flex items-center gap-md px-md py-md rounded-lg text-secondary hover:bg-background transition"
+          >
+            <DollarSign className="w-5 h-5" />
+            {sidebarOpen && <span className="font-semibold">રેટ બદલો</span>}
+          </button>
+
+          <div className="border-t border-border pt-sm mt-sm">
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center gap-md px-md py-md rounded-lg text-secondary hover:bg-background transition"
+            >
+              <LogOut className="w-5 h-5" />
+              {sidebarOpen && <span className="font-semibold">લોગ આઉટ</span>}
+            </button>
+          </div>
+        </nav>
       </div>
+
+      {/* Main Content */}
+      <div
+        style={{
+          marginLeft: sidebarOpen ? "256px" : "80px",
+          transition: "all 300ms ease-in-out",
+        }}
+        className="flex-1"
+      >
+        {/* Header */}
+        <header
+          className="sticky top-0 z-30 bg-surface shadow-sm border-b border-border"
+          style={{ backdropFilter: "blur(12px)" }}
+        >
+          <div className="px-lg py-md flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-primary-dark">
+              {currentSection === "projects" && "પ્રોજેક્ટ્સ"}
+              {currentSection === "workers" && "કારીગરો"}
+              {currentSection === "attendance" && "હાજરી"}
+              {(!currentSection || currentSection === "dashboard") && "ડેશબોર્ડ"}
+            </h2>
+            <div className="text-right">
+              <p className="text-sm text-secondary font-medium">સ્વાગત છે, નિતિનભાઈ</p>
+            </div>
+          </div>
+        </header>
+
+        {/* Content Area */}
+        <main className="p-lg">
+          {(!currentSection || currentSection === "dashboard") && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-lg">
+              <div className="bg-white rounded-xl p-lg border border-border shadow-sm">
+                <p className="text-secondary font-semibold text-sm mb-sm">કુલ પ્રોજેક્ટ્સ</p>
+                <h3 className="text-4xl font-bold text-primary-dark">0</h3>
+              </div>
+              <div className="bg-white rounded-xl p-lg border border-border shadow-sm">
+                <p className="text-secondary font-semibold text-sm mb-sm">કુલ કારીગરો</p>
+                <h3 className="text-4xl font-bold text-primary-dark">0</h3>
+              </div>
+              <div className="bg-white rounded-xl p-lg border border-border shadow-sm">
+                <p className="text-secondary font-semibold text-sm mb-sm">આજનો હાજરી</p>
+                <h3 className="text-4xl font-bold text-primary-dark">0</h3>
+              </div>
+            </div>
+          )}
+
+          {currentSection === "projects" && <AdminProjects />}
+          {currentSection === "workers" && <AdminWorkers />}
+          {currentSection === "attendance" && <AdminAttendance />}
+        </main>
+
+        {/* Status Bar */}
+        <ConnectionStatusBar />
+      </div>
+
+      {/* Rate Change Modal */}
+      {showRateModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+          onClick={() => setShowRateModal(false)}
+        >
+          <div
+            className="bg-white rounded-xl p-6 max-w-md w-full mx-4 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-xl font-bold text-primary-dark mb-4">રેટ બદલો (₹ / sq ft)</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-secondary mb-2">
+                  કિંમત પ્રતિ ચોરસ ફૂટ (₹)
+                </label>
+                <Input
+                  type="number"
+                  value={rate}
+                  onChange={(e) => setRate(e.target.value)}
+                  placeholder="દા.ત. 150"
+                  className="border-border"
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleSaveRate}
+                  disabled={savingRate}
+                  className="bg-primary text-white hover:bg-primary-dark"
+                >
+                  {savingRate ? "સાચવી રહ્યું છે..." : "સાચવો"}
+                </Button>
+                <Button
+                  onClick={() => {
+                    setShowRateModal(false);
+                    setRate("");
+                  }}
+                  className="bg-gray-200 text-secondary hover:bg-gray-300"
+                >
+                  રદ કરો
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -285,7 +354,11 @@ export default function Admin() {
 type StatusValue = "ok" | "error" | "checking";
 
 function ConnectionStatusBar() {
-  const [status, setStatus] = useState<{ api: StatusValue; firebase: StatusValue; cloudinary: StatusValue }>({
+  const [status, setStatus] = useState<{
+    api: StatusValue;
+    firebase: StatusValue;
+    cloudinary: StatusValue;
+  }>({
     api: "checking",
     firebase: "checking",
     cloudinary: "checking",
@@ -297,7 +370,10 @@ function ConnectionStatusBar() {
 
     const checkApi = async (): Promise<StatusValue> => {
       try {
-        const response = await fetch(apiUrl("/api/health"), { method: "GET", signal: controller.signal });
+        const response = await fetch(apiUrl("/api/health"), {
+          method: "GET",
+          signal: controller.signal,
+        });
         return response.ok ? "ok" : "error";
       } catch (error) {
         console.error("API health check failed", error);
@@ -318,19 +394,15 @@ function ConnectionStatusBar() {
     };
 
     const checkCloudinary = async (): Promise<StatusValue> => {
-      // Check if backend can upload (Cloudinary or fallback)
-      try {
-        // We'll test this when user tries to upload
-        // For now, just assume it's available if the API is working
-        return "ok";
-      } catch (error) {
-        console.error("Cloudinary health check failed", error);
-        return "error";
-      }
+      return "ok";
     };
 
     const run = async () => {
-      const [api, firebase, cloudinary] = await Promise.all([checkApi(), checkFirebase(), checkCloudinary()]);
+      const [api, firebase, cloudinary] = await Promise.all([
+        checkApi(),
+        checkFirebase(),
+        checkCloudinary(),
+      ]);
       if (isCancelled) return;
       setStatus({ api, firebase, cloudinary });
     };
@@ -345,7 +417,7 @@ function ConnectionStatusBar() {
   const renderIndicator = (label: string, value: StatusValue) => {
     const icon = value === "ok" ? "🟢" : value === "checking" ? "🟡" : "🔴";
     return (
-      <div className="d-flex items-center gap-xs text-sm text-secondary">
+      <div className="flex items-center gap-xs text-sm text-secondary">
         <span aria-hidden>{icon}</span>
         <span>{label}</span>
       </div>
@@ -353,16 +425,12 @@ function ConnectionStatusBar() {
   };
 
   return (
-    <footer className="section section--compact">
-      <div className="page page--centered">
-        <div className="card card--hover">
-          <div className="d-flex flex-wrap gap-md items-center">
-            <p className="text-sm font-semibold text-secondary">સિસ્ટમ સ્થિતિ</p>
-            {renderIndicator("API", status.api)}
-            {renderIndicator("Firebase", status.firebase)}
-            {renderIndicator("Cloudinary", status.cloudinary)}
-          </div>
-        </div>
+    <footer className="sticky bottom-0 bg-white border-t border-border px-lg py-md">
+      <div className="flex flex-wrap gap-md items-center">
+        <p className="text-sm font-semibold text-secondary">સિસ્ટમ સ્થિતિ</p>
+        {renderIndicator("API", status.api)}
+        {renderIndicator("Firebase", status.firebase)}
+        {renderIndicator("Cloudinary", status.cloudinary)}
       </div>
     </footer>
   );
