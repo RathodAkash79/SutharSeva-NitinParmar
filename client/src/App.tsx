@@ -9,6 +9,7 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import WorkGallery from "@/pages/work-gallery";
 import Admin from "@/pages/admin";
+import AdminLogin from "@/pages/admin-login";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, query, limit } from "firebase/firestore";
 
@@ -17,6 +18,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/work-gallery" component={WorkGallery} />
+      <Route path="/admin-login" component={AdminLogin} />
       <Route path="/admin/:section?" component={Admin} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />

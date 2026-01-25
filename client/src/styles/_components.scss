@@ -623,8 +623,8 @@
 .modal {
   @include card-base;
   max-width: 90vw;
-  max-height: 90vh;
-  overflow-y: auto;
+  max-height: 80vh;
+  overflow: hidden;
   margin: auto;
   animation: slideUp $transition-base;
   box-shadow: $shadow-xl;
@@ -681,6 +681,7 @@
     flex: 1;
     overflow-y: auto;
     margin-bottom: $spacing-lg;
+    padding-right: $spacing-sm;
   }
   
   &__footer {

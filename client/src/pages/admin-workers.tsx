@@ -24,7 +24,7 @@ interface Worker {
   createdAt: Timestamp;
 }
 
-export default function AdminWorkers() {
+export default function AdminWorkers({ isMobile = false }: { isMobile?: boolean }) {
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);

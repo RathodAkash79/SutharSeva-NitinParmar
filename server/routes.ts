@@ -109,7 +109,7 @@ export async function registerRoutes(
         fs.unlinkSync(filePath);
       }
 
-      res.json({ url });
+      res.json({ secure_url: url, url: url });
     } catch (error) {
       console.error("Upload error:", error);
       res.status(500).json({ message: `Upload failed: ${error instanceof Error ? error.message : "Unknown error"}` });

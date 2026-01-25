@@ -36,39 +36,6 @@ export default function Home() {
     window.open(`https://wa.me/918160911612?text=${message}`, "_blank");
   };
 
-  const WorkTypesSection = () => (
-    <section className="section" aria-labelledby="work-types">
-      <div className="section__header">
-        <p id="work-types" className="text-xs text-muted font-semibold uppercase">
-          📁 કામના પ્રકાર
-        </p>
-      </div>
-      <div className="grid grid--responsive gap-sm">
-        {[
-          "🚪 દરવાજા",
-          "🪟 બારી",
-          "🪑 ફર્નિચર",
-          "🧥 અલમારી",
-          "📦 કબાટ",
-          "🗄️ શો-કેસ",
-          "📺 TV યુનિટ",
-          "🛋️ સોફા",
-          "🛕 મંદિર",
-          "🛏️ પલંગ",
-          "📚 સ્ટડી ટેબલ",
-          "🪞 કાચ",
-          "💄 ડ્રેસિંગ ટેબલ",
-          "❄️ AC પેનલિંગ",
-          "✨ અન્ય",
-        ].map((category) => (
-          <div key={category} className="card card--hover text-center p-md">
-            <p className="font-semibold text-primary-dark text-sm">{category}</p>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-
   return (
     <div className="app">
       <main className="page page--full">
@@ -109,8 +76,6 @@ export default function Home() {
       </section>
 
       <div className="page page--centered">
-        <WorkTypesSection />
-
         <section id="calculator" className="section">
           <div className="card calculator">
             <div className="card__header">

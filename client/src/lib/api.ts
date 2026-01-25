@@ -1,5 +1,29 @@
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+// Railway Production Backend ONLY
+export const API_BASE_URL = "https://sutharseva-nitinparmar-production.up.railway.app";
+
+if (!API_BASE_URL) {
+  console.error("❌ CRITICAL: API_BASE_URL is not configured!");
+  console.error("API calls will FAIL. Check environment setup.");
+}
 
 export function apiUrl(path: string): string {
-  return `${API_BASE_URL}${path}`;
+  const url = `${API_BASE_URL}${path}`;
+  console.debug(`📡 API Call: ${url}`);
+  return url;
+}
+
+// Test API connectivity (call once on app start)
+export async function testApiHealth(): Promise<boolean> {
+  try {
+    const response = await fetch(apiUrl("/health"), {
+      method: "HEAD",
+      timeout: 5000,
+    });
+    const isOk = response.ok;
+    console.log(isOk ? "✅ API is healthy" : "❌ API health check failed");
+    return isOk;
+  } catch (error) {
+    console.error("❌ API unreachable:", error);
+    return false;
+  }
 }

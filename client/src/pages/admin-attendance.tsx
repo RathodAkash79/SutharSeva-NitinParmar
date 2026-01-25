@@ -29,7 +29,7 @@ interface Worker {
   name: string;
 }
 
-export default function AdminAttendance() {
+export default function AdminAttendance({ isMobile = false }: { isMobile?: boolean }) {
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [attendance, setAttendance] = useState<Attendance[]>([]);
   const [loading, setLoading] = useState(true);
