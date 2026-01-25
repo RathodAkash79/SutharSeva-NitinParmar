@@ -16,6 +16,78 @@
   background-color: $color-background;
 }
 
+// General app shell wrapper (sidebar + content)
+.layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: $color-background;
+  position: relative;
+
+  &__sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 256px;
+    background-color: $color-surface;
+    border-right: $border-width solid $color-border;
+    z-index: $z-sticky;
+    overflow-y: auto;
+    transition: transform $transition-base, width $transition-base;
+    box-shadow: $shadow-sm;
+
+    &.is-collapsed {
+      width: 80px;
+    }
+
+    @include respond-md {
+      transform: translateX(0);
+    }
+  }
+
+  &__sidebar.is-hidden {
+    transform: translateX(-100%);
+  }
+
+  &__content {
+    flex: 1;
+    min-height: 100vh;
+    margin-left: 256px;
+    transition: margin-left $transition-base;
+
+    &.is-collapsed {
+      margin-left: 80px;
+    }
+
+    @include respond-md {
+      margin-left: 256px;
+    }
+  }
+
+  &__content.is-overlay {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: calc(#{$breakpoint-md} - 1px)) {
+  .layout {
+    &__sidebar {
+      width: 80vw;
+      max-width: 320px;
+      transform: translateX(-100%);
+      box-shadow: $shadow-lg;
+    }
+
+    &__sidebar.is-open {
+      transform: translateX(0);
+    }
+
+    &__content {
+      margin-left: 0;
+    }
+  }
+}
+
 .page {
   flex: 1;
   width: 100%;

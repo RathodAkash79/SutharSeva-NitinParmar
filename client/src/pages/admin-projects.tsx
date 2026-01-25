@@ -31,6 +31,9 @@ export default function AdminProjects() {
     status: "Ongoing",
   });
   const [editingId, setEditingId] = useState<string | null>(null);
+  const activeUploadProject = uploadingPhotoForId
+    ? projects.find((p) => p.id === uploadingPhotoForId) || null
+    : null;
 
   const workTypeOptions = [
     "🚪 દરવાજા",
@@ -241,12 +244,11 @@ export default function AdminProjects() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Add Button */}
-      <div className="flex gap-2">
+    <div className="d-flex flex-column gap-lg">
+      <div className="d-flex gap-sm">
         <Button
           onClick={() => {
-            setShowForm(!showForm);
+            setShowForm(true);
             setEditingId(null);
             setFormData({
               name: "",
@@ -256,266 +258,79 @@ export default function AdminProjects() {
               status: "Ongoing",
             });
           }}
-          className="bg-primary text-white hover:bg-primary-dark"
         >
-          <Plus className="w-4 h-4 mr-2" />
-          નવું પ્રોજેક્ટ ઉમેરો
+          <Plus className="w-4 h-4" /> નવું પ્રોજેક્ટ ઉમેરો
         </Button>
       </div>
 
-      {/* Form */}
-      {showForm && (
-        <div className="bg-white rounded-xl p-6 border border-border shadow-sm">
-          <h3 className="text-xl font-bold text-primary-dark mb-4">
-            {editingId ? "પ્રોજેક્ટ સંપાદિત કરો" : "નવું પ્રોજેક્ટ ઉમેરો"}
-          </h3>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-semibold text-secondary mb-2">
-                પ્રોજેક્ટ નામ
-              </label>
-              <Input
-                type="text"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, name: e.target.value }))
-                }
-                placeholder="દા.ત. કિચન ફર્નિચર"
-                className="border-border"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-secondary mb-2">
-                ગામ
-              </label>
-              <Input
-                type="text"
-                value={formData.village}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, village: e.target.value }))
-                }
-                placeholder="દા.ત. ભાવનગર"
-                className="border-border"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-secondary mb-2">
-                કામના પ્રકાર (બહુવિધ પસંદ કરો)
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                {workTypeOptions.map((type) => (
-                  <label
-                    key={type}
-                    className="flex items-center gap-2 p-2 rounded border border-border cursor-pointer hover:bg-background"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={formData.workTypes.includes(type)}
-                      onChange={() => handleWorkTypeToggle(type)}
-                      className="w-4 h-4"
-                    />
-                    <span className="text-sm text-secondary">{type}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-secondary mb-2">
-                કુલ રકમ (₹)
-              </label>
-              <Input
-                type="number"
-                value={formData.totalAmount}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, totalAmount: e.target.value }))
-                }
-                placeholder="0"
-                className="border-border"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-secondary mb-2">
-                સ્થિતિ
-              </label>
-              <select
-                value={formData.status}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, status: e.target.value as any }))
-                }
-                className="w-full px-3 py-2 border border-border rounded-lg text-secondary"
-              >
-                <option value="Ongoing">ચાલુ</option>
-                <option value="Completed">પૂર્ણ</option>
-              </select>
-            </div>
-
-            <div className="flex gap-2">
-              <Button
-                type="submit"
-                className="bg-primary text-white hover:bg-primary-dark"
-              >
-                સાચવો
-              </Button>
-              <Button
-                type="button"
-                onClick={() => {
-                  setShowForm(false);
-                  setEditingId(null);
-                }}
-                className="bg-gray-200 text-secondary hover:bg-gray-300"
-              >
-                રદ કરો
-              </Button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      {/* Projects List */}
-      <div className="space-y-4">
+      <div className="d-flex flex-column gap-md">
         {projects.length === 0 ? (
-          <div className="text-center py-12 bg-white rounded-xl border border-border">
-            <p className="text-[#795548] font-medium">હજી કોઈ પ્રોજેક્ટ નથી</p>
+          <div className="empty-state">
+            <div className="empty-state__icon">📁</div>
+            <p className="empty-state__text">હજી કોઈ પ્રોજેક્ટ નથી</p>
           </div>
         ) : (
           projects.map((project) => (
-            <div
-              key={project.id}
-              className="bg-white rounded-xl border border-border shadow-sm overflow-hidden"
-            >
-              {/* Project Header */}
-              <div className="p-4 border-b border-border">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-bold text-primary-dark mb-1">
-                      {project.name}
-                    </h3>
-                    <p className="text-sm text-secondary mb-2">📍 {project.village}</p>
-                    <div className="flex flex-wrap gap-2 mb-2">
-                      {project.workTypes?.map((type) => (
-                        <span
-                          key={type}
-                          className="text-xs bg-border text-secondary px-2 py-1 rounded"
-                        >
-                          {type}
-                        </span>
-                      ))}
-                    </div>
-                    <p className="text-sm font-semibold text-primary">
-                      ₹{project.totalAmount.toLocaleString("en-IN")}
-                    </p>
+            <div key={project.id} className="card card--hover">
+              <div className="card__header">
+                <div>
+                  <h3 className="card__title">{project.name}</h3>
+                  <p className="text-sm text-secondary">📍 {project.village}</p>
+                  <div className="d-flex flex-wrap gap-xs mt-xs">
+                    {project.workTypes?.map((type) => (
+                      <span key={type} className="badge badge--primary">
+                        {type}
+                      </span>
+                    ))}
                   </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleEdit(project)}
-                      className="p-2 hover:bg-background rounded transition"
-                    >
-                      <Edit2 className="w-4 h-4 text-secondary" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(project.id)}
-                      className="p-2 hover:bg-background rounded transition"
-                    >
-                      <Trash2 className="w-4 h-4 text-danger" />
-                    </button>
-                  </div>
+                  <p className="text-sm font-semibold text-primary mt-sm">
+                    ₹{project.totalAmount.toLocaleString("en-IN")}
+                  </p>
+                </div>
+                <div className="d-flex gap-xs">
+                  <button onClick={() => handleEdit(project)} className="btn btn-ghost btn--icon" aria-label="Edit project">
+                    <Edit2 className="w-4 h-4 text-secondary" />
+                  </button>
+                  <button onClick={() => handleDelete(project.id)} className="btn btn-ghost btn--icon" aria-label="Delete project">
+                    <Trash2 className="w-4 h-4 text-danger" />
+                  </button>
                 </div>
               </div>
 
-              {/* Photo Upload Section */}
-              <div className="p-4 bg-background border-b border-border">
-                {uploadingPhotoForId === project.id ? (
-                  <div className="space-y-4">
-                    <h4 className="font-semibold text-secondary">ફોટો અપલોડ કરો</h4>
-
-                    {imagePreview && (
-                      <div className="relative w-full h-40 bg-border rounded-lg overflow-hidden">
-                        <img
-                          src={imagePreview}
-                          alt="Preview"
-                          className="w-full h-full object-contain"
-                        />
-                      </div>
-                    )}
-
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageSelect}
-                      className="w-full px-3 py-2 border border-border rounded-lg"
-                    />
-
-                    <select
-                      value={selectedPhotoCategory}
-                      onChange={(e) => setSelectedPhotoCategory(e.target.value)}
-                      className="w-full px-3 py-2 border border-border rounded-lg text-secondary"
-                    >
-                      {workTypeOptions.map((cat) => (
-                        <option key={cat} value={cat}>
-                          {cat}
-                        </option>
-                      ))}
-                    </select>
-
-                    <div className="flex gap-2">
-                      <Button
-                        onClick={() => handleUploadPhoto(project.id)}
-                        disabled={!imageFile || uploading}
-                        className="flex-1 bg-primary text-white hover:bg-primary-dark"
-                      >
-                        <Upload className="w-4 h-4 mr-2" />
-                        {uploading ? "અપલોડ થઈ રહ્યું..." : "અપલોડ કરો"}
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          setUploadingPhotoForId(null);
-                          setImageFile(null);
-                          setImagePreview("");
-                        }}
-                        className="flex-1 bg-gray-200 text-secondary hover:bg-gray-300"
-                      >
-                        <X className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
+              <div className="card__footer">
+                <div className="card__actions">
                   <Button
+                    variant="success"
                     onClick={() => setUploadingPhotoForId(project.id)}
-                    className="w-full bg-success text-white hover:bg-success-dark"
+                    className="btn--full-width"
                   >
-                    <Upload className="w-4 h-4 mr-2" />
-                    ફોટો અપલોડ કરો ({(project.photos || []).length})
+                    <Upload className="w-4 h-4" /> ફોટો અપલોડ કરો ({(project.photos || []).length})
                   </Button>
-                )}
+                </div>
               </div>
 
-              {/* Photos Grid */}
               {(project.photos || []).length > 0 && (
-                <div className="p-4">
-                  <h4 className="font-semibold text-secondary mb-3">
+                <div className="mt-md">
+                  <h4 className="text-sm font-semibold text-secondary mb-sm">
                     ફોટો ({project.photos!.length})
                   </h4>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid--3-col gap-sm">
                     {project.photos!.map((photo, idx) => (
-                      <div key={idx} className="relative group">
+                      <div key={idx} className="relative card card--hover" style={{ aspectRatio: "1 / 1" }}>
                         <img
                           src={photo.url}
                           alt={`Photo ${idx + 1}`}
-                          className="w-full aspect-square object-cover rounded-lg"
+                          className="w-full h-full object-cover rounded-lg"
                         />
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition rounded-lg flex items-center justify-center">
-                          <button
-                            onClick={() => handleDeletePhoto(project.id, idx)}
-                            className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                        <div className="absolute bottom-1 left-1 text-xs bg-black/60 text-white px-2 py-1 rounded">
+                        <button
+                          onClick={() => handleDeletePhoto(project.id, idx)}
+                          className="btn btn-danger btn--icon"
+                          style={{ position: "absolute", top: "8px", right: "8px" }}
+                          aria-label="Delete photo"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                        <div className="badge badge--primary" style={{ position: "absolute", bottom: "8px", left: "8px" }}>
                           {photo.category?.replace(/^[^\s]*\s/, "") || "ફોટો"}
                         </div>
                       </div>
@@ -527,6 +342,183 @@ export default function AdminProjects() {
           ))
         )}
       </div>
+
+      {showForm && (
+        <div className="modal-overlay">
+          <div className="modal modal--large">
+            <div className="modal__header">
+              <h3 className="modal__title">{editingId ? "પ્રોજેક્ટ સંપાદિત કરો" : "નવું પ્રોજેક્ટ ઉમેરો"}</h3>
+              <button className="btn btn-ghost btn--icon" onClick={() => setShowForm(false)} aria-label="Close project form">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <form onSubmit={handleSubmit} className="modal__body d-flex flex-column gap-md">
+              <div className="form__group">
+                <label className="form__label" htmlFor="project-name">પ્રોજેક્ટ નામ</label>
+                <Input
+                  id="project-name"
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, name: e.target.value }))
+                  }
+                  placeholder="દા.ત. કિચન ફર્નિચર"
+                  className="input"
+                />
+              </div>
+
+              <div className="form__group">
+                <label className="form__label" htmlFor="project-village">ગામ</label>
+                <Input
+                  id="project-village"
+                  type="text"
+                  value={formData.village}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, village: e.target.value }))
+                  }
+                  placeholder="દા.ત. ભાવનગર"
+                  className="input"
+                />
+              </div>
+
+              <div className="form__group">
+                <label className="form__label">કામના પ્રકાર (બહુવિધ પસંદ કરો)</label>
+                <div className="grid grid--2-col gap-sm">
+                  {workTypeOptions.map((type) => (
+                    <label
+                      key={type}
+                      className="card card--hover d-flex items-center gap-sm"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={formData.workTypes.includes(type)}
+                        onChange={() => handleWorkTypeToggle(type)}
+                      />
+                      <span className="text-sm text-secondary">{type}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="form__group">
+                <label className="form__label" htmlFor="project-amount">કુલ રકમ (₹)</label>
+                <Input
+                  id="project-amount"
+                  type="number"
+                  value={formData.totalAmount}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, totalAmount: e.target.value }))
+                  }
+                  placeholder="0"
+                  className="input"
+                />
+              </div>
+
+              <div className="form__group">
+                <label className="form__label" htmlFor="project-status">સ્થિતિ</label>
+                <select
+                  id="project-status"
+                  value={formData.status}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, status: e.target.value as any }))
+                  }
+                  className="input"
+                >
+                  <option value="Ongoing">ચાલુ</option>
+                  <option value="Completed">પૂર્ણ</option>
+                </select>
+              </div>
+
+              <div className="modal__footer">
+                <Button type="submit">સાચવો</Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => {
+                    setShowForm(false);
+                    setEditingId(null);
+                  }}
+                >
+                  રદ કરો
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {activeUploadProject && (
+        <div className="modal-overlay">
+          <div className="modal modal--large">
+            <div className="modal__header">
+              <div>
+                <h3 className="modal__title">ફોટો અપલોડ કરો</h3>
+                <p className="text-sm text-secondary">{activeUploadProject.name}</p>
+              </div>
+              <button
+                className="btn btn-ghost btn--icon"
+                onClick={() => {
+                  setUploadingPhotoForId(null);
+                  setImageFile(null);
+                  setImagePreview("");
+                }}
+                aria-label="Close photo upload"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="modal__body d-flex flex-column gap-md">
+              {imagePreview && (
+                <div className="card" style={{ minHeight: "200px" }}>
+                  <img src={imagePreview} alt="Preview" className="w-full h-full object-contain" />
+                </div>
+              )}
+
+              <div className="form__group">
+                <label className="form__label" htmlFor="project-photo">ફોટો પસંદ કરો</label>
+                <input id="project-photo" type="file" accept="image/*" onChange={handleImageSelect} className="input" />
+              </div>
+
+              <div className="form__group">
+                <label className="form__label" htmlFor="photo-category">કામનો પ્રકાર</label>
+                <select
+                  id="photo-category"
+                  value={selectedPhotoCategory}
+                  onChange={(e) => setSelectedPhotoCategory(e.target.value)}
+                  className="input"
+                >
+                  {workTypeOptions.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="modal__footer">
+                <Button
+                  onClick={() => handleUploadPhoto(activeUploadProject.id)}
+                  disabled={!imageFile || uploading}
+                  variant="success"
+                >
+                  <Upload className="w-4 h-4" /> {uploading ? "અપલોડ થઈ રહ્યું..." : "અપલોડ કરો"}
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    setUploadingPhotoForId(null);
+                    setImageFile(null);
+                    setImagePreview("");
+                  }}
+                >
+                  રદ કરો
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

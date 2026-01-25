@@ -239,87 +239,87 @@ export default function WorkGallery() {
     }
   };
 
+  useEffect(() => {
+    const modalActive = Boolean(selectedWork) || isViewerOpen;
+    if (modalActive) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [selectedWork, isViewerOpen]);
+
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-sticky bg-white/90 backdrop-blur-lg border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+    <div className="page page--full" onKeyDown={handleKeyDown}>
+      <header className="app-header">
+        <div className="app-header__container">
           <Link href="/">
-            <a className="flex items-center gap-2 cursor-pointer">
-              <span className="text-2xl">🔨</span>
-              <h1 className="text-lg font-bold text-primary-dark">સુથાર સેવા</h1>
+            <a className="app-header__logo">
+              <span className="app-header__logo-icon">🔨</span>
+              <span className="app-header__logo-text">સુથાર સેવા</span>
             </a>
           </Link>
-          <div className="flex gap-2">
-            <a
-              href="tel:+918160911612"
-              className="px-3 py-1.5 bg-primary text-white rounded-full text-sm font-semibold hover:bg-primary-dark transition"
-            >
+          <div className="app-header__actions">
+            <a href="tel:+918160911612" className="btn btn-primary btn--small">
               ☎️ ફોન
             </a>
           </div>
         </div>
       </header>
 
-      {/* Page Title */}
-      <div className="bg-gradient-to-b from-background to-bg-background-alt py-8 border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-primary-dark mb-2">અમારા કામ</h2>
+      <section className="section section--compact bg-background-alt">
+        <div className="page page--centered">
+          <h2 className="section__title mb-sm">અમારા કામ</h2>
           <p className="text-secondary font-medium">
             નિતિનભાઈ પરમારના શ્રેષ્ઠ ફર્નિચર અને સર્વિસ કાર્યોનો સંગ્રહ
           </p>
         </div>
-      </div>
+      </section>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Search Bar */}
-        <div className="relative mb-6">
-          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-secondary w-5 h-5" />
-          <Input
-            type="text"
-            placeholder="ગામ, કામનો પ્રકાર શોધો..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 rounded-full border-2 border-transparent bg-white shadow-md focus:border-border-dark transition text-base placeholder:text-muted"
-          />
-        </div>
-
-        {/* Category Filter */}
-        <div className="mb-6">
-          <p className="text-xs text-[#999] font-semibold uppercase mb-3">
-            📁 કામના પ્રકાર
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-4 py-2 rounded-full font-semibold text-sm transition-all ${
-                  selectedCategory === category
-                    ? "bg-primary text-white shadow-md"
-                    : "bg-white text-secondary border-2 border-border hover:border-primary hover:bg-background"
-                }`}
-              >
-                {category}
-              </button>
-            ))}
+      <main className="page page--centered">
+        <section className="section section--compact">
+          <div className="card card--hover">
+            <div className="d-flex items-center gap-sm">
+              <Search className="w-5 h-5 text-secondary" />
+              <Input
+                type="text"
+                placeholder="ગામ, કામનો પ્રકાર શોધો..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="input input--large flex-1"
+              />
+            </div>
           </div>
-        </div>
+        </section>
 
-        {/* Village Filter */}
+        <section className="section section--compact">
+          <p className="text-xs text-muted font-semibold uppercase mb-sm">📁 કામના પ્રકાર</p>
+          <div className="d-flex flex-wrap gap-sm">
+            {categories.map((category) => {
+              const active = selectedCategory === category;
+              return (
+                <button
+                  key={category}
+                  onClick={() => setSelectedCategory(category)}
+                  className={`btn ${active ? "btn-primary" : "btn-outline"} btn--small`}
+                >
+                  {category}
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
         {villages.length > 0 && (
-          <div className="mb-8">
-            <p className="text-xs text-[#999] font-semibold uppercase mb-3">
-              📍 ગામ પસંદ કરો
-            </p>
-            <div className="flex flex-wrap gap-2">
+          <section className="section section--compact">
+            <p className="text-xs text-muted font-semibold uppercase mb-sm">📍 ગામ પસંદ કરો</p>
+            <div className="d-flex flex-wrap gap-sm">
               <button
                 onClick={() => setSelectedVillage("બધા")}
-                className={`px-4 py-2 rounded-full font-semibold text-sm transition-all ${
-                  selectedVillage === "બધા"
-                    ? "bg-primary text-white shadow-md"
-                    : "bg-white text-secondary border-2 border-border hover:border-primary hover:bg-background"
-                }`}
+                className={`btn ${selectedVillage === "બધા" ? "btn-primary" : "btn-outline"} btn--small`}
               >
                 બધા
               </button>
@@ -327,156 +327,119 @@ export default function WorkGallery() {
                 <button
                   key={village}
                   onClick={() => setSelectedVillage(village)}
-                  className={`px-4 py-2 rounded-full font-semibold text-sm transition-all ${
-                    selectedVillage === village
-                      ? "bg-primary text-white shadow-md"
-                      : "bg-white text-secondary border-2 border-border hover:border-primary hover:bg-background"
-                  }`}
+                  className={`btn ${selectedVillage === village ? "btn-primary" : "btn-outline"} btn--small`}
                 >
                   {village}
                 </button>
               ))}
             </div>
-          </div>
+          </section>
         )}
 
-        {/* Gallery Grid */}
-        {loading ? (
-          <div className="text-center py-12">
-            <p className="text-secondary font-medium">લોડ થઈ રહ્યું છે...</p>
-          </div>
-        ) : filteredProjects.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-secondary font-medium text-lg">
-              {projects.length === 0
-                ? "હજી કોઈ કામ દર્શાવવામાં આવ્યું નથી."
-                : "તમારી શોધ સાથે મેળતું કામ નથી."}
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProjects.map((project) => (
-              <div
-                key={project.id}
-                className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-border hover:border-primary"
-                role="button"
-                tabIndex={0}
-                onClick={() => openWork(project)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    openWork(project);
-                  }
-                }}
-              >
-                {/* Image Container */}
-                <div className="relative w-full h-56 bg-border overflow-hidden">
-                  <img
-                    src={getMainImage(project, selectedCategory)}
-                    alt={project.name}
-                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                    loading="lazy"
-                  />
-                </div>
-
-                {/* Content */}
-                <div className="p-5">
-                  {/* Work Name */}
-                  <h3 className="text-lg font-bold text-primary-dark mb-2">
-                    {project.name}
-                  </h3>
-
-                  {/* Village */}
-                  <div className="flex items-center gap-2 text-secondary font-medium text-sm mb-3">
-                    <MapPin className="w-4 h-4" />
-                    {project.village}
+        <section className="section">
+          {loading ? (
+            <div className="card loading">
+              <p className="loading__text">લોડ થઈ રહ્યું છે...</p>
+            </div>
+          ) : filteredProjects.length === 0 ? (
+            <div className="empty-state">
+              <div className="empty-state__icon">📷</div>
+              <p className="empty-state__text">
+                {projects.length === 0
+                  ? "હજી કોઈ કામ દર્શાવવામાં આવ્યું નથી."
+                  : "તમારી શોધ સાથે મેળતું કામ નથી."}
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid--3-col gap-lg">
+              {filteredProjects.map((project) => (
+                <div
+                  key={project.id}
+                  className="card card--interactive"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => openWork(project)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      openWork(project);
+                    }
+                  }}
+                >
+                  <div className="relative overflow-hidden rounded-lg" style={{ aspectRatio: "4 / 3" }}>
+                    <img
+                      src={getMainImage(project, selectedCategory)}
+                      alt={project.name}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
                   </div>
 
-                  {/* Work Types */}
-                  {project.workTypes && project.workTypes.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {project.workTypes.map((type) => (
-                        <span
-                          key={type}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-border text-primary-dark text-xs font-semibold rounded-lg"
-                        >
-                          <Tag className="w-3 h-3" />
-                          {type}
-                        </span>
-                      ))}
+                  <div className="mt-md">
+                    <h3 className="card__title mb-xs">{project.name}</h3>
+                    <div className="d-flex items-center gap-xs text-secondary text-sm mb-sm">
+                      <MapPin className="w-4 h-4" />
+                      {project.village}
                     </div>
-                  )}
+                    {project.workTypes && project.workTypes.length > 0 && (
+                      <div className="d-flex flex-wrap gap-xs">
+                        {project.workTypes.map((type) => (
+                          <span key={type} className="badge badge--primary">
+                            <Tag className="w-3 h-3" /> {type}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+              ))}
+            </div>
+          )}
+        </section>
+      </main>
 
-      {/* Footer */}
-      <footer className="bg-white border-t border-border py-8 mt-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h4 className="font-bold text-primary-dark text-lg mb-3">
-            નિતિનભાઈ પરમાર
-          </h4>
-          <p className="text-secondary font-medium mb-4">
-            📱 મોબાઈલ: 8160911612
-          </p>
-          <a
-            href="https://wa.me/918160911612"
-            className="inline-block px-6 py-2.5 bg-success text-white rounded-full font-semibold hover:bg-success-dark transition"
-          >
+      <footer className="section section--compact text-center">
+        <div className="page page--centered">
+          <h4 className="font-bold text-primary-dark text-lg mb-sm">નિતિનભાઈ પરમાર</h4>
+          <p className="text-secondary font-medium mb-md">📱 મોબાઈલ: 8160911612</p>
+          <a href="https://wa.me/918160911612" className="btn btn-success">
             💬 WhatsApp મેસેજ
           </a>
         </div>
       </footer>
 
-      {/* Work Detail Modal */}
       {selectedWork && (
-        <div
-          className="fixed inset-0 z-40 flex items-start justify-center bg-black/50 backdrop-blur-sm px-4 py-6"
-          onKeyDown={handleKeyDown}
-          tabIndex={-1}
-        >
-          <div className="bg-white rounded-2xl w-full max-w-5xl max-h-full overflow-hidden shadow-2xl border border-border">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-background">
+        <div className="modal-overlay" tabIndex={-1} onKeyDown={handleKeyDown}>
+          <div className="modal modal--large">
+            <div className="modal__header">
               <div>
-                <h3 className="text-xl font-bold text-primary-dark mb-1">
-                  {selectedWork.name}
-                </h3>
-                <div className="flex items-center gap-2 text-secondary font-medium text-sm">
+                <h3 className="modal__title">{selectedWork.name}</h3>
+                <div className="d-flex items-center gap-xs text-secondary text-sm">
                   <MapPin className="w-4 h-4" />
                   {selectedWork.village}
                 </div>
               </div>
-              <button
-                onClick={closeWork}
-                className="px-3 py-1.5 bg-primary text-white rounded-full text-sm font-semibold hover:bg-primary-dark transition"
-                aria-label="Close work details"
-              >
+              <button className="btn btn-outline btn--icon" onClick={closeWork} aria-label="Close work details">
                 ✕
               </button>
             </div>
 
-            <div className="p-5 overflow-y-auto max-h-[75vh] space-y-6">
+            <div className="modal__body">
               {getImagesGrouped(selectedWork).map((group) => (
-                <div key={`${selectedWork.id}-${group.type}`} className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-secondary px-2 py-1 bg-border rounded-full">
-                      {group.type}
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                <div key={`${selectedWork.id}-${group.type}`} className="mb-lg">
+                  <div className="badge badge--primary mb-sm">{group.type}</div>
+                  <div className="grid grid--4-col gap-sm">
                     {group.items.map((item) => (
                       <button
                         key={`${selectedWork.id}-${group.type}-${item.index}`}
                         onClick={() => openViewer(item.index)}
-                        className="relative block w-full aspect-square bg-border rounded-xl overflow-hidden border border-border shadow-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                        className="card card--hover"
+                        style={{ aspectRatio: "1 / 1" }}
                       >
                         <img
                           src={item.url}
                           alt={`${selectedWork.name} ફોટો ${item.index + 1}`}
-                          className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                          className="w-full h-full object-cover"
                           loading="lazy"
                         />
                       </button>
@@ -489,37 +452,22 @@ export default function WorkGallery() {
         </div>
       )}
 
-      {/* Fullscreen Photo Viewer */}
       {isViewerOpen && selectedWork && (
-        <div
-          className="fixed inset-0 z-50 bg-black/90 flex flex-col"
-          onKeyDown={handleKeyDown}
-          tabIndex={-1}
-        >
-          <div className="flex justify-end p-4">
-            <button
-              onClick={closeViewer}
-              className="px-3 py-1.5 bg-white/10 text-white rounded-full text-sm font-semibold border border-white/20 hover:bg-white/20 transition"
-              aria-label="Close photo viewer"
-            >
-              ✕
-            </button>
-          </div>
-
-          <div className="flex-1 flex items-center justify-center px-4 pb-8">
-            <div
-              className="w-full h-full flex items-center justify-center overflow-hidden"
-              onTouchStart={handleTouchStart}
-              onTouchEnd={handleTouchEnd}
-              onClick={showNextPhoto}
-              style={{ touchAction: "pan-y pinch-zoom" }}
-            >
+        <div className="modal-overlay" tabIndex={-1} onKeyDown={handleKeyDown}>
+          <div className="modal modal--large" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+            <div className="modal__header">
+              <h3 className="modal__title">{selectedWork.name}</h3>
+              <button className="btn btn-outline btn--icon" onClick={closeViewer} aria-label="Close photo viewer">
+                ✕
+              </button>
+            </div>
+            <div className="modal__body" onClick={showNextPhoto}>
               <img
                 src={getFlatImages(selectedWork)[activePhotoIndex]}
                 alt={`${selectedWork.name} ફોટો`}
-                className="max-h-full max-w-full object-contain select-none"
+                className="w-full h-full object-contain"
                 loading="lazy"
-                style={{ touchAction: "inherit" }}
+                style={{ maxHeight: "70vh" }}
               />
             </div>
           </div>

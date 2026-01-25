@@ -149,9 +149,8 @@ export default function AdminWorkers() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Add Button */}
-      <div className="flex gap-2">
+    <div className="d-flex flex-column gap-lg">
+      <div className="d-flex gap-sm">
         <Button
           onClick={() => {
             setShowForm(!showForm);
@@ -163,60 +162,50 @@ export default function AdminWorkers() {
               dailyWage: "",
             });
           }}
-          className="bg-primary text-white hover:bg-primary-dark"
         >
-          <Plus className="w-4 h-4 mr-2" />
-          નવો કારીગર ઉમેરો
+          <Plus className="w-4 h-4" /> નવો કારીગર ઉમેરો
         </Button>
       </div>
 
-      {/* Form */}
       {showForm && (
-        <div className="bg-white rounded-xl p-6 border border-border shadow-sm">
-          <h3 className="text-xl font-bold text-primary-dark mb-4">
-            {editingId ? "કારીગર સંપાદિત કરો" : "નવો કારીગર ઉમેરો"}
-          </h3>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-semibold text-secondary mb-2">
-                નામ
-              </label>
+        <div className="card">
+          <h3 className="card__title mb-sm">{editingId ? "કારીગર સંપાદિત કરો" : "નવો કારીગર ઉમેરો"}</h3>
+          <form onSubmit={handleSubmit} className="d-flex flex-column gap-md">
+            <div className="form__group">
+              <label className="form__label" htmlFor="worker-name">નામ</label>
               <Input
+                id="worker-name"
                 type="text"
                 value={formData.name}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, name: e.target.value }))
                 }
                 placeholder="દા.ત. રાજુ"
-                className="border-border"
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-secondary mb-2">
-                ફોન નંબર
-              </label>
+            <div className="form__group">
+              <label className="form__label" htmlFor="worker-phone">ફોન નંબર</label>
               <Input
+                id="worker-phone"
                 type="tel"
                 value={formData.phone}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, phone: e.target.value }))
                 }
                 placeholder="9876543210"
-                className="border-border"
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-secondary mb-2">
-                વિશેષતા
-              </label>
+            <div className="form__group">
+              <label className="form__label" htmlFor="worker-speciality">વિશેષતા</label>
               <select
+                id="worker-speciality"
                 value={formData.speciality}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, speciality: e.target.value }))
                 }
-                className="w-full px-3 py-2 border border-border rounded-lg text-secondary"
+                className="input"
               >
                 <option value="">પસંદ કરો</option>
                 {specialities.map((spec) => (
@@ -227,35 +216,28 @@ export default function AdminWorkers() {
               </select>
             </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-secondary mb-2">
-                દૈનિક મજૂરી (₹)
-              </label>
+            <div className="form__group">
+              <label className="form__label" htmlFor="worker-wage">દૈનિક મજૂરી (₹)</label>
               <Input
+                id="worker-wage"
                 type="number"
                 value={formData.dailyWage}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, dailyWage: e.target.value }))
                 }
                 placeholder="0"
-                className="border-border"
               />
             </div>
 
-            <div className="flex gap-2">
-              <Button
-                type="submit"
-                className="bg-primary text-white hover:bg-primary-dark"
-              >
-                સાચવો
-              </Button>
+            <div className="d-flex gap-sm">
+              <Button type="submit">સાચવો</Button>
               <Button
                 type="button"
+                variant="secondary"
                 onClick={() => {
                   setShowForm(false);
                   setEditingId(null);
                 }}
-                className="bg-gray-200 text-secondary hover:bg-gray-300"
               >
                 રદ કરો
               </Button>
@@ -264,41 +246,36 @@ export default function AdminWorkers() {
         </div>
       )}
 
-      {/* Workers List */}
-      <div className="space-y-4">
+      <div className="d-flex flex-column gap-sm">
         {workers.length === 0 ? (
-          <div className="text-center py-12 bg-white rounded-xl border border-border">
-            <p className="text-secondary font-medium">હજી કોઈ કારીગર નથી</p>
+          <div className="empty-state">
+            <div className="empty-state__icon">👷</div>
+            <p className="empty-state__text">હજી કોઈ કારીગર નથી</p>
           </div>
         ) : (
           workers.map((worker) => (
-            <div
-              key={worker.id}
-              className="bg-white rounded-xl p-4 border border-border shadow-sm"
-            >
-              <div className="flex items-start justify-between">
+            <div key={worker.id} className="card card--hover">
+              <div className="d-flex items-start justify-between">
                 <div className="flex-1">
-                  <h3 className="text-lg font-bold text-primary-dark mb-1">
-                    {worker.name}
-                  </h3>
-                  <p className="text-sm text-secondary mb-1">📱 {worker.phone}</p>
-                  <p className="text-sm text-secondary mb-2">
-                    🔧 {worker.speciality}
-                  </p>
+                  <h3 className="card__title">{worker.name}</h3>
+                  <p className="text-sm text-secondary mb-xs">📱 {worker.phone}</p>
+                  <p className="text-sm text-secondary mb-xs">🔧 {worker.speciality}</p>
                   <p className="text-sm font-semibold text-primary">
                     દૈનિક મજૂરી: ₹{worker.dailyWage.toLocaleString("en-IN")}
                   </p>
                 </div>
-                <div className="flex gap-2">
+                <div className="d-flex gap-xs">
                   <button
                     onClick={() => handleEdit(worker)}
-                    className="p-2 hover:bg-background rounded transition"
+                    className="btn btn-ghost btn--icon"
+                    aria-label="Edit worker"
                   >
                     <Edit2 className="w-4 h-4 text-secondary" />
                   </button>
                   <button
                     onClick={() => handleDelete(worker.id)}
-                    className="p-2 hover:bg-background rounded transition"
+                    className="btn btn-ghost btn--icon"
+                    aria-label="Delete worker"
                   >
                     <Trash2 className="w-4 h-4 text-danger" />
                   </button>

@@ -2,14 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Phone,
-  MessageCircle,
-  Calculator,
-  MapPin,
-  Hammer,
-  ArrowRight,
-} from "lucide-react";
+import { Phone, MessageCircle, Calculator, ArrowRight } from "lucide-react";
 import { loadCurrentRate, subscribeToRate } from "@/lib/firebase";
 
 export default function Home() {
@@ -43,173 +36,150 @@ export default function Home() {
     window.open(`https://wa.me/918160911612?text=${message}`, "_blank");
   };
 
+  const WorkTypesSection = () => (
+    <section className="section" aria-labelledby="work-types">
+      <div className="section__header">
+        <p id="work-types" className="text-xs text-muted font-semibold uppercase">
+          📁 કામના પ્રકાર
+        </p>
+      </div>
+      <div className="grid grid--responsive gap-sm">
+        {[
+          "🚪 દરવાજા",
+          "🪟 બારી",
+          "🪑 ફર્નિચર",
+          "🧥 અલમારી",
+          "📦 કબાટ",
+          "🗄️ શો-કેસ",
+          "📺 TV યુનિટ",
+          "🛋️ સોફા",
+          "🛕 મંદિર",
+          "🛏️ પલંગ",
+          "📚 સ્ટડી ટેબલ",
+          "🪞 કાચ",
+          "💄 ડ્રેસિંગ ટેબલ",
+          "❄️ AC પેનલિંગ",
+          "✨ અન્ય",
+        ].map((category) => (
+          <div key={category} className="card card--hover text-center p-md">
+            <p className="font-semibold text-primary-dark text-sm">{category}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-sticky bg-surface transition shadow-sm" style={{ backdropFilter: 'blur(12px)' }}>
-        <div className="max-w-2xl mx-auto px-md sm:px-lg lg:px-xl py-sm flex items-center justify-between">
+    <main className="page page--full">
+      <header className="app-header">
+        <div className="app-header__container">
           <Link href="/">
-            <a className="flex items-center gap-sm cursor-pointer">
-              <span className="text-2xl">🔨</span>
-              <h1 className="text-lg font-bold text-primary-dark">સુથાર સેવા</h1>
+            <a className="app-header__logo">
+              <span className="app-header__logo-icon">🔨</span>
+              <span className="app-header__logo-text">સુથાર સેવા</span>
             </a>
           </Link>
-          <div className="flex gap-sm">
-            <a
-              href="tel:+918160911612"
-              className="px-md py-xs bg-primary text-white rounded-full text-sm font-semibold hover:bg-primary-dark transition flex items-center gap-xs"
-            >
+          <div className="app-header__actions">
+            <a href="tel:+918160911612" className="btn btn-primary btn--small">
               <Phone className="w-4 h-4" /> ફોન
             </a>
           </div>
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="relative py-2xl px-md sm:px-lg lg:px-xl text-center border-b border-border-dark bg-gradient-to-b from-background to-primary-lightest">
-        <div className="max-w-lg mx-auto">
-          <h2 className="text-4xl sm:text-5xl font-bold text-primary-dark mb-md">
-            નિતિન પરમાર - ફર્નિચર આર્ટિસ્ટ
-          </h2>
-          <p className="text-lg sm:text-xl text-secondary font-medium mb-sm">
+      <section className="section section--hero hero">
+        <div className="hero__container">
+          <h2 className="hero__title">નિતિન પરમાર - ફર્નિચર આર્ટિસ્ટ</h2>
+          <p className="hero__subtitle">
             મજબૂત, સુંદર અને વ્યાજબી ફર્નિચર કામ માટે આજે જ સંપર્ક કરો.
           </p>
-          <p className="text-sm sm:text-base text-tertiary font-semibold mb-lg">
+          <p className="hero__description">
             કોઈ પણ ફોટો કે આઈડિયા મોકલો, એ જ કામ તૈયાર કરીને આપીશું.
           </p>
-          <div className="flex flex-col sm:flex-row gap-md justify-center">
-            <a
-              href="https://wa.me/918160911612"
-              className="px-lg py-md bg-success text-white rounded-full font-semibold hover:bg-success-dark transition flex items-center justify-center gap-sm text-lg"
-            >
+          <div className="hero__actions">
+            <a href="https://wa.me/918160911612" className="btn btn-success btn--large">
               <MessageCircle className="w-5 h-5" /> WhatsApp મેસેજ
             </a>
-            <a
-              href="#calculator"
-              className="px-lg py-md bg-white text-primary border border-primary rounded-full font-semibold hover:bg-background transition flex items-center justify-center gap-sm text-lg"
-            >
+            <a href="#calculator" className="btn btn-outline btn--large">
               <Calculator className="w-5 h-5" /> ભાવ જાણો
             </a>
           </div>
         </div>
       </section>
 
-      {/* Main Content */}
-      <div className="max-w-xl mx-auto px-md sm:px-lg lg:px-xl py-lg">
-        {/* Service Categories Preview */}
-        <section className="mb-lg">
-          <p className="text-xs text-muted font-semibold uppercase mb-md">
-            📁 કામના પ્રકાર
-          </p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-sm">
-            {[
-              "🚪 દરવાજા",
-              "🪟 બારી",
-              "🪑 ફર્નિચર",
-              "🧥 અલમારી",
-              "📦 કબાટ",
-              "🗄️ શો-કેસ",
-              "📺 TV યુનિટ",
-              "🛋️ સોફા",
-              "🛕 મંદિર",
-              "🛏️ પલંગ",
-              "📚 સ્ટડી ટેબલ",
-              "🪞 કાચ",
-              "💄 ડ્રેસિંગ ટેબલ",
-              "❄️ AC પેનલિંગ",
-              "✨ અન્ય",
-            ].map((category) => (
-              <div
-                key={category}
-                className="text-center p-md bg-white rounded-lg border border-border hover:border-primary hover:shadow-md transition"
-              >
-                <p className="font-semibold text-primary-dark text-sm">
-                  {category}
-                </p>
+      <main className="page page--centered">
+        <WorkTypesSection />
+
+        <section id="calculator" className="section">
+          <div className="card calculator">
+            <div className="card__header">
+              <div className="flex items-center gap-sm">
+                <Calculator className="w-5 h-5 text-primary" />
+                <h3 className="card__title">અંદાજિત ખર્ચ ગણો</h3>
               </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Calculator Section */}
-        <section
-          id="calculator"
-          className="bg-white rounded-2xl shadow-lg p-lg mb-lg border border-border"
-        >
-          <div className="flex items-center gap-md mb-lg">
-            <Calculator className="w-7 h-7 text-primary" />
-            <h3 className="text-2xl font-bold text-primary-dark">
-              અંદાજિત ખર્ચ ગણો
-            </h3>
-          </div>
-
-          <div className="mb-lg">
-            <label className="block text-sm font-semibold text-secondary mb-md">
-              તમારા ફર્નિચરના કુલ ચોરસ ફૂટ (Sq. Ft)
-            </label>
-            <div className="flex items-center gap-sm bg-background border border-border rounded-xl px-md py-md focus-within:border-primary focus-within:bg-white transition">
-              <Input
-                type="number"
-                value={feet}
-                onChange={(e) => setFeet(e.target.value)}
-                placeholder="0"
-                className="flex-1 bg-transparent border-0 text-2xl font-bold text-primary-dark placeholder:text-muted outline-none"
-              />
-              <span className="font-bold text-lg text-secondary">ફૂટ</span>
             </div>
-          </div>
 
-          {/* Rate Display */}
-          <div className="text-center bg-primary-lightest rounded-xl px-md py-md mb-lg">
-            <p className="text-secondary font-semibold">વર્તમાન રેટ</p>
-            <p className="text-2xl font-bold text-primary-dark">
-              ₹{currentRate.toLocaleString("en-IN")} / ચોરસ ફૂટ
-            </p>
-          </div>
+            <div className="form__group">
+              <label className="form__label" htmlFor="feet-input">
+                તમારા ફર્નિચરના કુલ ચોરસ ફૂટ (Sq. Ft)
+              </label>
+              <div className="d-flex items-center gap-sm card card--hover">
+                <Input
+                  id="feet-input"
+                  type="number"
+                  value={feet}
+                  onChange={(e) => setFeet(e.target.value)}
+                  placeholder="0"
+                  className="input input--large flex-1"
+                />
+                <span className="font-semibold text-secondary">ફૂટ</span>
+              </div>
+            </div>
 
-          {/* Result Box */}
-          <div className="bg-gradient-to-b from-background to-primary-lightest rounded-2xl p-lg text-center mb-lg border border-border-dark">
-            <p className="text-secondary font-semibold text-sm mb-sm">
-              અંદાજિત કુલ ખર્ચ
-            </p>
-            <h2 className="text-5xl font-bold text-primary-dark mb-md">
-              ₹{totalCost.toLocaleString("en-IN")}
-            </h2>
-            <p className="text-xs text-muted">
-              *કારીગરીના રેટ અને મટીરીયલ મુજબ ફેરફાર થઈ શકે છે.
-            </p>
-          </div>
+            <div className="card card--hover text-center mb-md">
+              <p className="text-secondary font-semibold">વર્તમાન રેટ</p>
+              <p className="text-2xl font-bold text-primary-dark">
+                ₹{currentRate.toLocaleString("en-IN")} / ચોરસ ફૂટ
+              </p>
+            </div>
 
-          <button
-            onClick={handleWhatsAppEstimate}
-            className="w-full px-lg py-md bg-success text-white rounded-full font-bold hover:bg-success-dark transition text-lg flex items-center justify-center gap-sm"
-          >
-            <MessageCircle className="w-5 h-5" /> આ ભાવ WhatsApp પર મોકલો
-          </button>
+            <div className="card card--hover text-center mb-md">
+              <p className="text-secondary font-semibold text-sm">અંદાજિત કુલ ખર્ચ</p>
+              <h2 className="text-4xl font-bold text-primary-dark mb-sm">
+                ₹{totalCost.toLocaleString("en-IN")}
+              </h2>
+              <p className="text-xs text-muted">
+                *કારીગરીના રેટ અને મટીરીયલ મુજબ ફેરફાર થઈ શકે છે.
+              </p>
+            </div>
+
+            <Button
+              onClick={handleWhatsAppEstimate}
+              className="btn--full-width btn--large"
+              variant="success"
+            >
+              <MessageCircle className="w-5 h-5" /> આ ભાવ WhatsApp પર મોકલો
+            </Button>
+          </div>
         </section>
 
-        {/* Prominent Gallery Link */}
-        <section className="mb-lg">
-          <div className="bg-gradient-to-r from-primary to-primary-dark rounded-2xl shadow-lg p-lg text-center text-white">
-            <h3 className="text-2xl font-bold mb-md">અમારું કામ જુઓ</h3>
-            <p className="text-lg opacity-90 mb-lg">
+        <section className="section">
+          <div className="card card--hover text-center">
+            <h3 className="text-2xl font-bold text-primary-dark mb-sm">અમારું કામ જુઓ</h3>
+            <p className="text-base text-secondary mb-md">
               નિતિનભાઈના હજારો સંતુષ્ટ ગ્રાહકોનું કામ જુઓ અને આપનું કામ કરાવો.
             </p>
             <Link href="/work-gallery">
-              <a className="inline-flex items-center justify-center gap-sm px-xl py-md bg-white text-primary rounded-full font-bold hover:bg-background transition text-lg">
-                કામ ગેલેરી જુઓ
-                <ArrowRight className="w-5 h-5" />
+              <a className="btn btn-primary btn--large">
+                કામ ગેલેરી જુઓ <ArrowRight className="w-5 h-5" />
               </a>
             </Link>
           </div>
         </section>
 
-        {/* About Section */}
-        <section className="mb-lg">
-          <h3 className="text-2xl font-bold text-primary-dark mb-lg text-center">
-            કેમ નિતિનભાઈ પર વિશ્વાસ કરો?
-          </h3>
-          <div className="grid sm:grid-cols-2 gap-lg">
+        <section className="section">
+          <h3 className="section__title text-center">કેમ નિતિનભાઈ પર વિશ્વાસ કરો?</h3>
+          <div className="grid grid--2-col">
             {[
               {
                 icon: "⭐",
@@ -231,49 +201,31 @@ export default function Home() {
                 title: "પુરસ્કૃત",
                 desc: "સ્થાનિક અને વિસ્તરેલ વિસ્તારમાં વિખ્યાત",
               },
-            ].map((item, idx) => (
-              <div
-                key={idx}
-                className="bg-white rounded-xl p-lg border border-border hover:border-primary hover:shadow-md transition"
-              >
+            ].map((item) => (
+              <div key={item.title} className="card card--hover">
                 <p className="text-4xl mb-md">{item.icon}</p>
-                <h4 className="font-bold text-primary-dark mb-sm text-lg">
-                  {item.title}
-                </h4>
-                <p className="text-secondary text-sm leading-relaxed">
-                  {item.desc}
-                </p>
+                <h4 className="card__title">{item.title}</h4>
+                <p className="text-secondary text-sm leading-relaxed">{item.desc}</p>
               </div>
             ))}
           </div>
         </section>
-      </div>
+      </main>
 
-      {/* Footer */}
-      <footer className="bg-white border-t border-border py-lg">
-        <div className="max-w-2xl mx-auto px-md sm:px-lg lg:px-xl text-center">
-          <h4 className="font-bold text-primary-dark text-lg mb-md">
-            નિતિનભાઈ પરમાર
-          </h4>
-          <p className="text-secondary font-medium mb-md">
-            📱 મોબાઈલ: 8160911612
-          </p>
-          <div className="flex justify-center gap-md">
-            <a
-              href="tel:+918160911612"
-              className="inline-block px-lg py-sm bg-primary text-white rounded-full font-semibold hover:bg-primary-dark transition"
-            >
+      <footer className="section section--compact text-center">
+        <div className="page page--centered">
+          <h4 className="font-bold text-primary-dark text-lg mb-sm">નિતિનભાઈ પરમાર</h4>
+          <p className="text-secondary font-medium mb-md">📱 મોબાઈલ: 8160911612</p>
+          <div className="d-flex justify-center gap-md">
+            <a href="tel:+918160911612" className="btn btn-primary">
               ☎️ કૉલ કરો
             </a>
-            <a
-              href="https://wa.me/918160911612"
-              className="inline-block px-lg py-sm bg-success text-white rounded-full font-semibold hover:bg-success-dark transition"
-            >
+            <a href="https://wa.me/918160911612" className="btn btn-success">
               💬 WhatsApp
             </a>
           </div>
         </div>
       </footer>
-    </div>
+    </main>
   );
 }
