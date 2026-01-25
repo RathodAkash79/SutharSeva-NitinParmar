@@ -1,14 +1,4 @@
 import { useState, useEffect } from "react";
-import { Link, useRoute, useLocation } from "wouter";
-import { 
-  Plus, 
-  Users, 
-  Calendar, 
-  LogOut,
-  Menu,
-  X,
-  DollarSign
-} from "lucide-react";
 import { collection, getDocs, limit, query, doc, getDoc, setDoc } from "firebase/firestore";
 import { apiUrl } from "@/lib/api";
 import { db, auth } from "@/lib/firebase";
@@ -23,6 +13,7 @@ import { Input } from "@/components/ui/input";
 const ALLOWED_ADMIN_EMAILS = [
   "rathodakashr79@gmail.com",
   "admin@sutharseva.com",
+  "nitin@sutharseva.com",
   "nitin.parmar@sutharseva.com",
 ];
 
@@ -34,24 +25,21 @@ function isAllowedAdmin(userEmail: string | null): boolean {
 }
 
 export default function Admin() {
-  const [, setLocation] = useLocation();
   const [authUser, setAuthUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [authError, setAuthError] = useState<string | null>(null);
-  const [, params] = useRoute("/admin/:section");
-  const [showRateModal, setShowRateModal] = useState(false);
+  const [activeTab, setActiveTab] = useState<"projects" | "attendance" | "workers" | "rate">("attendance");
   const [rate, setRate] = useState("");
   const [savingRate, setSavingRate] = useState(false);
-  
-  const currentSection = params?.section || "dashboard";
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!user) {
         setAuthError("Not authenticated. Redirecting to login...");
         setLoading(false);
-        setTimeout(() => setLocation("/admin-login"), 800);
+        setTimeout(() => {
+          window.location.href = "/admin-login";
+        }, 800);
         return;
       }
 
@@ -60,7 +48,9 @@ export default function Admin() {
         setAuthError(`Access denied. You are not authorized (${user.email})`);
         await signOut(auth);
         setLoading(false);
-        setTimeout(() => setLocation("/admin-login"), 1000);
+        setTimeout(() => {
+          window.location.href = "/admin-login";
+        }, 1000);
         return;
       }
 
@@ -71,13 +61,13 @@ export default function Admin() {
     });
 
     return () => unsubscribe();
-  }, [setLocation]);
+  }, []);
 
   const handleLogout = async () => {
     try {
       await signOut(auth);
       setAuthUser(null);
-      setLocation("/admin-login");
+      window.location.href = "/admin-login";
     } catch (error) {
       console.error("Logout error:", error);
       alert("લોગ આઉટ કરવામાં ભૂલ આવી");
@@ -99,7 +89,6 @@ export default function Admin() {
         updatedBy: authUser?.email || "unknown",
       });
       alert("રેટ સફળતાથી સાચવ્યો!");
-      setShowRateModal(false);
       setRate("");
     } catch (error) {
       console.error("Error saving rate:", error);
@@ -107,19 +96,6 @@ export default function Admin() {
     } finally {
       setSavingRate(false);
     }
-  };
-
-  const handleOpenRateModal = async () => {
-    try {
-      const rateDocRef = doc(db, "settings", "rate");
-      const rateDoc = await getDoc(rateDocRef);
-      if (rateDoc.exists()) {
-        setRate(rateDoc.data().pricePerSqFt.toString());
-      }
-    } catch (error) {
-      console.error("Error loading rate:", error);
-    }
-    setShowRateModal(true);
   };
 
   if (authError) {
@@ -142,211 +118,131 @@ export default function Admin() {
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
-      {/* Sidebar */}
-      <div
-        style={{
-          width: sidebarOpen ? "256px" : "80px",
-          transition: "all 300ms ease-in-out",
-        }}
-        className="bg-white border-r border-border fixed h-screen left-0 top-0 z-40 overflow-y-auto"
-      >
-        <div className="p-md border-b border-border">
-          <div className="flex items-center justify-between mb-md">
-            {sidebarOpen && (
-              <Link href="/admin">
-                <a className="flex items-center gap-sm cursor-pointer">
-                  <span className="text-2xl">🔨</span>
-                  <h1 className="text-lg font-bold text-primary-dark">સુથાર સેવા</h1>
-                </a>
-              </Link>
-            )}
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* Header */}
+      <header className="sticky top-0 z-30 bg-surface shadow-sm border-b border-border" style={{ backdropFilter: "blur(12px)" }}>
+        <div className="px-lg py-md flex items-center justify-between">
+          <div className="flex items-center gap-sm">
+            <span className="text-2xl">🔨</span>
+            <div className="leading-tight">
+              <p className="text-sm font-semibold text-primary-dark">સુથાર સેવા</p>
+              <p className="text-xs text-secondary">Admin Panel</p>
+            </div>
+          </div>
+          <div className="text-right">
+            <p className="text-sm text-secondary font-medium">સ્વાગત છે, નિતિનભાઈ</p>
+          </div>
+        </div>
+      </header>
+
+      {/* Dashboard summary */}
+      <section className="px-lg py-md flex gap-md overflow-x-auto">
+        <div className="bg-white rounded-xl p-lg border border-border shadow-sm min-w-[180px]">
+          <p className="text-secondary font-semibold text-sm mb-sm">આજની આવક</p>
+          <h3 className="text-3xl font-bold text-primary-dark">₹0</h3>
+        </div>
+        <div className="bg-white rounded-xl p-lg border border-border shadow-sm min-w-[180px]">
+          <p className="text-secondary font-semibold text-sm mb-sm">કુલ આવક</p>
+          <h3 className="text-3xl font-bold text-primary-dark">₹0</h3>
+        </div>
+        <div className="bg-white rounded-xl p-lg border border-border shadow-sm min-w-[180px]">
+          <p className="text-secondary font-semibold text-sm mb-sm">બાકી રકમ</p>
+          <h3 className="text-3xl font-bold text-primary-dark">₹0</h3>
+        </div>
+      </section>
+
+      {/* Tabs */}
+      <section className="px-lg">
+        <div className="flex gap-sm mb-md">
+          <button
+            className={`px-4 py-2 rounded-lg font-semibold ${activeTab === "projects" ? "bg-primary text-white" : "border border-border text-secondary"}`}
+            onClick={() => setActiveTab("projects")}
+          >
+            પ્રોજેક્ટ
+          </button>
+          <button
+            className={`px-4 py-2 rounded-lg font-semibold ${activeTab === "attendance" ? "bg-primary text-white" : "border border-border text-secondary"}`}
+            onClick={() => setActiveTab("attendance")}
+          >
+            હાજરી
+          </button>
+          <button
+            className={`px-4 py-2 rounded-lg font-semibold ${activeTab === "workers" ? "bg-primary text-white" : "border border-border text-secondary"}`}
+            onClick={() => setActiveTab("workers")}
+          >
+            કારીગર
+          </button>
+          <button
+            className={`px-4 py-2 rounded-lg font-semibold ${activeTab === "rate" ? "bg-primary text-white" : "border border-border text-secondary"}`}
+            onClick={() => setActiveTab("rate")}
+          >
+            રેટ
+          </button>
+          <div className="ml-auto">
             <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-xs hover:bg-background rounded transition"
+              onClick={handleLogout}
+              className="px-4 py-2 rounded-lg font-semibold border border-border text-secondary hover:bg-background"
             >
-              {sidebarOpen ? (
-                <X className="w-4 h-4 text-secondary" />
-              ) : (
-                <Menu className="w-4 h-4 text-secondary" />
-              )}
+              લોગ આઉટ
             </button>
           </div>
         </div>
 
-        <nav className="p-md space-y-sm">
-          <Link href="/admin">
-            <a
-              className={`flex items-center gap-md px-md py-md rounded-lg transition ${
-                currentSection === "dashboard" || currentSection === undefined
-                  ? "bg-primary text-white"
-                  : "text-secondary hover:bg-background"
-              }`}
-            >
-              <span className="text-xl">📊</span>
-              {sidebarOpen && <span className="font-semibold">ડેશબોર્ડ</span>}
-            </a>
-          </Link>
-
-          <Link href="/admin/projects">
-            <a
-              className={`flex items-center gap-md px-md py-md rounded-lg transition ${
-                currentSection === "projects"
-                  ? "bg-primary text-white"
-                  : "text-secondary hover:bg-background"
-              }`}
-            >
-              <Plus className="w-5 h-5" />
-              {sidebarOpen && <span className="font-semibold">પ્રોજેક્ટ</span>}
-            </a>
-          </Link>
-
-          <Link href="/admin/workers">
-            <a
-              className={`flex items-center gap-md px-md py-md rounded-lg transition ${
-                currentSection === "workers"
-                  ? "bg-primary text-white"
-                  : "text-secondary hover:bg-background"
-              }`}
-            >
-              <Users className="w-5 h-5" />
-              {sidebarOpen && <span className="font-semibold">કારીગરો</span>}
-            </a>
-          </Link>
-
-          <Link href="/admin/attendance">
-            <a
-              className={`flex items-center gap-md px-md py-md rounded-lg transition ${
-                currentSection === "attendance"
-                  ? "bg-primary text-white"
-                  : "text-secondary hover:bg-background"
-              }`}
-            >
-              <Calendar className="w-5 h-5" />
-              {sidebarOpen && <span className="font-semibold">હાજરી</span>}
-            </a>
-          </Link>
-
-          <button
-            onClick={handleOpenRateModal}
-            className="w-full flex items-center gap-md px-md py-md rounded-lg text-secondary hover:bg-background transition"
-          >
-            <DollarSign className="w-5 h-5" />
-            {sidebarOpen && <span className="font-semibold">રેટ બદલો</span>}
-          </button>
-
-          <div className="border-t border-border pt-sm mt-sm">
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center gap-md px-md py-md rounded-lg text-secondary hover:bg-background transition"
-            >
-              <LogOut className="w-5 h-5" />
-              {sidebarOpen && <span className="font-semibold">લોગ આઉટ</span>}
-            </button>
-          </div>
-        </nav>
-      </div>
-
-      {/* Main Content */}
-      <div
-        style={{
-          marginLeft: sidebarOpen ? "256px" : "80px",
-          transition: "all 300ms ease-in-out",
-        }}
-        className="flex-1"
-      >
-        {/* Header */}
-        <header
-          className="sticky top-0 z-30 bg-surface shadow-sm border-b border-border"
-          style={{ backdropFilter: "blur(12px)" }}
-        >
-          <div className="px-lg py-md flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-primary-dark">
-              {currentSection === "projects" && "પ્રોજેક્ટ્સ"}
-              {currentSection === "workers" && "કારીગરો"}
-              {currentSection === "attendance" && "હાજરી"}
-              {(!currentSection || currentSection === "dashboard") && "ડેશબોર્ડ"}
-            </h2>
-            <div className="text-right">
-              <p className="text-sm text-secondary font-medium">સ્વાગત છે, નિતિનભાઈ</p>
-            </div>
-          </div>
-        </header>
-
-        {/* Content Area */}
-        <main className="p-lg">
-          {(!currentSection || currentSection === "dashboard") && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-lg">
-              <div className="bg-white rounded-xl p-lg border border-border shadow-sm">
-                <p className="text-secondary font-semibold text-sm mb-sm">કુલ પ્રોજેક્ટ્સ</p>
-                <h3 className="text-4xl font-bold text-primary-dark">0</h3>
-              </div>
-              <div className="bg-white rounded-xl p-lg border border-border shadow-sm">
-                <p className="text-secondary font-semibold text-sm mb-sm">કુલ કારીગરો</p>
-                <h3 className="text-4xl font-bold text-primary-dark">0</h3>
-              </div>
-              <div className="bg-white rounded-xl p-lg border border-border shadow-sm">
-                <p className="text-secondary font-semibold text-sm mb-sm">આજનો હાજરી</p>
-                <h3 className="text-4xl font-bold text-primary-dark">0</h3>
+        {/* Tab content */}
+        <div className="pb-lg">
+          {activeTab === "projects" && <AdminProjects />}
+          {activeTab === "attendance" && <AdminAttendance />}
+          {activeTab === "workers" && <AdminWorkers />}
+          {activeTab === "rate" && (
+            <div className="bg-white rounded-xl p-6 border border-border shadow-sm max-w-xl">
+              <h3 className="text-xl font-bold text-primary-dark mb-4">રેટ બદલો (₹ / sq ft)</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-secondary mb-2">
+                    કિંમત પ્રતિ ચોરસ ફૂટ (₹)
+                  </label>
+                  <Input
+                    type="number"
+                    value={rate}
+                    onChange={(e) => setRate(e.target.value)}
+                    placeholder="દા.ત. 150"
+                    className="border-border"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handleSaveRate}
+                    disabled={savingRate}
+                    className="bg-primary text-white hover:bg-primary-dark"
+                  >
+                    {savingRate ? "સાચવી રહ્યું છે..." : "સાચવો"}
+                  </Button>
+                  <Button
+                    onClick={async () => {
+                      try {
+                        const rateDocRef = doc(db, "settings", "rate");
+                        const rateDoc = await getDoc(rateDocRef);
+                        if (rateDoc.exists()) {
+                          setRate(rateDoc.data().pricePerSqFt.toString());
+                        } else {
+                          setRate("");
+                        }
+                      } catch (error) {
+                        console.error("Error loading rate:", error);
+                      }
+                    }}
+                    className="border border-border text-secondary"
+                  >
+                    રિફ્રેશ
+                  </Button>
+                </div>
               </div>
             </div>
           )}
-
-          {currentSection === "projects" && <AdminProjects />}
-          {currentSection === "workers" && <AdminWorkers />}
-          {currentSection === "attendance" && <AdminAttendance />}
-        </main>
-
-        {/* Status Bar */}
-        <ConnectionStatusBar />
-      </div>
-
-      {/* Rate Change Modal */}
-      {showRateModal && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-          onClick={() => setShowRateModal(false)}
-        >
-          <div
-            className="bg-white rounded-xl p-6 max-w-md w-full mx-4 shadow-xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3 className="text-xl font-bold text-primary-dark mb-4">રેટ બદલો (₹ / sq ft)</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-semibold text-secondary mb-2">
-                  કિંમત પ્રતિ ચોરસ ફૂટ (₹)
-                </label>
-                <Input
-                  type="number"
-                  value={rate}
-                  onChange={(e) => setRate(e.target.value)}
-                  placeholder="દા.ત. 150"
-                  className="border-border"
-                />
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  onClick={handleSaveRate}
-                  disabled={savingRate}
-                  className="bg-primary text-white hover:bg-primary-dark"
-                >
-                  {savingRate ? "સાચવી રહ્યું છે..." : "સાચવો"}
-                </Button>
-                <Button
-                  onClick={() => {
-                    setShowRateModal(false);
-                    setRate("");
-                  }}
-                  className="bg-gray-200 text-secondary hover:bg-gray-300"
-                >
-                  રદ કરો
-                </Button>
-              </div>
-            </div>
-          </div>
         </div>
-      )}
+      </section>
+
+      <ConnectionStatusBar />
     </div>
   );
 }

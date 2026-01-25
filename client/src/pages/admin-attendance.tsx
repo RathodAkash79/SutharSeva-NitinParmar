@@ -20,7 +20,7 @@ interface Attendance {
   workerId: string;
   workerName: string;
   date: string;
-  status: "present" | "absent";
+  status: "present" | "absent" | "half";
   createdAt: Timestamp;
 }
 
@@ -91,7 +91,7 @@ export default function AdminAttendance() {
   const handleMarkAttendance = async (
     workerId: string,
     workerName: string,
-    status: "present" | "absent"
+    status: "present" | "absent" | "half"
   ) => {
     try {
       const attendanceRef = doc(
@@ -123,23 +123,11 @@ export default function AdminAttendance() {
     }
   };
 
-  const getDaysInMonth = (date: Date) => {
-    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-  };
-
-  const getFirstDayOfMonth = (date: Date) => {
-    return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
-  };
-
-  const getAttendanceCount = (date: string) => {
-    return attendance.filter((a) => a.date === date && a.status === "present")
-      .length;
-  };
+  const getDaysInMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+  const getAttendanceCount = (date: string) => attendance.filter((a) => a.date === date && a.status === "present").length;
 
   const monthDays = getDaysInMonth(currentMonth);
-  const firstDay = getFirstDayOfMonth(currentMonth);
   const days = Array.from({ length: monthDays }, (_, i) => i + 1);
-  const emptyDays = Array.from({ length: firstDay }, (_, i) => null);
 
   const handlePrevMonth = () => {
     setCurrentMonth(
@@ -184,69 +172,40 @@ export default function AdminAttendance() {
     <div className="space-y-6">
       {/* Calendar */}
       <div className="bg-white rounded-xl p-6 border border-border shadow-sm">
-        <div className="flex items-center justify-between mb-6">
-          <button
-            onClick={handlePrevMonth}
-            className="p-2 hover:bg-background rounded transition"
-          >
+        <div className="flex items-center justify-between mb-4">
+          <button onClick={handlePrevMonth} className="p-2 hover:bg-background rounded transition">
             <ChevronLeft className="w-5 h-5 text-secondary" />
           </button>
           <h3 className="text-lg font-bold text-primary-dark">
-            {currentMonth.toLocaleDateString("gu-IN", {
-              month: "long",
-              year: "numeric",
-            })}
+            {currentMonth.toLocaleDateString("gu-IN", { month: "long", year: "numeric" })}
           </h3>
-          <button
-            onClick={handleNextMonth}
-            className="p-2 hover:bg-background rounded transition"
-          >
+          <button onClick={handleNextMonth} className="p-2 hover:bg-background rounded transition">
             <ChevronRight className="w-5 h-5 text-secondary" />
           </button>
         </div>
 
-        {/* Calendar Grid */}
-        <div className="grid grid-cols-7 gap-1 mb-4">
-          {["સો", "સ", "બુ", "બ", "ગુ", "શુ", "રવિ"].map((day) => (
-            <div
-              key={day}
-              className="text-center p-2 text-sm font-bold text-primary"
-            >
-              {day}
-            </div>
-          ))}
-
-          {[...emptyDays, ...days].map((day, idx) => {
-            const dateStr =
-              day !== null
-                ? `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
-                : null;
-
+        {/* Calendar Grid: 10 columns, square blocks */}
+        <div className="grid gap-1 mb-4" style={{ gridTemplateColumns: "repeat(10, 1fr)" }}>
+          {days.map((day) => {
+            const dateStr = `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
             const isSelected = dateStr === selectedDate;
-            const count = dateStr ? getAttendanceCount(dateStr) : 0;
+            const count = getAttendanceCount(dateStr);
 
             return (
               <button
-                key={idx}
-                onClick={() => dateStr && setSelectedDate(dateStr)}
-                disabled={!dateStr}
-                className={`aspect-square flex flex-col items-center justify-center rounded-lg text-sm font-semibold transition ${
-                  !dateStr
-                    ? "bg-transparent"
-                    : isSelected
-                      ? "bg-primary text-white"
-                      : count > 0
-                        ? "bg-success text-white"
-                        : "bg-border text-secondary hover:bg-border-dark"
-                }`}
+                key={dateStr}
+                onClick={() => setSelectedDate(dateStr)}
+                className={`aspect-square relative flex flex-col items-center justify-center rounded-lg text-sm font-semibold transition border ${
+                  isSelected
+                    ? "bg-primary text-white border-primary"
+                    : "bg-white text-secondary border-border"
+                } ${count > 0 && !isSelected ? "hover:bg-background" : ""}`}
               >
-                {day && (
-                  <>
-                    <span>{day}</span>
-                    {count > 0 && (
-                      <span className="text-xs opacity-75">{count}</span>
-                    )}
-                  </>
+                <span>{day}</span>
+                {count > 0 && (
+                  <span className="absolute top-1 right-1 inline-flex items-center justify-center text-[10px] px-1 rounded-full bg-success text-white">
+                    {count}
+                  </span>
                 )}
               </button>
             );
@@ -256,9 +215,11 @@ export default function AdminAttendance() {
 
       {/* Selected Date Attendance */}
       <div className="bg-white rounded-xl p-6 border border-border shadow-sm">
-        <h3 className="text-lg font-bold text-primary-dark mb-4">
-          હાજરી - {formatDateForDisplay(selectedDate)}
-        </h3>
+        <div className="flex flex-wrap items-center gap-sm mb-4">
+          <h3 className="text-lg font-bold text-primary-dark">હાજરી</h3>
+          <span className="text-sm text-secondary">તારીખ: {formatDateForDisplay(selectedDate)}</span>
+          <span className="text-xs px-2 py-1 rounded bg-[#e6f4ea] text-[#2f855a]">ALL - KANTHKOT</span>
+        </div>
 
         <div className="space-y-3">
           {workers.map((worker) => {
@@ -268,6 +229,12 @@ export default function AdminAttendance() {
                 a.date === selectedDate &&
                 a.status === "present"
             );
+            const half = attendance.find(
+              (a) =>
+                a.workerId === worker.id &&
+                a.date === selectedDate &&
+                a.status === "half"
+            );
             const absent = attendance.find(
               (a) =>
                 a.workerId === worker.id &&
@@ -276,35 +243,45 @@ export default function AdminAttendance() {
             );
 
             return (
-              <div
-                key={worker.id}
-                className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-background transition"
-              >
-                <span className="font-semibold text-primary-dark">{worker.name}</span>
-                <div className="flex gap-2">
+              <div key={worker.id} className="border border-border rounded-lg p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-primary-dark">{worker.name}</span>
+                  <span className="text-success font-semibold">₹0</span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="number"
+                    placeholder="દૈનિક પગાર (₹)"
+                    className="border-border"
+                  />
+                  <Button className="bg-primary text-white hover:bg-primary-dark">સેવ</Button>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
                   <button
-                    onClick={() =>
-                      handleMarkAttendance(worker.id, worker.name, "present")
-                    }
-                    className={`px-4 py-2 rounded-lg font-semibold transition ${
-                      present
-                        ? "bg-success text-white"
-                        : "bg-border text-secondary hover:bg-border-dark"
+                    onClick={() => handleMarkAttendance(worker.id, worker.name, "present")}
+                    className={`px-3 py-2 rounded-lg font-semibold border ${
+                      present ? "bg-primary text-white border-primary" : "border-border text-secondary"
                     }`}
                   >
-                    ✓ હાજર
+                    પૂર્ણ દિવસ
                   </button>
                   <button
-                    onClick={() =>
-                      handleMarkAttendance(worker.id, worker.name, "absent")
-                    }
-                    className={`px-4 py-2 rounded-lg font-semibold transition ${
-                      absent
-                        ? "bg-danger text-white"
-                        : "bg-border text-secondary hover:bg-border-dark"
+                    onClick={() => handleMarkAttendance(worker.id, worker.name, "half")}
+                    className={`px-3 py-2 rounded-lg font-semibold border ${
+                      half ? "bg-primary text-white border-primary" : "border-border text-secondary"
                     }`}
                   >
-                    ✗ ગેરહાજર
+                    અડધો દિવસ
+                  </button>
+                  <button
+                    onClick={() => handleMarkAttendance(worker.id, worker.name, "absent")}
+                    className={`px-3 py-2 rounded-lg font-semibold border ${
+                      absent ? "bg-primary text-white border-primary" : "border-border text-secondary"
+                    }`}
+                  >
+                    ગેરહાજર
                   </button>
                 </div>
               </div>
