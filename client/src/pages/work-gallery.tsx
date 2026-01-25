@@ -253,7 +253,8 @@ export default function WorkGallery() {
   }, [selectedWork, isViewerOpen]);
 
   return (
-    <div className="page page--full" onKeyDown={handleKeyDown}>
+    <div className="app">
+      <div className="page page--full" onKeyDown={handleKeyDown}>
       <header className="app-header">
         <div className="app-header__container">
           <Link href="/">
@@ -473,6 +474,7 @@ export default function WorkGallery() {
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 }

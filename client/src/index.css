@@ -1,6 +1,11 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* 
+  This file is kept for compatibility but is not used.
+  All styles are defined in styles/main.scss via SCSS architecture.
+  Tailwind has been removed from this project in favor of pure SCSS.
+  
+  To remove this file entirely, also remove any references to it in imports.
+*/
+
 
 /* LIGHT MODE */
 :root {

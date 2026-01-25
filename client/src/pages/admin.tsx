@@ -13,7 +13,7 @@ import AdminWorkers from "./admin-workers";
 import AdminAttendance from "./admin-attendance";
 
 export default function Admin() {
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [, setCurrentUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [, params] = useRoute("/admin/:section");

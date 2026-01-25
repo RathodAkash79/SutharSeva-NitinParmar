@@ -18,7 +18,7 @@ interface SystemHealthProbeProps {
 
 // Hidden, opt-in health probe for development diagnostics. No UI is rendered.
 export function SystemHealthProbe({ enabled = false, verbose = false }: SystemHealthProbeProps) {
-  const [status, setStatus] = useState<HealthSnapshot | null>(null);
+  const [, setStatus] = useState<HealthSnapshot | null>(null);
 
   useEffect(() => {
     if (!enabled) return;

@@ -70,24 +70,25 @@ export default function Home() {
   );
 
   return (
-    <main className="page page--full">
-      <header className="app-header">
-        <div className="app-header__container">
-          <Link href="/">
-            <a className="app-header__logo">
-              <span className="app-header__logo-icon">🔨</span>
-              <span className="app-header__logo-text">સુથાર સેવા</span>
-            </a>
-          </Link>
-          <div className="app-header__actions">
-            <a href="tel:+918160911612" className="btn btn-primary btn--small">
-              <Phone className="w-4 h-4" /> ફોન
-            </a>
+    <div className="app">
+      <main className="page page--full">
+        <header className="app-header">
+          <div className="app-header__container">
+            <Link href="/">
+              <a className="app-header__logo">
+                <span className="app-header__logo-icon">🔨</span>
+                <span className="app-header__logo-text">સુથાર સેવા</span>
+              </a>
+            </Link>
+            <div className="app-header__actions">
+              <a href="tel:+918160911612" className="btn btn-primary btn--small">
+                <Phone className="w-4 h-4" /> ફોન
+              </a>
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      <section className="section section--hero hero">
+        <section className="section section--hero hero">
         <div className="hero__container">
           <h2 className="hero__title">નિતિન પરમાર - ફર્નિચર આર્ટિસ્ટ</h2>
           <p className="hero__subtitle">
@@ -212,20 +213,21 @@ export default function Home() {
         </section>
       </div>
 
-      <footer className="section section--compact text-center">
-        <div className="page page--centered">
-          <h4 className="font-bold text-primary-dark text-lg mb-sm">નિતિનભાઈ પરમાર</h4>
-          <p className="text-secondary font-medium mb-md">📱 મોબાઈલ: 8160911612</p>
-          <div className="d-flex justify-center gap-md">
-            <a href="tel:+918160911612" className="btn btn-primary">
-              ☎️ કૉલ કરો
-            </a>
-            <a href="https://wa.me/918160911612" className="btn btn-success">
-              💬 WhatsApp
-            </a>
+        <footer className="section section--compact text-center">
+          <div className="page page--centered">
+            <h4 className="font-bold text-primary-dark text-lg mb-sm">નિતિનભાઈ પરમાર</h4>
+            <p className="text-secondary font-medium mb-md">📱 મોબાઈલ: 8160911612</p>
+            <div className="d-flex justify-center gap-md">
+              <a href="tel:+918160911612" className="btn btn-primary">
+                ☎️ કૉલ કરો
+              </a>
+              <a href="https://wa.me/918160911612" className="btn btn-success">
+                💬 WhatsApp
+              </a>
+            </div>
           </div>
-        </div>
-      </footer>
-    </main>
+        </footer>
+      </main>
+    </div>
   );
 }
