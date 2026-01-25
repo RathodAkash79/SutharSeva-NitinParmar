@@ -424,6 +424,22 @@ html {
 .line-clamp-1 { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; }
 .line-clamp-2 { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .line-clamp-3 { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+
+// ════════════════════════════════════════════════════════════════════════════
+// HOVER & INTERACTIVE STATES
+// ════════════════════════════════════════════════════════════════════════════
+
+.hover\:bg-primary-dark:hover { background-color: $color-primary-dark; }
+.hover\:bg-success-dark:hover { background-color: $color-success-dark; }
+.hover\:bg-danger-dark:hover { background-color: $color-danger-dark; }
+.hover\:bg-background:hover { background-color: $color-background; }
+.hover\:border-primary:hover { border-color: $color-primary; }
+.hover\:shadow-lg:hover { box-shadow: $shadow-lg; }
+.hover\:shadow-md:hover { box-shadow: $shadow-md; }
+.active\:bg-primary-dark:active { background-color: $color-primary-dark; }
+.active\:bg-success-dark:active { background-color: $color-success-dark; }
+.active\:bg-danger-dark:active { background-color: $color-danger-dark; }
+
 // ════════════════════════════════════════════════════════════════════════════
 // RESPONSIVE UTILITIES
 // ════════════════════════════════════════════════════════════════════════════
