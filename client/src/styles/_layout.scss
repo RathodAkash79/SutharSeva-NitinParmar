@@ -33,8 +33,11 @@
     border-right: $border-width solid $color-border;
     z-index: $z-sticky;
     overflow-y: auto;
+    overflow-x: hidden;
     transition: transform $transition-base, width $transition-base;
     box-shadow: $shadow-sm;
+    display: flex;
+    flex-direction: column;
 
     &.is-collapsed {
       width: 80px;
@@ -362,6 +365,54 @@
   
   &__content {
     margin-top: $spacing-xl;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SIDEBAR NAVIGATION
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Sidebar navigation links/buttons container
+.layout__sidebar {
+  nav {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-sm;
+    padding: $spacing-md;
+    
+    a, button {
+      display: flex;
+      align-items: center;
+      gap: $spacing-md;
+      padding: $spacing-sm $spacing-md;
+      min-height: $touch-target-min;
+      width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-decoration: none;
+      border-radius: $border-radius-md;
+      transition: all $transition-base;
+      
+      span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+  }
+  
+  // When collapsed, center the icon buttons
+  &.is-collapsed {
+    nav {
+      a, button {
+        justify-content: center;
+        padding: $spacing-sm;
+        
+        span {
+          display: none;
+        }
+      }
+    }
   }
 }
 
