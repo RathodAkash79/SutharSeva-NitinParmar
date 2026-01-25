@@ -296,6 +296,109 @@ html {
 .z-sticky { z-index: $z-sticky; }
 .z-modal { z-index: $z-modal; }
 
+// SHORTHAND COLOR ALIASES (for quick reference)
+.bg-primary-light { background-color: $color-primary-light; }
+.bg-primary-dark { background-color: $color-primary-dark; }
+.bg-primary-lighter { background-color: $color-primary-lighter; }
+.bg-primary-lightest { background-color: $color-primary-lightest; }
+.bg-success-dark { background-color: $color-success-dark; }
+.bg-success-light { background-color: $color-success-light; }
+.bg-danger-dark { background-color: $color-danger-dark; }
+.bg-danger-light { background-color: $color-danger-light; }
+
+.text-primary { color: $color-text-primary; }
+.text-primary-dark { color: $color-primary-dark; }
+.text-secondary { color: $color-text-secondary; }
+.text-tertiary { color: $color-text-tertiary; }
+.text-muted { color: $color-text-muted; }
+.text-success { color: $color-success; }
+.text-danger { color: $color-danger; }
+.text-white { color: #ffffff; }
+
+.border-border { border-color: $color-border; }
+.border-border-dark { border-color: $color-border-dark; }
+
+.success { color: $color-success; }
+.danger { color: $color-danger; }
+.warning { color: $color-warning; }
+.info { color: $color-info; }
+
+// Additional semantic color utility classes
+.primary-dark { color: $color-primary-dark; }
+.primary-light { color: $color-primary-light; }
+.success-dark { color: $color-success-dark; }
+.success-light { color: $color-success-light; }
+.danger-dark { color: $color-danger-dark; }
+.danger-light { color: $color-danger-light; }
+
+.xs { 
+  &--px { padding-left: $spacing-xs; padding-right: $spacing-xs; }
+  &--py { padding-top: $spacing-xs; padding-bottom: $spacing-xs; }
+}
+
+.sm { 
+  &--px { padding-left: $spacing-sm; padding-right: $spacing-sm; }
+  &--py { padding-top: $spacing-sm; padding-bottom: $spacing-sm; }
+}
+
+.md { 
+  &--px { padding-left: $spacing-md; padding-right: $spacing-md; }
+  &--py { padding-top: $spacing-md; padding-bottom: $spacing-md; }
+}
+
+.lg { 
+  &--px { padding-left: $spacing-lg; padding-right: $spacing-lg; }
+  &--py { padding-top: $spacing-lg; padding-bottom: $spacing-lg; }
+}
+
+.xl { 
+  &--px { padding-left: $spacing-xl; padding-right: $spacing-xl; }
+  &--py { padding-top: $spacing-xl; padding-bottom: $spacing-xl; }
+}
+
+// Direct shorthand classes for spacing
+.px-xs { padding-left: $spacing-xs; padding-right: $spacing-xs; }
+.px-sm { padding-left: $spacing-sm; padding-right: $spacing-sm; }
+.px-md { padding-left: $spacing-md; padding-right: $spacing-md; }
+.px-lg { padding-left: $spacing-lg; padding-right: $spacing-lg; }
+.px-xl { padding-left: $spacing-xl; padding-right: $spacing-xl; }
+
+.py-xs { padding-top: $spacing-xs; padding-bottom: $spacing-xs; }
+.py-sm { padding-top: $spacing-sm; padding-bottom: $spacing-sm; }
+.py-md { padding-top: $spacing-md; padding-bottom: $spacing-md; }
+.py-lg { padding-top: $spacing-lg; padding-bottom: $spacing-lg; }
+.py-xl { padding-top: $spacing-xl; padding-bottom: $spacing-xl; }
+
+.p-xs { padding: $spacing-xs; }
+.p-sm { padding: $spacing-sm; }
+.p-md { padding: $spacing-md; }
+.p-lg { padding: $spacing-lg; }
+.p-xl { padding: $spacing-xl; }
+
+// Shorthand for spacing - mt, mb, mx, my, etc.
+.mt-xs { margin-top: $spacing-xs; }
+.mt-sm { margin-top: $spacing-sm; }
+.mt-md { margin-top: $spacing-md; }
+.mt-lg { margin-top: $spacing-lg; }
+.mt-xl { margin-top: $spacing-xl; }
+
+.mb-xs { margin-bottom: $spacing-xs; }
+.mb-sm { margin-bottom: $spacing-sm; }
+.mb-md { margin-bottom: $spacing-md; }
+.mb-lg { margin-bottom: $spacing-lg; }
+.mb-xl { margin-bottom: $spacing-xl; }
+.mb-2xl { margin-bottom: $spacing-2xl; }
+
+.mx-auto { margin-left: auto; margin-right: auto; }
+.my-auto { margin-top: auto; margin-bottom: auto; }
+
+// Gap shortcuts for grids and flexbox
+.gap-xs { gap: $spacing-xs; }
+.gap-sm { gap: $spacing-sm; }
+.gap-md { gap: $spacing-md; }
+.gap-lg { gap: $spacing-lg; }
+.gap-xl { gap: $spacing-xl; }
+
 // Transition
 .transition { transition: all $transition-base; }
 .transition-all { transition: all $transition-base; }

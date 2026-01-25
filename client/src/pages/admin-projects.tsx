@@ -235,7 +235,7 @@ export default function AdminProjects() {
   if (loading) {
     return (
       <div className="text-center py-12">
-        <p className="text-[#795548] font-medium">લોડ થઈ રહ્યું છે...</p>
+        <p className="text-secondary font-medium">લોડ થઈ રહ્યું છે...</p>
       </div>
     );
   }
@@ -256,7 +256,7 @@ export default function AdminProjects() {
               status: "Ongoing",
             });
           }}
-          className="bg-[#855e42] text-white hover:bg-[#5d4037]"
+          className="bg-primary text-white hover:bg-primary-dark"
         >
           <Plus className="w-4 h-4 mr-2" />
           નવું પ્રોજેક્ટ ઉમેરો
@@ -265,13 +265,13 @@ export default function AdminProjects() {
 
       {/* Form */}
       {showForm && (
-        <div className="bg-white rounded-xl p-6 border border-[#efebe9] shadow-sm">
-          <h3 className="text-xl font-bold text-[#5d4037] mb-4">
+        <div className="bg-white rounded-xl p-6 border border-border shadow-sm">
+          <h3 className="text-xl font-bold text-primary-dark mb-4">
             {editingId ? "પ્રોજેક્ટ સંપાદિત કરો" : "નવું પ્રોજેક્ટ ઉમેરો"}
           </h3>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-semibold text-[#795548] mb-2">
+              <label className="block text-sm font-semibold text-secondary mb-2">
                 પ્રોજેક્ટ નામ
               </label>
               <Input
@@ -281,12 +281,12 @@ export default function AdminProjects() {
                   setFormData((prev) => ({ ...prev, name: e.target.value }))
                 }
                 placeholder="દા.ત. કિચન ફર્નિચર"
-                className="border-[#efebe9]"
+                className="border-border"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-[#795548] mb-2">
+              <label className="block text-sm font-semibold text-secondary mb-2">
                 ગામ
               </label>
               <Input
@@ -296,19 +296,19 @@ export default function AdminProjects() {
                   setFormData((prev) => ({ ...prev, village: e.target.value }))
                 }
                 placeholder="દા.ત. ભાવનગર"
-                className="border-[#efebe9]"
+                className="border-border"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-[#795548] mb-2">
+              <label className="block text-sm font-semibold text-secondary mb-2">
                 કામના પ્રકાર (બહુવિધ પસંદ કરો)
               </label>
               <div className="grid grid-cols-2 gap-2">
                 {workTypeOptions.map((type) => (
                   <label
                     key={type}
-                    className="flex items-center gap-2 p-2 rounded border border-[#efebe9] cursor-pointer hover:bg-[#fdfbf7]"
+                    className="flex items-center gap-2 p-2 rounded border border-border cursor-pointer hover:bg-background"
                   >
                     <input
                       type="checkbox"
@@ -316,14 +316,14 @@ export default function AdminProjects() {
                       onChange={() => handleWorkTypeToggle(type)}
                       className="w-4 h-4"
                     />
-                    <span className="text-sm text-[#795548]">{type}</span>
+                    <span className="text-sm text-secondary">{type}</span>
                   </label>
                 ))}
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-[#795548] mb-2">
+              <label className="block text-sm font-semibold text-secondary mb-2">
                 કુલ રકમ (₹)
               </label>
               <Input
@@ -333,12 +333,12 @@ export default function AdminProjects() {
                   setFormData((prev) => ({ ...prev, totalAmount: e.target.value }))
                 }
                 placeholder="0"
-                className="border-[#efebe9]"
+                className="border-border"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-[#795548] mb-2">
+              <label className="block text-sm font-semibold text-secondary mb-2">
                 સ્થિતિ
               </label>
               <select
@@ -346,7 +346,7 @@ export default function AdminProjects() {
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, status: e.target.value as any }))
                 }
-                className="w-full px-3 py-2 border border-[#efebe9] rounded-lg text-[#795548]"
+                className="w-full px-3 py-2 border border-border rounded-lg text-secondary"
               >
                 <option value="Ongoing">ચાલુ</option>
                 <option value="Completed">પૂર્ણ</option>
@@ -356,7 +356,7 @@ export default function AdminProjects() {
             <div className="flex gap-2">
               <Button
                 type="submit"
-                className="bg-[#855e42] text-white hover:bg-[#5d4037]"
+                className="bg-primary text-white hover:bg-primary-dark"
               >
                 સાચવો
               </Button>
@@ -366,7 +366,7 @@ export default function AdminProjects() {
                   setShowForm(false);
                   setEditingId(null);
                 }}
-                className="bg-gray-200 text-[#795548] hover:bg-gray-300"
+                className="bg-gray-200 text-secondary hover:bg-gray-300"
               >
                 રદ કરો
               </Button>
@@ -378,62 +378,62 @@ export default function AdminProjects() {
       {/* Projects List */}
       <div className="space-y-4">
         {projects.length === 0 ? (
-          <div className="text-center py-12 bg-white rounded-xl border border-[#efebe9]">
+          <div className="text-center py-12 bg-white rounded-xl border border-border">
             <p className="text-[#795548] font-medium">હજી કોઈ પ્રોજેક્ટ નથી</p>
           </div>
         ) : (
           projects.map((project) => (
             <div
               key={project.id}
-              className="bg-white rounded-xl border border-[#efebe9] shadow-sm overflow-hidden"
+              className="bg-white rounded-xl border border-border shadow-sm overflow-hidden"
             >
               {/* Project Header */}
-              <div className="p-4 border-b border-[#efebe9]">
+              <div className="p-4 border-b border-border">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <h3 className="text-lg font-bold text-[#5d4037] mb-1">
+                    <h3 className="text-lg font-bold text-primary-dark mb-1">
                       {project.name}
                     </h3>
-                    <p className="text-sm text-[#795548] mb-2">📍 {project.village}</p>
+                    <p className="text-sm text-secondary mb-2">📍 {project.village}</p>
                     <div className="flex flex-wrap gap-2 mb-2">
                       {project.workTypes?.map((type) => (
                         <span
                           key={type}
-                          className="text-xs bg-[#efebe9] text-[#795548] px-2 py-1 rounded"
+                          className="text-xs bg-border text-secondary px-2 py-1 rounded"
                         >
                           {type}
                         </span>
                       ))}
                     </div>
-                    <p className="text-sm font-semibold text-[#855e42]">
+                    <p className="text-sm font-semibold text-primary">
                       ₹{project.totalAmount.toLocaleString("en-IN")}
                     </p>
                   </div>
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleEdit(project)}
-                      className="p-2 hover:bg-[#fdfbf7] rounded transition"
+                      className="p-2 hover:bg-background rounded transition"
                     >
-                      <Edit2 className="w-4 h-4 text-[#795548]" />
+                      <Edit2 className="w-4 h-4 text-secondary" />
                     </button>
                     <button
                       onClick={() => handleDelete(project.id)}
-                      className="p-2 hover:bg-[#fdfbf7] rounded transition"
+                      className="p-2 hover:bg-background rounded transition"
                     >
-                      <Trash2 className="w-4 h-4 text-red-500" />
+                      <Trash2 className="w-4 h-4 text-danger" />
                     </button>
                   </div>
                 </div>
               </div>
 
               {/* Photo Upload Section */}
-              <div className="p-4 bg-[#fdfbf7] border-b border-[#efebe9]">
+              <div className="p-4 bg-background border-b border-border">
                 {uploadingPhotoForId === project.id ? (
                   <div className="space-y-4">
-                    <h4 className="font-semibold text-[#795548]">ફોટો અપલોડ કરો</h4>
+                    <h4 className="font-semibold text-secondary">ફોટો અપલોડ કરો</h4>
 
                     {imagePreview && (
-                      <div className="relative w-full h-40 bg-[#efebe9] rounded-lg overflow-hidden">
+                      <div className="relative w-full h-40 bg-border rounded-lg overflow-hidden">
                         <img
                           src={imagePreview}
                           alt="Preview"
@@ -446,13 +446,13 @@ export default function AdminProjects() {
                       type="file"
                       accept="image/*"
                       onChange={handleImageSelect}
-                      className="w-full px-3 py-2 border border-[#efebe9] rounded-lg"
+                      className="w-full px-3 py-2 border border-border rounded-lg"
                     />
 
                     <select
                       value={selectedPhotoCategory}
                       onChange={(e) => setSelectedPhotoCategory(e.target.value)}
-                      className="w-full px-3 py-2 border border-[#efebe9] rounded-lg text-[#795548]"
+                      className="w-full px-3 py-2 border border-border rounded-lg text-secondary"
                     >
                       {workTypeOptions.map((cat) => (
                         <option key={cat} value={cat}>
@@ -465,7 +465,7 @@ export default function AdminProjects() {
                       <Button
                         onClick={() => handleUploadPhoto(project.id)}
                         disabled={!imageFile || uploading}
-                        className="flex-1 bg-[#855e42] text-white hover:bg-[#5d4037]"
+                        className="flex-1 bg-primary text-white hover:bg-primary-dark"
                       >
                         <Upload className="w-4 h-4 mr-2" />
                         {uploading ? "અપલોડ થઈ રહ્યું..." : "અપલોડ કરો"}
@@ -476,7 +476,7 @@ export default function AdminProjects() {
                           setImageFile(null);
                           setImagePreview("");
                         }}
-                        className="flex-1 bg-gray-200 text-[#795548] hover:bg-gray-300"
+                        className="flex-1 bg-gray-200 text-secondary hover:bg-gray-300"
                       >
                         <X className="w-4 h-4" />
                       </Button>
@@ -485,7 +485,7 @@ export default function AdminProjects() {
                 ) : (
                   <Button
                     onClick={() => setUploadingPhotoForId(project.id)}
-                    className="w-full bg-[#43a047] text-white hover:bg-[#2e7d32]"
+                    className="w-full bg-success text-white hover:bg-success-dark"
                   >
                     <Upload className="w-4 h-4 mr-2" />
                     ફોટો અપલોડ કરો ({(project.photos || []).length})
@@ -496,7 +496,7 @@ export default function AdminProjects() {
               {/* Photos Grid */}
               {(project.photos || []).length > 0 && (
                 <div className="p-4">
-                  <h4 className="font-semibold text-[#795548] mb-3">
+                  <h4 className="font-semibold text-secondary mb-3">
                     ફોટો ({project.photos!.length})
                   </h4>
                   <div className="grid grid-cols-3 gap-2">

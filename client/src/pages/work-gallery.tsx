@@ -240,20 +240,20 @@ export default function WorkGallery() {
   };
 
   return (
-    <div className="min-h-screen bg-[#fdfbf7]">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-lg border-b border-[#efebe9]">
+      <header className="sticky top-0 z-sticky bg-white/90 backdrop-blur-lg border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
           <Link href="/">
             <a className="flex items-center gap-2 cursor-pointer">
               <span className="text-2xl">🔨</span>
-              <h1 className="text-lg font-bold text-[#5d4037]">સુથાર સેવા</h1>
+              <h1 className="text-lg font-bold text-primary-dark">સુથાર સેવા</h1>
             </a>
           </Link>
           <div className="flex gap-2">
             <a
               href="tel:+918160911612"
-              className="px-3 py-1.5 bg-[#855e42] text-white rounded-full text-sm font-semibold hover:bg-[#5d4037] transition"
+              className="px-3 py-1.5 bg-primary text-white rounded-full text-sm font-semibold hover:bg-primary-dark transition"
             >
               ☎️ ફોન
             </a>
@@ -262,10 +262,10 @@ export default function WorkGallery() {
       </header>
 
       {/* Page Title */}
-      <div className="bg-gradient-to-b from-[#fdfbf7] to-[#f5f5f5] py-8 border-b border-[#efebe9]">
+      <div className="bg-gradient-to-b from-background to-bg-background-alt py-8 border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-[#5d4037] mb-2">અમારા કામ</h2>
-          <p className="text-[#795548] font-medium">
+          <h2 className="text-3xl font-bold text-primary-dark mb-2">અમારા કામ</h2>
+          <p className="text-secondary font-medium">
             નિતિનભાઈ પરમારના શ્રેષ્ઠ ફર્નિચર અને સર્વિસ કાર્યોનો સંગ્રહ
           </p>
         </div>
@@ -274,13 +274,13 @@ export default function WorkGallery() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Search Bar */}
         <div className="relative mb-6">
-          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#795548] w-5 h-5" />
+          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-secondary w-5 h-5" />
           <Input
             type="text"
             placeholder="ગામ, કામનો પ્રકાર શોધો..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 rounded-full border-2 border-transparent bg-white shadow-md focus:border-[#d7ccc8] transition text-base placeholder:text-[#bdbdbd]"
+            className="w-full pl-12 pr-4 py-3 rounded-full border-2 border-transparent bg-white shadow-md focus:border-border-dark transition text-base placeholder:text-muted"
           />
         </div>
 
@@ -296,8 +296,8 @@ export default function WorkGallery() {
                 onClick={() => setSelectedCategory(category)}
                 className={`px-4 py-2 rounded-full font-semibold text-sm transition-all ${
                   selectedCategory === category
-                    ? "bg-[#855e42] text-white shadow-md"
-                    : "bg-white text-[#795548] border-2 border-[#efebe9] hover:border-[#855e42] hover:bg-[#fdfbf7]"
+                    ? "bg-primary text-white shadow-md"
+                    : "bg-white text-secondary border-2 border-border hover:border-primary hover:bg-background"
                 }`}
               >
                 {category}
@@ -317,8 +317,8 @@ export default function WorkGallery() {
                 onClick={() => setSelectedVillage("બધા")}
                 className={`px-4 py-2 rounded-full font-semibold text-sm transition-all ${
                   selectedVillage === "બધા"
-                    ? "bg-[#855e42] text-white shadow-md"
-                    : "bg-white text-[#795548] border-2 border-[#efebe9] hover:border-[#855e42] hover:bg-[#fdfbf7]"
+                    ? "bg-primary text-white shadow-md"
+                    : "bg-white text-secondary border-2 border-border hover:border-primary hover:bg-background"
                 }`}
               >
                 બધા
@@ -329,8 +329,8 @@ export default function WorkGallery() {
                   onClick={() => setSelectedVillage(village)}
                   className={`px-4 py-2 rounded-full font-semibold text-sm transition-all ${
                     selectedVillage === village
-                      ? "bg-[#855e42] text-white shadow-md"
-                      : "bg-white text-[#795548] border-2 border-[#efebe9] hover:border-[#855e42] hover:bg-[#fdfbf7]"
+                      ? "bg-primary text-white shadow-md"
+                      : "bg-white text-secondary border-2 border-border hover:border-primary hover:bg-background"
                   }`}
                 >
                   {village}
@@ -343,11 +343,11 @@ export default function WorkGallery() {
         {/* Gallery Grid */}
         {loading ? (
           <div className="text-center py-12">
-            <p className="text-[#795548] font-medium">લોડ થઈ રહ્યું છે...</p>
+            <p className="text-secondary font-medium">લોડ થઈ રહ્યું છે...</p>
           </div>
         ) : filteredProjects.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-[#795548] font-medium text-lg">
+            <p className="text-secondary font-medium text-lg">
               {projects.length === 0
                 ? "હજી કોઈ કામ દર્શાવવામાં આવ્યું નથી."
                 : "તમારી શોધ સાથે મેળતું કામ નથી."}
@@ -358,7 +358,7 @@ export default function WorkGallery() {
             {filteredProjects.map((project) => (
               <div
                 key={project.id}
-                className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-[#efebe9] hover:border-[#855e42]"
+                className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-border hover:border-primary"
                 role="button"
                 tabIndex={0}
                 onClick={() => openWork(project)}
@@ -370,7 +370,7 @@ export default function WorkGallery() {
                 }}
               >
                 {/* Image Container */}
-                <div className="relative w-full h-56 bg-[#efebe9] overflow-hidden">
+                <div className="relative w-full h-56 bg-border overflow-hidden">
                   <img
                     src={getMainImage(project, selectedCategory)}
                     alt={project.name}
@@ -382,12 +382,12 @@ export default function WorkGallery() {
                 {/* Content */}
                 <div className="p-5">
                   {/* Work Name */}
-                  <h3 className="text-lg font-bold text-[#5d4037] mb-2">
+                  <h3 className="text-lg font-bold text-primary-dark mb-2">
                     {project.name}
                   </h3>
 
                   {/* Village */}
-                  <div className="flex items-center gap-2 text-[#795548] font-medium text-sm mb-3">
+                  <div className="flex items-center gap-2 text-secondary font-medium text-sm mb-3">
                     <MapPin className="w-4 h-4" />
                     {project.village}
                   </div>
@@ -398,7 +398,7 @@ export default function WorkGallery() {
                       {project.workTypes.map((type) => (
                         <span
                           key={type}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#efebe9] text-[#5d4037] text-xs font-semibold rounded-lg"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-border text-primary-dark text-xs font-semibold rounded-lg"
                         >
                           <Tag className="w-3 h-3" />
                           {type}
@@ -414,17 +414,17 @@ export default function WorkGallery() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-[#efebe9] py-8 mt-12">
+      <footer className="bg-white border-t border-border py-8 mt-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h4 className="font-bold text-[#5d4037] text-lg mb-3">
+          <h4 className="font-bold text-primary-dark text-lg mb-3">
             નિતિનભાઈ પરમાર
           </h4>
-          <p className="text-[#795548] font-medium mb-4">
+          <p className="text-secondary font-medium mb-4">
             📱 મોબાઈલ: 8160911612
           </p>
           <a
             href="https://wa.me/918160911612"
-            className="inline-block px-6 py-2.5 bg-[#43a047] text-white rounded-full font-semibold hover:bg-[#2e7d32] transition"
+            className="inline-block px-6 py-2.5 bg-success text-white rounded-full font-semibold hover:bg-success-dark transition"
           >
             💬 WhatsApp મેસેજ
           </a>
@@ -438,20 +438,20 @@ export default function WorkGallery() {
           onKeyDown={handleKeyDown}
           tabIndex={-1}
         >
-          <div className="bg-white rounded-2xl w-full max-w-5xl max-h-full overflow-hidden shadow-2xl border border-[#efebe9]">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-[#efebe9] bg-[#fdfbf7]">
+          <div className="bg-white rounded-2xl w-full max-w-5xl max-h-full overflow-hidden shadow-2xl border border-border">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-background">
               <div>
-                <h3 className="text-xl font-bold text-[#5d4037] mb-1">
+                <h3 className="text-xl font-bold text-primary-dark mb-1">
                   {selectedWork.name}
                 </h3>
-                <div className="flex items-center gap-2 text-[#795548] font-medium text-sm">
+                <div className="flex items-center gap-2 text-secondary font-medium text-sm">
                   <MapPin className="w-4 h-4" />
                   {selectedWork.village}
                 </div>
               </div>
               <button
                 onClick={closeWork}
-                className="px-3 py-1.5 bg-[#855e42] text-white rounded-full text-sm font-semibold hover:bg-[#5d4037] transition"
+                className="px-3 py-1.5 bg-primary text-white rounded-full text-sm font-semibold hover:bg-primary-dark transition"
                 aria-label="Close work details"
               >
                 ✕
@@ -462,7 +462,7 @@ export default function WorkGallery() {
               {getImagesGrouped(selectedWork).map((group) => (
                 <div key={`${selectedWork.id}-${group.type}`} className="space-y-3">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-[#795548] px-2 py-1 bg-[#efebe9] rounded-full">
+                    <span className="text-sm font-semibold text-secondary px-2 py-1 bg-border rounded-full">
                       {group.type}
                     </span>
                   </div>
@@ -471,7 +471,7 @@ export default function WorkGallery() {
                       <button
                         key={`${selectedWork.id}-${group.type}-${item.index}`}
                         onClick={() => openViewer(item.index)}
-                        className="relative block w-full aspect-square bg-[#efebe9] rounded-xl overflow-hidden border border-[#efebe9] shadow-sm focus:outline-none focus:ring-2 focus:ring-[#855e42]"
+                        className="relative block w-full aspect-square bg-border rounded-xl overflow-hidden border border-border shadow-sm focus:outline-none focus:ring-2 focus:ring-primary"
                       >
                         <img
                           src={item.url}

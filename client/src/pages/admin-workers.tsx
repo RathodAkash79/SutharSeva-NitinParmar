@@ -143,7 +143,7 @@ export default function AdminWorkers() {
   if (loading) {
     return (
       <div className="text-center py-12">
-        <p className="text-[#795548] font-medium">લોડ થઈ રહ્યું છે...</p>
+        <p className="text-secondary font-medium">લોડ થઈ રહ્યું છે...</p>
       </div>
     );
   }
@@ -163,7 +163,7 @@ export default function AdminWorkers() {
               dailyWage: "",
             });
           }}
-          className="bg-[#855e42] text-white hover:bg-[#5d4037]"
+          className="bg-primary text-white hover:bg-primary-dark"
         >
           <Plus className="w-4 h-4 mr-2" />
           નવો કારીગર ઉમેરો
@@ -172,13 +172,13 @@ export default function AdminWorkers() {
 
       {/* Form */}
       {showForm && (
-        <div className="bg-white rounded-xl p-6 border border-[#efebe9] shadow-sm">
-          <h3 className="text-xl font-bold text-[#5d4037] mb-4">
+        <div className="bg-white rounded-xl p-6 border border-border shadow-sm">
+          <h3 className="text-xl font-bold text-primary-dark mb-4">
             {editingId ? "કારીગર સંપાદિત કરો" : "નવો કારીગર ઉમેરો"}
           </h3>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-semibold text-[#795548] mb-2">
+              <label className="block text-sm font-semibold text-secondary mb-2">
                 નામ
               </label>
               <Input
@@ -188,12 +188,12 @@ export default function AdminWorkers() {
                   setFormData((prev) => ({ ...prev, name: e.target.value }))
                 }
                 placeholder="દા.ત. રાજુ"
-                className="border-[#efebe9]"
+                className="border-border"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-[#795548] mb-2">
+              <label className="block text-sm font-semibold text-secondary mb-2">
                 ફોન નંબર
               </label>
               <Input
@@ -203,12 +203,12 @@ export default function AdminWorkers() {
                   setFormData((prev) => ({ ...prev, phone: e.target.value }))
                 }
                 placeholder="9876543210"
-                className="border-[#efebe9]"
+                className="border-border"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-[#795548] mb-2">
+              <label className="block text-sm font-semibold text-secondary mb-2">
                 વિશેષતા
               </label>
               <select
@@ -216,7 +216,7 @@ export default function AdminWorkers() {
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, speciality: e.target.value }))
                 }
-                className="w-full px-3 py-2 border border-[#efebe9] rounded-lg text-[#795548]"
+                className="w-full px-3 py-2 border border-border rounded-lg text-secondary"
               >
                 <option value="">પસંદ કરો</option>
                 {specialities.map((spec) => (
@@ -228,7 +228,7 @@ export default function AdminWorkers() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-[#795548] mb-2">
+              <label className="block text-sm font-semibold text-secondary mb-2">
                 દૈનિક મજૂરી (₹)
               </label>
               <Input
@@ -238,14 +238,14 @@ export default function AdminWorkers() {
                   setFormData((prev) => ({ ...prev, dailyWage: e.target.value }))
                 }
                 placeholder="0"
-                className="border-[#efebe9]"
+                className="border-border"
               />
             </div>
 
             <div className="flex gap-2">
               <Button
                 type="submit"
-                className="bg-[#855e42] text-white hover:bg-[#5d4037]"
+                className="bg-primary text-white hover:bg-primary-dark"
               >
                 સાચવો
               </Button>
@@ -255,7 +255,7 @@ export default function AdminWorkers() {
                   setShowForm(false);
                   setEditingId(null);
                 }}
-                className="bg-gray-200 text-[#795548] hover:bg-gray-300"
+                className="bg-gray-200 text-secondary hover:bg-gray-300"
               >
                 રદ કરો
               </Button>
@@ -267,40 +267,40 @@ export default function AdminWorkers() {
       {/* Workers List */}
       <div className="space-y-4">
         {workers.length === 0 ? (
-          <div className="text-center py-12 bg-white rounded-xl border border-[#efebe9]">
-            <p className="text-[#795548] font-medium">હજી કોઈ કારીગર નથી</p>
+          <div className="text-center py-12 bg-white rounded-xl border border-border">
+            <p className="text-secondary font-medium">હજી કોઈ કારીગર નથી</p>
           </div>
         ) : (
           workers.map((worker) => (
             <div
               key={worker.id}
-              className="bg-white rounded-xl p-4 border border-[#efebe9] shadow-sm"
+              className="bg-white rounded-xl p-4 border border-border shadow-sm"
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <h3 className="text-lg font-bold text-[#5d4037] mb-1">
+                  <h3 className="text-lg font-bold text-primary-dark mb-1">
                     {worker.name}
                   </h3>
-                  <p className="text-sm text-[#795548] mb-1">📱 {worker.phone}</p>
-                  <p className="text-sm text-[#795548] mb-2">
+                  <p className="text-sm text-secondary mb-1">📱 {worker.phone}</p>
+                  <p className="text-sm text-secondary mb-2">
                     🔧 {worker.speciality}
                   </p>
-                  <p className="text-sm font-semibold text-[#855e42]">
+                  <p className="text-sm font-semibold text-primary">
                     દૈનિક મજૂરી: ₹{worker.dailyWage.toLocaleString("en-IN")}
                   </p>
                 </div>
                 <div className="flex gap-2">
                   <button
                     onClick={() => handleEdit(worker)}
-                    className="p-2 hover:bg-[#fdfbf7] rounded transition"
+                    className="p-2 hover:bg-background rounded transition"
                   >
-                    <Edit2 className="w-4 h-4 text-[#795548]" />
+                    <Edit2 className="w-4 h-4 text-secondary" />
                   </button>
                   <button
                     onClick={() => handleDelete(worker.id)}
-                    className="p-2 hover:bg-[#fdfbf7] rounded transition"
+                    className="p-2 hover:bg-background rounded transition"
                   >
-                    <Trash2 className="w-4 h-4 text-red-500" />
+                    <Trash2 className="w-4 h-4 text-danger" />
                   </button>
                 </div>
               </div>

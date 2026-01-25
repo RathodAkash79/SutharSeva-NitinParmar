@@ -44,20 +44,20 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-[#fdfbf7]">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-lg border-b border-[#efebe9]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+      <header className="sticky top-0 z-sticky bg-surface transition shadow-sm" style={{ backdropFilter: 'blur(12px)' }}>
+        <div className="max-w-2xl mx-auto px-md sm:px-lg lg:px-xl py-sm flex items-center justify-between">
           <Link href="/">
-            <a className="flex items-center gap-2 cursor-pointer">
+            <a className="flex items-center gap-sm cursor-pointer">
               <span className="text-2xl">🔨</span>
-              <h1 className="text-lg font-bold text-[#5d4037]">સુથાર સેવા</h1>
+              <h1 className="text-lg font-bold text-primary-dark">સુથાર સેવા</h1>
             </a>
           </Link>
-        <div className="flex gap-2">
+          <div className="flex gap-sm">
             <a
               href="tel:+918160911612"
-              className="px-3 py-1.5 bg-[#855e42] text-white rounded-full text-sm font-semibold hover:bg-[#5d4037] transition flex items-center gap-1"
+              className="px-md py-xs bg-primary text-white rounded-full text-sm font-semibold hover:bg-primary-dark transition flex items-center gap-xs"
             >
               <Phone className="w-4 h-4" /> ફોન
             </a>
@@ -66,27 +66,27 @@ export default function Home() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative py-16 px-4 sm:px-6 lg:px-8 text-center border-b-8 border-[#d7ccc8] bg-gradient-to-b from-[#fdfbf7] to-[#efebe9]">
-        <div className="max-w-3xl mx-auto">
-          <h2 className="text-4xl sm:text-5xl font-bold text-[#5d4037] mb-4">
+      <section className="relative py-2xl px-md sm:px-lg lg:px-xl text-center border-b border-border-dark bg-gradient-to-b from-background to-primary-lightest">
+        <div className="max-w-lg mx-auto">
+          <h2 className="text-4xl sm:text-5xl font-bold text-primary-dark mb-md">
             નિતિન પરમાર - ફર્નિચર આર્ટિસ્ટ
           </h2>
-          <p className="text-lg sm:text-xl text-[#795548] font-medium mb-3">
+          <p className="text-lg sm:text-xl text-secondary font-medium mb-sm">
             મજબૂત, સુંદર અને વ્યાજબી ફર્નિચર કામ માટે આજે જ સંપર્ક કરો.
           </p>
-          <p className="text-sm sm:text-base text-[#6d4c41] font-semibold mb-8">
+          <p className="text-sm sm:text-base text-tertiary font-semibold mb-lg">
             કોઈ પણ ફોટો કે આઈડિયા મોકલો, એ જ કામ તૈયાર કરીને આપીશું.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-md justify-center">
             <a
               href="https://wa.me/918160911612"
-              className="px-6 py-3 bg-[#43a047] text-white rounded-full font-semibold hover:bg-[#2e7d32] transition flex items-center justify-center gap-2 text-lg"
+              className="px-lg py-md bg-success text-white rounded-full font-semibold hover:bg-success-dark transition flex items-center justify-center gap-sm text-lg"
             >
               <MessageCircle className="w-5 h-5" /> WhatsApp મેસેજ
             </a>
             <a
               href="#calculator"
-              className="px-6 py-3 bg-white text-[#855e42] border-2 border-[#855e42] rounded-full font-semibold hover:bg-[#fdfbf7] transition flex items-center justify-center gap-2 text-lg"
+              className="px-lg py-md bg-white text-primary border border-primary rounded-full font-semibold hover:bg-background transition flex items-center justify-center gap-sm text-lg"
             >
               <Calculator className="w-5 h-5" /> ભાવ જાણો
             </a>
@@ -95,13 +95,13 @@ export default function Home() {
       </section>
 
       {/* Main Content */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-xl mx-auto px-md sm:px-lg lg:px-xl py-lg">
         {/* Service Categories Preview */}
-        <section className="mb-12">
-          <p className="text-xs text-[#999] font-semibold uppercase mb-4">
+        <section className="mb-lg">
+          <p className="text-xs text-muted font-semibold uppercase mb-md">
             📁 કામના પ્રકાર
           </p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-sm">
             {[
               "🚪 દરવાજા",
               "🪟 બારી",
@@ -121,9 +121,9 @@ export default function Home() {
             ].map((category) => (
               <div
                 key={category}
-                className="text-center p-4 bg-white rounded-lg border border-[#efebe9] hover:border-[#855e42] hover:shadow-md transition"
+                className="text-center p-md bg-white rounded-lg border border-border hover:border-primary hover:shadow-md transition"
               >
-                <p className="font-semibold text-[#5d4037] text-sm">
+                <p className="font-semibold text-primary-dark text-sm">
                   {category}
                 </p>
               </div>
@@ -134,69 +134,69 @@ export default function Home() {
         {/* Calculator Section */}
         <section
           id="calculator"
-          className="bg-white rounded-2xl shadow-lg p-8 mb-12 border border-[#efebe9]"
+          className="bg-white rounded-2xl shadow-lg p-lg mb-lg border border-border"
         >
-          <div className="flex items-center gap-3 mb-8">
-            <Calculator className="w-7 h-7 text-[#855e42]" />
-            <h3 className="text-2xl font-bold text-[#5d4037]">
+          <div className="flex items-center gap-md mb-lg">
+            <Calculator className="w-7 h-7 text-primary" />
+            <h3 className="text-2xl font-bold text-primary-dark">
               અંદાજિત ખર્ચ ગણો
             </h3>
           </div>
 
-          <div className="mb-6">
-            <label className="block text-sm font-semibold text-[#795548] mb-3">
+          <div className="mb-lg">
+            <label className="block text-sm font-semibold text-secondary mb-md">
               તમારા ફર્નિચરના કુલ ચોરસ ફૂટ (Sq. Ft)
             </label>
-            <div className="flex items-center gap-2 bg-[#fdfbf7] border-2 border-[#efebe9] rounded-xl px-4 py-3 focus-within:border-[#855e42] focus-within:bg-white transition">
+            <div className="flex items-center gap-sm bg-background border border-border rounded-xl px-md py-md focus-within:border-primary focus-within:bg-white transition">
               <Input
                 type="number"
                 value={feet}
                 onChange={(e) => setFeet(e.target.value)}
                 placeholder="0"
-                className="flex-1 bg-transparent border-0 text-2xl font-bold text-[#5d4037] placeholder:text-[#bdbdbd] outline-none"
+                className="flex-1 bg-transparent border-0 text-2xl font-bold text-primary-dark placeholder:text-muted outline-none"
               />
-              <span className="font-bold text-lg text-[#795548]">ફૂટ</span>
+              <span className="font-bold text-lg text-secondary">ફૂટ</span>
             </div>
           </div>
 
           {/* Rate Display */}
-          <div className="text-center bg-[#efebe9] rounded-xl px-4 py-3 mb-6">
-            <p className="text-[#795548] font-semibold">વર્તમાન રેટ</p>
-            <p className="text-2xl font-bold text-[#5d4037]">
+          <div className="text-center bg-primary-lightest rounded-xl px-md py-md mb-lg">
+            <p className="text-secondary font-semibold">વર્તમાન રેટ</p>
+            <p className="text-2xl font-bold text-primary-dark">
               ₹{currentRate.toLocaleString("en-IN")} / ચોરસ ફૂટ
             </p>
           </div>
 
           {/* Result Box */}
-          <div className="bg-gradient-to-b from-[#fdfbf7] to-[#efebe9] rounded-2xl p-8 text-center mb-6 border border-[#d7ccc8]">
-            <p className="text-[#795548] font-semibold text-sm mb-2">
+          <div className="bg-gradient-to-b from-background to-primary-lightest rounded-2xl p-lg text-center mb-lg border border-border-dark">
+            <p className="text-secondary font-semibold text-sm mb-sm">
               અંદાજિત કુલ ખર્ચ
             </p>
-            <h2 className="text-5xl font-bold text-[#5d4037] mb-3">
+            <h2 className="text-5xl font-bold text-primary-dark mb-md">
               ₹{totalCost.toLocaleString("en-IN")}
             </h2>
-            <p className="text-xs text-[#999]">
+            <p className="text-xs text-muted">
               *કારીગરીના રેટ અને મટીરીયલ મુજબ ફેરફાર થઈ શકે છે.
             </p>
           </div>
 
           <button
             onClick={handleWhatsAppEstimate}
-            className="w-full px-6 py-3.5 bg-[#43a047] text-white rounded-full font-bold hover:bg-[#2e7d32] transition text-lg flex items-center justify-center gap-2"
+            className="w-full px-lg py-md bg-success text-white rounded-full font-bold hover:bg-success-dark transition text-lg flex items-center justify-center gap-sm"
           >
             <MessageCircle className="w-5 h-5" /> આ ભાવ WhatsApp પર મોકલો
           </button>
         </section>
 
         {/* Prominent Gallery Link */}
-        <section className="mb-12">
-          <div className="bg-gradient-to-r from-[#855e42] to-[#5d4037] rounded-2xl shadow-lg p-8 text-center text-white">
-            <h3 className="text-2xl font-bold mb-3">અમારું કામ જુઓ</h3>
-            <p className="text-lg opacity-90 mb-6">
+        <section className="mb-lg">
+          <div className="bg-gradient-to-r from-primary to-primary-dark rounded-2xl shadow-lg p-lg text-center text-white">
+            <h3 className="text-2xl font-bold mb-md">અમારું કામ જુઓ</h3>
+            <p className="text-lg opacity-90 mb-lg">
               નિતિનભાઈના હજારો સંતુષ્ટ ગ્રાહકોનું કામ જુઓ અને આપનું કામ કરાવો.
             </p>
             <Link href="/work-gallery">
-              <a className="inline-flex items-center justify-center gap-2 px-8 py-3 bg-white text-[#855e42] rounded-full font-bold hover:bg-[#fdfbf7] transition text-lg">
+              <a className="inline-flex items-center justify-center gap-sm px-xl py-md bg-white text-primary rounded-full font-bold hover:bg-background transition text-lg">
                 કામ ગેલેરી જુઓ
                 <ArrowRight className="w-5 h-5" />
               </a>
@@ -205,11 +205,11 @@ export default function Home() {
         </section>
 
         {/* About Section */}
-        <section className="mb-12">
-          <h3 className="text-2xl font-bold text-[#5d4037] mb-6 text-center">
+        <section className="mb-lg">
+          <h3 className="text-2xl font-bold text-primary-dark mb-lg text-center">
             કેમ નિતિનભાઈ પર વિશ્વાસ કરો?
           </h3>
-          <div className="grid sm:grid-cols-2 gap-6">
+          <div className="grid sm:grid-cols-2 gap-lg">
             {[
               {
                 icon: "⭐",
@@ -234,13 +234,13 @@ export default function Home() {
             ].map((item, idx) => (
               <div
                 key={idx}
-                className="bg-white rounded-xl p-6 border border-[#efebe9] hover:border-[#855e42] hover:shadow-md transition"
+                className="bg-white rounded-xl p-lg border border-border hover:border-primary hover:shadow-md transition"
               >
-                <p className="text-4xl mb-3">{item.icon}</p>
-                <h4 className="font-bold text-[#5d4037] mb-2 text-lg">
+                <p className="text-4xl mb-md">{item.icon}</p>
+                <h4 className="font-bold text-primary-dark mb-sm text-lg">
                   {item.title}
                 </h4>
-                <p className="text-[#795548] text-sm leading-relaxed">
+                <p className="text-secondary text-sm leading-relaxed">
                   {item.desc}
                 </p>
               </div>
@@ -250,24 +250,24 @@ export default function Home() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-[#efebe9] py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h4 className="font-bold text-[#5d4037] text-lg mb-3">
+      <footer className="bg-white border-t border-border py-lg">
+        <div className="max-w-2xl mx-auto px-md sm:px-lg lg:px-xl text-center">
+          <h4 className="font-bold text-primary-dark text-lg mb-md">
             નિતિનભાઈ પરમાર
           </h4>
-          <p className="text-[#795548] font-medium mb-4">
+          <p className="text-secondary font-medium mb-md">
             📱 મોબાઈલ: 8160911612
           </p>
-          <div className="flex justify-center gap-4">
+          <div className="flex justify-center gap-md">
             <a
               href="tel:+918160911612"
-              className="inline-block px-6 py-2 bg-[#855e42] text-white rounded-full font-semibold hover:bg-[#5d4037] transition"
+              className="inline-block px-lg py-sm bg-primary text-white rounded-full font-semibold hover:bg-primary-dark transition"
             >
               ☎️ કૉલ કરો
             </a>
             <a
               href="https://wa.me/918160911612"
-              className="inline-block px-6 py-2 bg-[#43a047] text-white rounded-full font-semibold hover:bg-[#2e7d32] transition"
+              className="inline-block px-lg py-sm bg-success text-white rounded-full font-semibold hover:bg-success-dark transition"
             >
               💬 WhatsApp
             </a>

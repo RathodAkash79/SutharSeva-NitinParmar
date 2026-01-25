@@ -141,7 +141,7 @@ export default function AdminPhotos() {
   if (loading) {
     return (
       <div className="text-center py-12">
-        <p className="text-[#795548] font-medium">લોડ થઈ રહ્યું છે...</p>
+        <p className="text-secondary font-medium">લોડ થઈ રહ્યું છે...</p>
       </div>
     );
   }
@@ -149,12 +149,12 @@ export default function AdminPhotos() {
   return (
     <div className="space-y-6">
       {/* Project Selection */}
-      <div className="bg-white rounded-xl p-6 border border-[#efebe9] shadow-sm">
-        <h3 className="text-lg font-bold text-[#5d4037] mb-4">પ્રોજેક્ટ પસંદ કરો</h3>
+      <div className="bg-white rounded-xl p-6 border border-border shadow-sm">
+        <h3 className="text-lg font-bold text-primary-dark mb-4">પ્રોજેક્ટ પસંદ કરો</h3>
         <select
           value={selectedProjectId}
           onChange={(e) => setSelectedProjectId(e.target.value)}
-          className="w-full px-4 py-2 border border-[#efebe9] rounded-lg text-[#795548]"
+          className="w-full px-4 py-2 border border-border rounded-lg text-secondary"
         >
           <option value="">-- પ્રોજેક્ટ પસંદ કરો --</option>
           {projects.map((project) => (
@@ -167,13 +167,13 @@ export default function AdminPhotos() {
 
       {/* Upload Form */}
       {selectedProject && (
-        <div className="bg-white rounded-xl p-6 border border-[#efebe9] shadow-sm">
-          <h3 className="text-lg font-bold text-[#5d4037] mb-4">ફોટો અપલોડ કરો</h3>
+        <div className="bg-white rounded-xl p-6 border border-border shadow-sm">
+          <h3 className="text-lg font-bold text-primary-dark mb-4">ફોટો અપલોડ કરો</h3>
 
           <div className="space-y-4">
             {/* Image Preview */}
             {imagePreview && (
-              <div className="relative w-full h-64 bg-[#efebe9] rounded-lg overflow-hidden">
+              <div className="relative w-full h-64 bg-border rounded-lg overflow-hidden">
                 <img
                   src={imagePreview}
                   alt="Preview"
@@ -184,26 +184,26 @@ export default function AdminPhotos() {
 
             {/* File Input */}
             <div>
-              <label className="block text-sm font-semibold text-[#795548] mb-2">
+              <label className="block text-sm font-semibold text-secondary mb-2">
                 ફોટો પસંદ કરો
               </label>
               <input
                 type="file"
                 accept="image/*"
                 onChange={handleImageSelect}
-                className="w-full px-4 py-2 border border-[#efebe9] rounded-lg"
+                className="w-full px-4 py-2 border border-border rounded-lg"
               />
             </div>
 
             {/* Category Selection */}
             <div>
-              <label className="block text-sm font-semibold text-[#795548] mb-2">
+              <label className="block text-sm font-semibold text-secondary mb-2">
                 કામનો પ્રકાર
               </label>
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full px-4 py-2 border border-[#efebe9] rounded-lg text-[#795548]"
+                className="w-full px-4 py-2 border border-border rounded-lg text-secondary"
               >
                 {categories.map((cat) => (
                   <option key={cat} value={cat}>
@@ -217,7 +217,7 @@ export default function AdminPhotos() {
             <Button
               onClick={handleUpload}
               disabled={!imageFile || uploading}
-              className="w-full bg-[#855e42] text-white hover:bg-[#5d4037]"
+              className="w-full bg-primary text-white hover:bg-primary-dark"
             >
               <Upload className="w-4 h-4 mr-2" />
               {uploading ? "અપલોડ થઈ રહ્યું છે..." : "અપલોડ કરો"}
@@ -228,13 +228,13 @@ export default function AdminPhotos() {
 
       {/* Project Photos */}
       {selectedProject && (
-        <div className="bg-white rounded-xl p-6 border border-[#efebe9] shadow-sm">
-          <h3 className="text-lg font-bold text-[#5d4037] mb-4">
+        <div className="bg-white rounded-xl p-6 border border-border shadow-sm">
+          <h3 className="text-lg font-bold text-primary-dark mb-4">
             {selectedProject.name} - ફોટો
           </h3>
 
           {!selectedProject.photos || selectedProject.photos.length === 0 ? (
-            <p className="text-center text-[#795548] py-8">
+            <p className="text-center text-secondary py-8">
               હજી કોઈ ફોટો નથી
             </p>
           ) : (

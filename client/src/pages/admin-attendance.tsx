@@ -165,15 +165,15 @@ export default function AdminAttendance() {
   if (loading) {
     return (
       <div className="text-center py-12">
-        <p className="text-[#795548] font-medium">લોડ થઈ રહ્યું છે...</p>
+        <p className="text-secondary font-medium">લોડ થઈ રહ્યું છે...</p>
       </div>
     );
   }
 
   if (workers.length === 0) {
     return (
-      <div className="text-center py-12 bg-white rounded-xl border border-[#efebe9]">
-        <p className="text-[#795548] font-medium">
+      <div className="text-center py-12 bg-white rounded-xl border border-border">
+        <p className="text-secondary font-medium">
           પહેલા કુछ કારીગર ઉમેરો
         </p>
       </div>
@@ -183,15 +183,15 @@ export default function AdminAttendance() {
   return (
     <div className="space-y-6">
       {/* Calendar */}
-      <div className="bg-white rounded-xl p-6 border border-[#efebe9] shadow-sm">
+      <div className="bg-white rounded-xl p-6 border border-border shadow-sm">
         <div className="flex items-center justify-between mb-6">
           <button
             onClick={handlePrevMonth}
-            className="p-2 hover:bg-[#fdfbf7] rounded transition"
+            className="p-2 hover:bg-background rounded transition"
           >
-            <ChevronLeft className="w-5 h-5 text-[#795548]" />
+            <ChevronLeft className="w-5 h-5 text-secondary" />
           </button>
-          <h3 className="text-lg font-bold text-[#5d4037]">
+          <h3 className="text-lg font-bold text-primary-dark">
             {currentMonth.toLocaleDateString("gu-IN", {
               month: "long",
               year: "numeric",
@@ -199,9 +199,9 @@ export default function AdminAttendance() {
           </h3>
           <button
             onClick={handleNextMonth}
-            className="p-2 hover:bg-[#fdfbf7] rounded transition"
+            className="p-2 hover:bg-background rounded transition"
           >
-            <ChevronRight className="w-5 h-5 text-[#795548]" />
+            <ChevronRight className="w-5 h-5 text-secondary" />
           </button>
         </div>
 
@@ -210,7 +210,7 @@ export default function AdminAttendance() {
           {["સો", "સ", "બુ", "બ", "ગુ", "શુ", "રવિ"].map((day) => (
             <div
               key={day}
-              className="text-center p-2 text-sm font-bold text-[#855e42]"
+              className="text-center p-2 text-sm font-bold text-primary"
             >
               {day}
             </div>
@@ -234,10 +234,10 @@ export default function AdminAttendance() {
                   !dateStr
                     ? "bg-transparent"
                     : isSelected
-                      ? "bg-[#855e42] text-white"
+                      ? "bg-primary text-white"
                       : count > 0
-                        ? "bg-[#43a047] text-white"
-                        : "bg-[#efebe9] text-[#795548] hover:bg-[#d7ccc8]"
+                        ? "bg-success text-white"
+                        : "bg-border text-secondary hover:bg-border-dark"
                 }`}
               >
                 {day && (
@@ -255,8 +255,8 @@ export default function AdminAttendance() {
       </div>
 
       {/* Selected Date Attendance */}
-      <div className="bg-white rounded-xl p-6 border border-[#efebe9] shadow-sm">
-        <h3 className="text-lg font-bold text-[#5d4037] mb-4">
+      <div className="bg-white rounded-xl p-6 border border-border shadow-sm">
+        <h3 className="text-lg font-bold text-primary-dark mb-4">
           હાજરી - {formatDateForDisplay(selectedDate)}
         </h3>
 
@@ -278,9 +278,9 @@ export default function AdminAttendance() {
             return (
               <div
                 key={worker.id}
-                className="flex items-center justify-between p-4 border border-[#efebe9] rounded-lg hover:bg-[#fdfbf7] transition"
+                className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-background transition"
               >
-                <span className="font-semibold text-[#5d4037]">{worker.name}</span>
+                <span className="font-semibold text-primary-dark">{worker.name}</span>
                 <div className="flex gap-2">
                   <button
                     onClick={() =>
@@ -288,8 +288,8 @@ export default function AdminAttendance() {
                     }
                     className={`px-4 py-2 rounded-lg font-semibold transition ${
                       present
-                        ? "bg-[#43a047] text-white"
-                        : "bg-[#efebe9] text-[#795548] hover:bg-[#d7ccc8]"
+                        ? "bg-success text-white"
+                        : "bg-border text-secondary hover:bg-border-dark"
                     }`}
                   >
                     ✓ હાજર
@@ -300,8 +300,8 @@ export default function AdminAttendance() {
                     }
                     className={`px-4 py-2 rounded-lg font-semibold transition ${
                       absent
-                        ? "bg-red-500 text-white"
-                        : "bg-[#efebe9] text-[#795548] hover:bg-[#d7ccc8]"
+                        ? "bg-danger text-white"
+                        : "bg-border text-secondary hover:bg-border-dark"
                     }`}
                   >
                     ✗ ગેરહાજર

@@ -43,46 +43,47 @@ export default function Admin() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-[#795548] font-medium">લોડ થઈ રહ્યું છે...</p>
+        <p className="text-secondary font-medium">લોડ થઈ રહ્યું છે...</p>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-[#fdfbf7]">
+    <div className="flex min-h-screen bg-background">
       {/* Sidebar */}
-      <div className={`${
-        sidebarOpen ? "w-64" : "w-20"
-      } bg-white border-r border-[#efebe9] transition-all duration-300 fixed h-screen left-0 top-0 z-40 overflow-y-auto`}>
-        <div className="p-4 border-b border-[#efebe9]">
-          <div className="flex items-center justify-between mb-4">
+      <div style={{ 
+        width: sidebarOpen ? '256px' : '80px',
+        transition: 'all 300ms ease-in-out'
+      }} className="bg-white border-r border-border fixed h-screen left-0 top-0 z-40 overflow-y-auto">
+        <div className="p-md border-b border-border">
+          <div className="flex items-center justify-between mb-md">
             {sidebarOpen && (
               <Link href="/admin">
-                <a className="flex items-center gap-2 cursor-pointer">
+                <a className="flex items-center gap-sm cursor-pointer">
                   <span className="text-2xl">🔨</span>
-                  <h1 className="text-lg font-bold text-[#5d4037]">સુથાર સેવા</h1>
+                  <h1 className="text-lg font-bold text-primary-dark">સુથાર સેવા</h1>
                 </a>
               </Link>
             )}
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-1 hover:bg-[#fdfbf7] rounded transition"
+              className="p-xs hover:bg-background rounded transition"
             >
               {sidebarOpen ? (
-                <X className="w-4 h-4 text-[#795548]" />
+                <X className="w-4 h-4 text-secondary" />
               ) : (
-                <Menu className="w-4 h-4 text-[#795548]" />
+                <Menu className="w-4 h-4 text-secondary" />
               )}
             </button>
           </div>
         </div>
 
-        <nav className="p-4 space-y-2">
+        <nav className="p-md space-y-sm">
           <Link href="/admin">
-            <a className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition ${
+            <a className={`flex items-center gap-md px-md py-md rounded-lg transition ${
               currentSection === "dashboard" || currentSection === undefined
-                ? "bg-[#855e42] text-white"
-                : "text-[#795548] hover:bg-[#fdfbf7]"
+                ? "bg-primary text-white"
+                : "text-secondary hover:bg-background"
             }`}>
               <span className="text-xl">📊</span>
               {sidebarOpen && <span className="font-semibold">ડેશબોર્ડ</span>}
@@ -90,10 +91,10 @@ export default function Admin() {
           </Link>
 
           <Link href="/admin/projects">
-            <a className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition ${
+            <a className={`flex items-center gap-md px-md py-md rounded-lg transition ${
               currentSection === "projects"
-                ? "bg-[#855e42] text-white"
-                : "text-[#795548] hover:bg-[#fdfbf7]"
+                ? "bg-primary text-white"
+                : "text-secondary hover:bg-background"
             }`}>
               <Plus className="w-5 h-5" />
               {sidebarOpen && <span className="font-semibold">પ્રોજેક્ટ</span>}
@@ -101,10 +102,10 @@ export default function Admin() {
           </Link>
 
           <Link href="/admin/workers">
-            <a className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition ${
+            <a className={`flex items-center gap-md px-md py-md rounded-lg transition ${
               currentSection === "workers"
-                ? "bg-[#855e42] text-white"
-                : "text-[#795548] hover:bg-[#fdfbf7]"
+                ? "bg-primary text-white"
+                : "text-secondary hover:bg-background"
             }`}>
               <Users className="w-5 h-5" />
               {sidebarOpen && <span className="font-semibold">કારીગરો</span>}
@@ -112,20 +113,20 @@ export default function Admin() {
           </Link>
 
           <Link href="/admin/attendance">
-            <a className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition ${
+            <a className={`flex items-center gap-md px-md py-md rounded-lg transition ${
               currentSection === "attendance"
-                ? "bg-[#855e42] text-white"
-                : "text-[#795548] hover:bg-[#fdfbf7]"
+                ? "bg-primary text-white"
+                : "text-secondary hover:bg-background"
             }`}>
               <Calendar className="w-5 h-5" />
               {sidebarOpen && <span className="font-semibold">હાજરી</span>}
             </a>
           </Link>
 
-          <div className="border-t border-[#efebe9] pt-2 mt-2">
+          <div className="border-t border-border pt-sm mt-sm">
             <button
               onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#795548] hover:bg-[#fdfbf7] transition"
+              className="w-full flex items-center gap-md px-md py-md rounded-lg text-secondary hover:bg-background transition"
             >
               <LogOut className="w-5 h-5" />
               {sidebarOpen && <span className="font-semibold">લોગ આउટ</span>}
@@ -135,37 +136,37 @@ export default function Admin() {
       </div>
 
       {/* Main Content */}
-      <div className={`${sidebarOpen ? "ml-64" : "ml-20"} flex-1 transition-all duration-300`}>
+      <div style={{ marginLeft: sidebarOpen ? '256px' : '80px', transition: 'all 300ms ease-in-out' }} className="flex-1">
         {/* Header */}
-        <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-lg border-b border-[#efebe9]">
-          <div className="px-6 py-4 flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-[#5d4037]">
+        <header className="sticky top-0 z-30 bg-surface shadow-sm border-b border-border" style={{ backdropFilter: 'blur(12px)' }}>
+          <div className="px-lg py-md flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-primary-dark">
               {currentSection === "projects" && "પ્રોજેક્ટ્સ"}
               {currentSection === "workers" && "કારીગરો"}
               {currentSection === "attendance" && "હાજરી"}
               {(!currentSection || currentSection === "dashboard") && "ડેશબોર્ડ"}
             </h2>
             <div className="text-right">
-              <p className="text-sm text-[#795548] font-medium">સ્વાગત છે, નિતિનભાઈ</p>
+              <p className="text-sm text-secondary font-medium">સ્વાગત છે, નિતિનભાઈ</p>
             </div>
           </div>
         </header>
 
         {/* Content Area */}
-        <main className="p-6">
+        <main className="p-lg">
           {(!currentSection || currentSection === "dashboard") && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-white rounded-xl p-6 border border-[#efebe9] shadow-sm">
-                <p className="text-[#795548] font-semibold text-sm mb-2">કુલ પ્રોજેક્ટ્સ</p>
-                <h3 className="text-4xl font-bold text-[#5d4037]">0</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-lg">
+              <div className="bg-white rounded-xl p-lg border border-border shadow-sm">
+                <p className="text-secondary font-semibold text-sm mb-sm">કુલ પ્રોજેક્ટ્સ</p>
+                <h3 className="text-4xl font-bold text-primary-dark">0</h3>
               </div>
-              <div className="bg-white rounded-xl p-6 border border-[#efebe9] shadow-sm">
-                <p className="text-[#795548] font-semibold text-sm mb-2">કુલ કારીગરો</p>
-                <h3 className="text-4xl font-bold text-[#5d4037]">0</h3>
+              <div className="bg-white rounded-xl p-lg border border-border shadow-sm">
+                <p className="text-secondary font-semibold text-sm mb-sm">કુલ કારીગરો</p>
+                <h3 className="text-4xl font-bold text-primary-dark">0</h3>
               </div>
-              <div className="bg-white rounded-xl p-6 border border-[#efebe9] shadow-sm">
-                <p className="text-[#795548] font-semibold text-sm mb-2">આજનો હાજરી</p>
-                <h3 className="text-4xl font-bold text-[#5d4037]">0</h3>
+              <div className="bg-white rounded-xl p-lg border border-border shadow-sm">
+                <p className="text-secondary font-semibold text-sm mb-sm">આજનો હાજરી</p>
+                <h3 className="text-4xl font-bold text-primary-dark">0</h3>
               </div>
             </div>
           )}
