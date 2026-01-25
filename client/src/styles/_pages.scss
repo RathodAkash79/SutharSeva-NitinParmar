@@ -1,0 +1,467 @@
+// ════════════════════════════════════════════════════════════════════════════
+// PAGE-SPECIFIC STYLES
+// ════════════════════════════════════════════════════════════════════════════
+
+@import 'variables';
+@import 'mixins';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// HOME PAGE
+// ─────────────────────────────────────────────────────────────────────────────
+
+.home-page {
+  min-height: 100vh;
+  background-color: $color-background;
+}
+
+// Service Categories
+.service-categories {
+  &__list {
+    @include grid-responsive;
+  }
+  
+  &__item {
+    @include card-base;
+    @include flex-column;
+    align-items: center;
+    text-align: center;
+    gap: $spacing-md;
+    transition: all $transition-base;
+    
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: $shadow-lg;
+    }
+  }
+  
+  &__icon {
+    @include flex-center;
+    width: 64px;
+    height: 64px;
+    background-color: $color-primary-lightest;
+    border-radius: $border-radius-full;
+    font-size: $font-size-3xl;
+  }
+  
+  &__title {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: $color-primary-dark;
+  }
+  
+  &__description {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    line-height: $line-height-relaxed;
+  }
+}
+
+// Contact Section
+.contact-section {
+  &__container {
+    @include flex-column;
+    gap: $spacing-md;
+    
+    @include respond-md {
+      flex-direction: row;
+    }
+  }
+  
+  &__item {
+    @include card-base;
+    @include flex-start;
+    gap: $spacing-md;
+    flex: 1;
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: $shadow-md;
+    }
+  }
+  
+  &__icon-wrapper {
+    @include flex-center;
+    width: $touch-target-comfortable;
+    height: $touch-target-comfortable;
+    background-color: $color-primary-lightest;
+    border-radius: $border-radius-full;
+    flex-shrink: 0;
+  }
+  
+  &__icon {
+    color: $color-primary;
+  }
+  
+  &__content {
+    flex: 1;
+  }
+  
+  &__label {
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+    margin-bottom: $spacing-xs;
+  }
+  
+  &__value {
+    font-size: $font-size-base;
+    font-weight: $font-weight-semibold;
+    color: $color-text-primary;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// WORK GALLERY PAGE
+// ─────────────────────────────────────────────────────────────────────────────
+
+.work-gallery-page {
+  min-height: 100vh;
+  background-color: $color-background;
+  
+  &__header {
+    @include section-spacing;
+    background: linear-gradient(to bottom, $color-surface, $color-background);
+    border-bottom: $border-width solid $color-border;
+    text-align: center;
+  }
+  
+  &__title {
+    @include heading-primary;
+    margin-bottom: $spacing-md;
+  }
+  
+  &__subtitle {
+    font-size: $font-size-lg;
+    color: $color-text-secondary;
+  }
+  
+  &__content {
+    @include container;
+    @include section-spacing;
+  }
+  
+  &__grid {
+    @include grid-responsive;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ADMIN PAGE
+// ─────────────────────────────────────────────────────────────────────────────
+
+.admin-page {
+  min-height: 100vh;
+  background-color: $color-background;
+  
+  &__header {
+    background-color: $color-surface;
+    border-bottom: $border-width solid $color-border;
+    padding: $spacing-lg 0;
+    
+    &-container {
+      @include container;
+      @include flex-between;
+      flex-wrap: wrap;
+      gap: $spacing-md;
+    }
+  }
+  
+  &__title {
+    @include heading-secondary;
+  }
+  
+  &__content {
+    @include container;
+    padding-top: $spacing-xl;
+    padding-bottom: $spacing-xl;
+  }
+}
+
+// Admin Tables
+.admin-table {
+  width: 100%;
+  background-color: $color-surface;
+  border: $border-width solid $color-border;
+  border-radius: $border-radius-lg;
+  overflow: hidden;
+  
+  &__wrapper {
+    overflow-x: auto;
+  }
+  
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  &__header {
+    background-color: $color-primary-lightest;
+  }
+  
+  &__header-cell {
+    padding: $spacing-md;
+    text-align: left;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-bold;
+    color: $color-primary-dark;
+    white-space: nowrap;
+  }
+  
+  &__row {
+    border-top: $border-width solid $color-border;
+    transition: background-color $transition-base;
+    
+    &:hover {
+      background-color: $color-background;
+    }
+  }
+  
+  &__cell {
+    padding: $spacing-md;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+  }
+  
+  &__actions {
+    @include flex-start;
+    gap: $spacing-sm;
+  }
+}
+
+// Admin Cards
+.admin-cards {
+  @include grid-responsive;
+  
+  &__item {
+    @include card-base;
+    
+    &:hover {
+      box-shadow: $shadow-md;
+    }
+  }
+}
+
+// Admin Stats
+.admin-stats {
+  @include grid-auto(200px, $spacing-md);
+  margin-bottom: $spacing-xl;
+  
+  &__card {
+    @include card-base;
+    text-align: center;
+  }
+  
+  &__value {
+    font-size: $font-size-3xl;
+    font-weight: $font-weight-bold;
+    color: $color-primary;
+    margin-bottom: $spacing-xs;
+  }
+  
+  &__label {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// NOT FOUND PAGE
+// ─────────────────────────────────────────────────────────────────────────────
+
+.not-found-page {
+  @include flex-column-center;
+  min-height: 100vh;
+  background-color: $color-background;
+  padding: $spacing-xl;
+  text-align: center;
+  
+  &__code {
+    font-size: 6rem;
+    font-weight: $font-weight-bold;
+    color: $color-primary;
+    line-height: 1;
+    margin-bottom: $spacing-md;
+    
+    @include respond-md {
+      font-size: 8rem;
+    }
+  }
+  
+  &__title {
+    @include heading-secondary;
+    margin-bottom: $spacing-md;
+  }
+  
+  &__message {
+    font-size: $font-size-lg;
+    color: $color-text-secondary;
+    margin-bottom: $spacing-xl;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ATTENDANCE PAGE
+// ─────────────────────────────────────────────────────────────────────────────
+
+.attendance-page {
+  &__calendar-section {
+    margin-bottom: $spacing-xl;
+  }
+  
+  &__workers-section {
+    margin-top: $spacing-xl;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PHOTOS PAGE
+// ─────────────────────────────────────────────────────────────────────────────
+
+.photos-page {
+  &__upload-section {
+    margin-bottom: $spacing-xl;
+  }
+  
+  &__gallery-section {
+    margin-top: $spacing-xl;
+  }
+}
+
+// Upload Zone
+.upload-zone {
+  @include card-base;
+  @include flex-column-center;
+  padding: $spacing-3xl;
+  border: 2px dashed $color-border-dark;
+  background-color: $color-background;
+  cursor: pointer;
+  transition: all $transition-base;
+  
+  &:hover {
+    border-color: $color-primary;
+    background-color: $color-primary-lightest;
+  }
+  
+  &__icon {
+    font-size: $font-size-5xl;
+    color: $color-primary-light;
+    margin-bottom: $spacing-md;
+  }
+  
+  &__text {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+    color: $color-text-primary;
+    margin-bottom: $spacing-sm;
+  }
+  
+  &__hint {
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PROJECTS PAGE
+// ─────────────────────────────────────────────────────────────────────────────
+
+.projects-page {
+  &__filters {
+    @include flex-between;
+    margin-bottom: $spacing-xl;
+    flex-wrap: wrap;
+    gap: $spacing-md;
+  }
+  
+  &__grid {
+    @include grid-responsive;
+  }
+}
+
+.project-card {
+  @include card-base;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: $shadow-md;
+  }
+  
+  &__image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: $border-radius-md;
+    margin-bottom: $spacing-md;
+  }
+  
+  &__title {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: $color-text-primary;
+    margin-bottom: $spacing-sm;
+  }
+  
+  &__description {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    line-height: $line-height-relaxed;
+    margin-bottom: $spacing-md;
+  }
+  
+  &__meta {
+    @include flex-between;
+    font-size: $font-size-xs;
+    color: $color-text-muted;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// WORKERS PAGE
+// ─────────────────────────────────────────────────────────────────────────────
+
+.workers-page {
+  &__header {
+    @include flex-between;
+    margin-bottom: $spacing-xl;
+    flex-wrap: wrap;
+    gap: $spacing-md;
+  }
+  
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-md;
+  }
+}
+
+.worker-card {
+  @include card-base;
+  
+  &__header {
+    @include flex-between;
+    margin-bottom: $spacing-md;
+    flex-wrap: wrap;
+    gap: $spacing-sm;
+  }
+  
+  &__name {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: $color-primary-dark;
+  }
+  
+  &__info {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-sm;
+    color: $color-text-secondary;
+    font-size: $font-size-sm;
+  }
+  
+  &__actions {
+    @include flex-start;
+    gap: $spacing-sm;
+    margin-top: $spacing-md;
+    padding-top: $spacing-md;
+    border-top: $border-width solid $color-border;
+  }
+}

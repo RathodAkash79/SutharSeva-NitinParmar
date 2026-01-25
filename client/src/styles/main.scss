@@ -1,0 +1,372 @@
+// ════════════════════════════════════════════════════════════════════════════
+// MAIN SCSS ENTRY POINT - સુથાર સેવા
+// ════════════════════════════════════════════════════════════════════════════
+// This is the ONLY file imported in the React app
+// All other SCSS files are partials imported here
+// ════════════════════════════════════════════════════════════════════════════
+
+// 1. Variables (must be first)
+@import 'variables';
+
+// 2. Mixins (must be second, depends on variables)
+@import 'mixins';
+
+// 3. Reset (normalize browser defaults)
+@import 'reset';
+
+// 4. Layout (page structure, containers, grids)
+@import 'layout';
+
+// 5. Components (buttons, cards, forms, etc.)
+@import 'components';
+
+// 6. Pages (page-specific styles)
+@import 'pages';
+
+// 7. Responsive (breakpoint adjustments)
+@import 'responsive';
+
+// ════════════════════════════════════════════════════════════════════════════
+// GLOBAL STYLES
+// ════════════════════════════════════════════════════════════════════════════
+
+body {
+  font-family: $font-primary;
+  color: $color-text-primary;
+  background-color: $color-background;
+}
+
+// Gujarati text optimization
+[lang="gu"],
+.gujarati-text {
+  font-family: $font-gujarati;
+  line-height: $line-height-relaxed;
+}
+
+// Focus styles for accessibility
+*:focus-visible {
+  outline: 2px solid $color-primary;
+  outline-offset: 2px;
+}
+
+// Selection styles
+::selection {
+  background-color: rgba($color-primary, 0.2);
+  color: $color-text-primary;
+}
+
+// Smooth scrolling
+html {
+  scroll-behavior: smooth;
+}
+
+// Scrollbar styling (webkit browsers)
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: $color-background-alt;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: $color-primary-light;
+  border-radius: $border-radius-full;
+  
+  &:hover {
+    background-color: $color-primary;
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// UTILITY CLASSES
+// ════════════════════════════════════════════════════════════════════════════
+
+// Display
+.d-block { display: block; }
+.d-inline-block { display: inline-block; }
+.d-inline { display: inline; }
+.d-flex { display: flex; }
+.d-inline-flex { display: inline-flex; }
+.d-grid { display: grid; }
+.d-none { display: none; }
+
+// Flex Layout
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.flex-row { flex-direction: row; }
+.flex-wrap { flex-wrap: wrap; }
+.flex-nowrap { flex-wrap: nowrap; }
+.items-start { align-items: flex-start; }
+.items-end { align-items: flex-end; }
+.items-center { align-items: center; }
+.items-stretch { align-items: stretch; }
+.justify-start { justify-content: flex-start; }
+.justify-end { justify-content: flex-end; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.justify-around { justify-content: space-around; }
+.gap-0 { gap: 0; }
+.gap-xs { gap: $spacing-xs; }
+.gap-sm { gap: $spacing-sm; }
+.gap-md { gap: $spacing-md; }
+.gap-lg { gap: $spacing-lg; }
+.gap-xl { gap: $spacing-xl; }
+
+// Grid
+.grid { display: grid; }
+.grid-cols-1 { grid-template-columns: 1fr; }
+.grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+.grid-cols-6 { grid-template-columns: repeat(6, 1fr); }
+
+// Text utilities
+.text-bold { font-weight: $font-weight-bold; }
+.font-bold { font-weight: $font-weight-bold; }
+.text-semibold { font-weight: $font-weight-semibold; }
+.font-semibold { font-weight: $font-weight-semibold; }
+.text-medium { font-weight: $font-weight-medium; }
+.font-medium { font-weight: $font-weight-medium; }
+.text-normal { font-weight: $font-weight-normal; }
+.font-normal { font-weight: $font-weight-normal; }
+
+.text-xs { font-size: $font-size-xs; }
+.text-sm { font-size: $font-size-sm; }
+.text-base { font-size: $font-size-base; }
+.text-lg { font-size: $font-size-lg; }
+.text-xl { font-size: $font-size-xl; }
+.text-2xl { font-size: $font-size-2xl; }
+.text-3xl { font-size: $font-size-3xl; }
+.text-4xl { font-size: $font-size-4xl; }
+.text-5xl { font-size: $font-size-5xl; }
+
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+.text-primary { color: $color-text-primary; }
+.text-secondary { color: $color-text-secondary; }
+.text-muted { color: $color-text-muted; }
+.text-success { color: $color-success; }
+.text-danger { color: $color-danger; }
+
+.text-uppercase { text-transform: uppercase; }
+.text-capitalize { text-transform: capitalize; }
+
+.leading-tight { line-height: $line-height-tight; }
+.leading-normal { line-height: $line-height-normal; }
+.leading-relaxed { line-height: $line-height-relaxed; }
+.leading-loose { line-height: $line-height-loose; }
+
+// Height/Width
+.h-full { height: 100%; }
+.h-screen { height: 100vh; }
+.h-auto { height: auto; }
+.w-full { width: 100%; }
+.w-auto { width: auto; }
+.w-max { width: max-content; }
+.min-h-screen { min-height: 100vh; }
+.min-w-full { min-width: 100%; }
+.max-w-sm { max-width: $max-width-sm; }
+.max-w-md { max-width: $max-width-md; }
+.max-w-lg { max-width: $max-width-lg; }
+.max-w-xl { max-width: $max-width-xl; }
+.max-w-2xl { max-width: $max-width-2xl; }
+
+// Margin utilities
+.m-0 { margin: 0; }
+.m-auto { margin: auto; }
+.mx-auto { margin-left: auto; margin-right: auto; }
+.my-auto { margin-top: auto; margin-bottom: auto; }
+
+.mt-0 { margin-top: 0; }
+.mt-xs { margin-top: $spacing-xs; }
+.mt-sm { margin-top: $spacing-sm; }
+.mt-md { margin-top: $spacing-md; }
+.mt-lg { margin-top: $spacing-lg; }
+.mt-xl { margin-top: $spacing-xl; }
+
+.mb-0 { margin-bottom: 0; }
+.mb-xs { margin-bottom: $spacing-xs; }
+.mb-sm { margin-bottom: $spacing-sm; }
+.mb-md { margin-bottom: $spacing-md; }
+.mb-lg { margin-bottom: $spacing-lg; }
+.mb-xl { margin-bottom: $spacing-xl; }
+
+.mr-sm { margin-right: $spacing-sm; }
+.mr-md { margin-right: $spacing-md; }
+.ml-sm { margin-left: $spacing-sm; }
+.ml-md { margin-left: $spacing-md; }
+
+// Padding utilities
+.p-0 { padding: 0; }
+.p-xs { padding: $spacing-xs; }
+.p-sm { padding: $spacing-sm; }
+.p-md { padding: $spacing-md; }
+.p-lg { padding: $spacing-lg; }
+.p-xl { padding: $spacing-xl; }
+
+.px-sm { padding-left: $spacing-sm; padding-right: $spacing-sm; }
+.px-md { padding-left: $spacing-md; padding-right: $spacing-md; }
+.px-lg { padding-left: $spacing-lg; padding-right: $spacing-lg; }
+.px-xl { padding-left: $spacing-xl; padding-right: $spacing-xl; }
+
+.py-sm { padding-top: $spacing-sm; padding-bottom: $spacing-sm; }
+.py-md { padding-top: $spacing-md; padding-bottom: $spacing-md; }
+.py-lg { padding-top: $spacing-lg; padding-bottom: $spacing-lg; }
+.py-xl { padding-top: $spacing-xl; padding-bottom: $spacing-xl; }
+
+// Background colors
+.bg-white { background-color: $color-surface; }
+.bg-background { background-color: $color-background; }
+.bg-background-alt { background-color: $color-background-alt; }
+.bg-surface { background-color: $color-surface; }
+.bg-primary { background-color: $color-primary; }
+.bg-primary-light { background-color: $color-primary-light; }
+.bg-primary-dark { background-color: $color-primary-dark; }
+.bg-primary-lighter { background-color: $color-primary-lighter; }
+.bg-primary-lightest { background-color: $color-primary-lightest; }
+.bg-success { background-color: $color-success; }
+.bg-danger { background-color: $color-danger; }
+.bg-warning { background-color: $color-warning; }
+.bg-info { background-color: $color-info; }
+
+// Border & Border radius
+.border { border: $border-width solid $color-border; }
+.border-t { border-top: $border-width solid $color-border; }
+.border-b { border-bottom: $border-width solid $color-border; }
+.border-l { border-left: $border-width solid $color-border; }
+.border-r { border-right: $border-width solid $color-border; }
+
+.border-primary { border-color: $color-primary; }
+.border-success { border-color: $color-success; }
+.border-danger { border-color: $color-danger; }
+
+.rounded-none { border-radius: 0; }
+.rounded-sm { border-radius: $border-radius-sm; }
+.rounded { border-radius: $border-radius-md; }
+.rounded-lg { border-radius: $border-radius-lg; }
+.rounded-full { border-radius: $border-radius-full; }
+.rounded-xl { border-radius: $border-radius-xl; }
+.rounded-2xl { border-radius: $border-radius-2xl; }
+
+// Shadows
+.shadow-none { box-shadow: none; }
+.shadow-sm { box-shadow: $shadow-sm; }
+.shadow { box-shadow: $shadow-md; }
+.shadow-md { box-shadow: $shadow-md; }
+.shadow-lg { box-shadow: $shadow-lg; }
+
+// Cursor
+.cursor-pointer { cursor: pointer; }
+.cursor-not-allowed { cursor: not-allowed; }
+.cursor-default { cursor: default; }
+
+// Overflow
+.overflow-hidden { overflow: hidden; }
+.overflow-auto { overflow: auto; }
+.overflow-x-auto { overflow-x: auto; }
+.overflow-y-auto { overflow-y: auto; }
+.overflow-visible { overflow: visible; }
+
+// Position
+.relative { position: relative; }
+.absolute { position: absolute; }
+.fixed { position: fixed; }
+.sticky { position: sticky; }
+.static { position: static; }
+
+// Top/Right/Bottom/Left
+.top-0 { top: 0; }
+.right-0 { right: 0; }
+.bottom-0 { bottom: 0; }
+.left-0 { left: 0; }
+
+// Z-index
+.z-base { z-index: $z-base; }
+.z-0 { z-index: 0; }
+.z-10 { z-index: 10; }
+.z-20 { z-index: 20; }
+.z-30 { z-index: 30; }
+.z-40 { z-index: 40; }
+.z-50 { z-index: 50; }
+.z-dropdown { z-index: $z-dropdown; }
+.z-sticky { z-index: $z-sticky; }
+.z-modal { z-index: $z-modal; }
+
+// Transition
+.transition { transition: all $transition-base; }
+.transition-all { transition: all $transition-base; }
+.transition-colors { transition: background-color, color, border-color $transition-base; }
+
+// Opacity
+.opacity-0 { opacity: 0; }
+.opacity-25 { opacity: 0.25; }
+.opacity-50 { opacity: 0.5; }
+.opacity-75 { opacity: 0.75; }
+.opacity-100 { opacity: 1; }
+
+// Transform
+.transform { transform: none; }
+.scale-75 { transform: scale(0.75); }
+.scale-100 { transform: scale(1); }
+
+// Aspect ratio
+.aspect-square { aspect-ratio: 1/1; }
+.aspect-video { aspect-ratio: 16/9; }
+
+// Line clamp
+.line-clamp-1 { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; }
+.line-clamp-2 { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.line-clamp-3 { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+// ════════════════════════════════════════════════════════════════════════════
+// RESPONSIVE UTILITIES
+// ════════════════════════════════════════════════════════════════════════════
+
+@include respond-sm {
+  .sm\:hidden { display: none !important; }
+  .sm\:flex { display: flex !important; }
+  .sm\:grid { display: grid !important; }
+  .sm\:block { display: block !important; }
+  .sm\:px-6 { padding-left: $spacing-lg; padding-right: $spacing-lg; }
+  .sm\:py-6 { padding-top: $spacing-lg; padding-bottom: $spacing-lg; }
+  .sm\:gap-4 { gap: $spacing-lg; }
+  .sm\:gap-6 { gap: $spacing-xl; }
+  .sm\:text-lg { font-size: $font-size-lg; }
+  .sm\:text-xl { font-size: $font-size-xl; }
+  .sm\:text-5xl { font-size: $font-size-5xl; }
+  .sm\:flex-row { flex-direction: row; }
+  .sm\:grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .sm\:grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+}
+
+@include respond-md {
+  .md\:hidden { display: none !important; }
+  .md\:flex { display: flex !important; }
+  .md\:grid { display: grid !important; }
+  .md\:block { display: block !important; }
+  .md\:px-6 { padding-left: $spacing-lg; padding-right: $spacing-lg; }
+  .md\:px-8 { padding-left: 2rem; padding-right: 2rem; }
+  .md\:py-6 { padding-top: $spacing-lg; padding-bottom: $spacing-lg; }
+  .md\:gap-4 { gap: $spacing-lg; }
+  .md\:gap-6 { gap: $spacing-xl; }
+  .md\:text-lg { font-size: $font-size-lg; }
+  .md\:text-xl { font-size: $font-size-xl; }
+  .md\:text-3xl { font-size: $font-size-3xl; }
+  .md\:flex-row { flex-direction: row; }
+  .md\:grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .md\:grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .md\:w-64 { width: 256px; }
+  .md\:w-20 { width: 80px; }
+  .md\:ml-64 { margin-left: 256px; }
+  .md\:ml-20 { margin-left: 80px; }
+}
+
+@include respond-lg {
+  .lg\:hidden { display: none !important; }
+  .lg\:flex { display: flex !important; }
+  .lg\:px-8 { padding-left: 2rem; padding-right: 2rem; }
+  .lg\:grid-cols-6 { grid-template-columns: repeat(6, 1fr); }
+}

@@ -1,0 +1,539 @@
+// ════════════════════════════════════════════════════════════════════════════
+// COMPONENT STYLES
+// ════════════════════════════════════════════════════════════════════════════
+
+@import 'variables';
+@import 'mixins';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BUTTONS
+// ─────────────────────────────────────────────────────────────────────────────
+
+.btn {
+  @include button-base;
+  
+  &--primary {
+    @include button-primary;
+  }
+  
+  &--success {
+    @include button-success;
+  }
+  
+  &--danger {
+    @include button-danger;
+  }
+  
+  &--outline {
+    @include button-outline;
+  }
+  
+  &--ghost {
+    @include button-ghost;
+  }
+  
+  &--small {
+    padding: $spacing-xs $spacing-md;
+    font-size: $font-size-sm;
+    min-height: 36px;
+  }
+  
+  &--large {
+    padding: $spacing-md $spacing-xl;
+    font-size: $font-size-lg;
+    min-height: $touch-target-comfortable;
+  }
+  
+  &--icon {
+    padding: $spacing-sm;
+    min-width: $touch-target-min;
+    border-radius: $border-radius-md;
+  }
+  
+  &--full-width {
+    width: 100%;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CARDS
+// ─────────────────────────────────────────────────────────────────────────────
+
+.card {
+  @include card-base;
+  
+  &--hover {
+    @include card-hover;
+  }
+  
+  &--interactive {
+    @include card-interactive;
+  }
+  
+  &__header {
+    @include flex-between;
+    margin-bottom: $spacing-md;
+    flex-wrap: wrap;
+    gap: $spacing-sm;
+  }
+  
+  &__title {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: $color-primary-dark;
+  }
+  
+  &__subtitle {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    margin-top: $spacing-xs;
+  }
+  
+  &__body {
+    color: $color-text-secondary;
+    line-height: $line-height-relaxed;
+  }
+  
+  &__footer {
+    @include flex-between;
+    margin-top: $spacing-lg;
+    padding-top: $spacing-md;
+    border-top: $border-width solid $color-border;
+    flex-wrap: wrap;
+    gap: $spacing-sm;
+  }
+  
+  &__actions {
+    @include flex-start;
+    gap: $spacing-sm;
+    flex-wrap: wrap;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FORMS
+// ─────────────────────────────────────────────────────────────────────────────
+
+.form {
+  &__group {
+    margin-bottom: $spacing-lg;
+  }
+  
+  &__label {
+    display: block;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: $color-text-primary;
+    margin-bottom: $spacing-sm;
+  }
+  
+  &__required {
+    color: $color-danger;
+    margin-left: $spacing-xs;
+  }
+  
+  &__input {
+    @include input-base;
+    
+    &--error {
+      @include input-error;
+    }
+  }
+  
+  &__textarea {
+    @include input-base;
+    min-height: 120px;
+    resize: vertical;
+  }
+  
+  &__select {
+    @include input-base;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236d4c41' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+    background-position: right $spacing-sm center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: $spacing-2xl;
+  }
+  
+  &__error {
+    display: block;
+    font-size: $font-size-sm;
+    color: $color-danger;
+    margin-top: $spacing-xs;
+  }
+  
+  &__hint {
+    display: block;
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+    margin-top: $spacing-xs;
+  }
+  
+  &__actions {
+    @include flex-start;
+    gap: $spacing-md;
+    margin-top: $spacing-xl;
+    flex-wrap: wrap;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CALCULATOR WIDGET
+// ─────────────────────────────────────────────────────────────────────────────
+
+.calculator {
+  @include card-base;
+  background: linear-gradient(135deg, $color-primary-lightest 0%, $color-surface 100%);
+  
+  &__header {
+    text-align: center;
+    margin-bottom: $spacing-lg;
+  }
+  
+  &__title {
+    @include heading-secondary;
+    margin-bottom: $spacing-sm;
+  }
+  
+  &__subtitle {
+    font-size: $font-size-base;
+    color: $color-text-secondary;
+  }
+  
+  &__form {
+    margin-bottom: $spacing-lg;
+  }
+  
+  &__result {
+    @include card-base;
+    @include flex-between;
+    background-color: $color-surface;
+    padding: $spacing-lg;
+    margin-bottom: $spacing-lg;
+  }
+  
+  &__result-label {
+    font-size: $font-size-base;
+    font-weight: $font-weight-medium;
+    color: $color-text-secondary;
+  }
+  
+  &__result-value {
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-bold;
+    color: $color-primary;
+    
+    @include respond-md {
+      font-size: $font-size-3xl;
+    }
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GALLERY
+// ─────────────────────────────────────────────────────────────────────────────
+
+.gallery {
+  &__grid {
+    @include grid-responsive;
+  }
+  
+  &__item {
+    @include card-interactive;
+    padding: 0;
+    overflow: hidden;
+    aspect-ratio: 4 / 3;
+  }
+  
+  &__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform $transition-slow;
+  }
+  
+  &__item:hover &__image {
+    transform: scale(1.05);
+  }
+  
+  &__caption {
+    padding: $spacing-md;
+    background-color: $color-surface;
+  }
+  
+  &__title {
+    font-weight: $font-weight-semibold;
+    color: $color-text-primary;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TABS
+// ─────────────────────────────────────────────────────────────────────────────
+
+.tabs {
+  &__list {
+    @include flex-start;
+    gap: $spacing-xs;
+    border-bottom: $border-width-thick solid $color-border;
+    overflow-x: auto;
+    flex-wrap: wrap;
+  }
+  
+  &__tab {
+    padding: $spacing-sm $spacing-md;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: $color-text-secondary;
+    background-color: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: all $transition-base;
+    white-space: nowrap;
+    min-height: $touch-target-min;
+    
+    @include respond-md {
+      font-size: $font-size-base;
+      padding: $spacing-md $spacing-lg;
+    }
+    
+    &:hover {
+      color: $color-primary;
+      background-color: $color-background;
+    }
+    
+    &--active {
+      color: $color-primary;
+      border-bottom-color: $color-primary;
+    }
+  }
+  
+  &__content {
+    padding-top: $spacing-lg;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CALENDAR
+// ─────────────────────────────────────────────────────────────────────────────
+
+.calendar {
+  @include card-base;
+  
+  &__header {
+    @include flex-between;
+    margin-bottom: $spacing-md;
+  }
+  
+  &__nav-btn {
+    @include flex-center;
+    padding: $spacing-sm;
+    min-width: $touch-target-min;
+    min-height: $touch-target-min;
+    background-color: transparent;
+    border-radius: $border-radius-md;
+    transition: background-color $transition-base;
+    
+    &:hover {
+      background-color: $color-background;
+    }
+  }
+  
+  &__title {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: $color-primary-dark;
+  }
+  
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: $spacing-xs;
+  }
+  
+  &__day-label {
+    text-align: center;
+    padding: $spacing-sm;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-bold;
+    color: $color-primary;
+  }
+  
+  &__day {
+    @include flex-column-center;
+    aspect-ratio: 1;
+    padding: $spacing-sm;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    border-radius: $border-radius-md;
+    transition: all $transition-base;
+    cursor: pointer;
+    
+    &--empty {
+      cursor: default;
+      opacity: 0.3;
+    }
+    
+    &--today {
+      background-color: $color-primary-lightest;
+      border: $border-width-thick solid $color-primary;
+    }
+    
+    &--has-data {
+      background-color: $color-success-light;
+      color: $color-text-on-success;
+      
+      &:hover {
+        background-color: $color-success;
+      }
+    }
+    
+    &--selected {
+      background-color: $color-primary;
+      color: $color-text-on-primary;
+    }
+  }
+  
+  &__day-count {
+    font-size: $font-size-xs;
+    opacity: 0.75;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// WORKER LIST
+// ─────────────────────────────────────────────────────────────────────────────
+
+.worker-list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+  
+  &__item {
+    @include flex-between;
+    padding: $spacing-md;
+    background-color: $color-surface;
+    border: $border-width solid $color-border;
+    border-radius: $border-radius-lg;
+    transition: all $transition-base;
+    
+    &:hover {
+      background-color: $color-background;
+    }
+  }
+  
+  &__name {
+    font-weight: $font-weight-semibold;
+    color: $color-primary-dark;
+  }
+  
+  &__status {
+    @include flex-center;
+    gap: $spacing-sm;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LOADING STATES
+// ─────────────────────────────────────────────────────────────────────────────
+
+.loading {
+  @include flex-column-center;
+  padding: $spacing-3xl;
+  
+  &__text {
+    color: $color-text-secondary;
+    font-weight: $font-weight-medium;
+  }
+}
+
+.empty-state {
+  @include flex-column-center;
+  padding: $spacing-3xl;
+  text-align: center;
+  background-color: $color-surface;
+  border-radius: $border-radius-xl;
+  border: $border-width solid $color-border;
+  
+  &__icon {
+    font-size: $font-size-5xl;
+    margin-bottom: $spacing-lg;
+    opacity: 0.5;
+  }
+  
+  &__text {
+    color: $color-text-secondary;
+    font-weight: $font-weight-medium;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BADGES
+// ─────────────────────────────────────────────────────────────────────────────
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-xs;
+  padding: $spacing-xs $spacing-sm;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  border-radius: $border-radius-full;
+  
+  &--primary {
+    background-color: $color-primary-lighter;
+    color: $color-primary-dark;
+  }
+  
+  &--success {
+    background-color: rgba($color-success, 0.1);
+    color: $color-success-dark;
+  }
+  
+  &--danger {
+    background-color: rgba($color-danger, 0.1);
+    color: $color-danger-dark;
+  }
+  
+  &--warning {
+    background-color: rgba($color-warning, 0.1);
+    color: darken($color-warning, 20%);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ALERTS
+// ─────────────────────────────────────────────────────────────────────────────
+
+.alert {
+  padding: $spacing-md;
+  border-radius: $border-radius-md;
+  border: $border-width solid;
+  
+  &--info {
+    background-color: rgba($color-info, 0.1);
+    border-color: $color-info;
+    color: darken($color-info, 20%);
+  }
+  
+  &--success {
+    background-color: rgba($color-success, 0.1);
+    border-color: $color-success;
+    color: $color-success-dark;
+  }
+  
+  &--warning {
+    background-color: rgba($color-warning, 0.1);
+    border-color: $color-warning;
+    color: darken($color-warning, 20%);
+  }
+  
+  &--danger {
+    background-color: rgba($color-danger, 0.1);
+    border-color: $color-danger;
+    color: $color-danger-dark;
+  }
+}

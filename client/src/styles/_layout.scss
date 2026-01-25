@@ -1,0 +1,269 @@
+// ════════════════════════════════════════════════════════════════════════════
+// LAYOUT STYLES
+// ════════════════════════════════════════════════════════════════════════════
+
+@import 'variables';
+@import 'mixins';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// HEADER & NAVIGATION
+// ─────────────────────────────────────────────────────────────────────────────
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: $z-sticky;
+  background-color: rgba($color-surface, 0.9);
+  backdrop-filter: blur(12px);
+  border-bottom: $border-width solid $color-border;
+  
+  &__container {
+    @include container;
+    @include flex-between;
+    padding-top: $spacing-sm;
+    padding-bottom: $spacing-sm;
+    gap: $spacing-md;
+  }
+  
+  &__logo {
+    @include flex-start;
+    gap: $spacing-sm;
+    cursor: pointer;
+    transition: transform $transition-base;
+    
+    &:hover {
+      transform: scale(1.05);
+    }
+  }
+  
+  &__logo-icon {
+    font-size: $font-size-2xl;
+  }
+  
+  &__logo-text {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: $color-primary-dark;
+  }
+  
+  &__actions {
+    @include flex-start;
+    gap: $spacing-sm;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// HERO SECTION
+// ─────────────────────────────────────────────────────────────────────────────
+
+.hero {
+  position: relative;
+  padding: $spacing-3xl $spacing-md;
+  text-align: center;
+  background: linear-gradient(to bottom, $color-background, $color-primary-lightest);
+  border-bottom: $border-width-heavy solid $color-border-dark;
+  
+  @include respond-md {
+    padding: $spacing-3xl $spacing-xl;
+  }
+  
+  &__container {
+    @include container;
+    max-width: $max-width-lg;
+  }
+  
+  &__title {
+    @include heading-primary;
+    margin-bottom: $spacing-md;
+  }
+  
+  &__subtitle {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-medium;
+    color: $color-text-secondary;
+    margin-bottom: $spacing-sm;
+    line-height: $line-height-relaxed;
+    
+    @include respond-md {
+      font-size: $font-size-xl;
+    }
+  }
+  
+  &__description {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: $color-text-tertiary;
+    margin-bottom: $spacing-xl;
+    
+    @include respond-md {
+      font-size: $font-size-base;
+    }
+  }
+  
+  &__actions {
+    @include flex-column;
+    gap: $spacing-md;
+    
+    @include respond-sm {
+      flex-direction: row;
+      justify-content: center;
+    }
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MAIN CONTENT CONTAINER
+// ─────────────────────────────────────────────────────────────────────────────
+
+.main-content {
+  @include container;
+  @include section-spacing;
+  max-width: $max-width-lg;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SECTION
+// ─────────────────────────────────────────────────────────────────────────────
+
+.section {
+  margin-bottom: $spacing-2xl;
+  
+  @include respond-md {
+    margin-bottom: $spacing-3xl;
+  }
+  
+  &__header {
+    margin-bottom: $spacing-lg;
+  }
+  
+  &__title {
+    @include heading-secondary;
+    margin-bottom: $spacing-sm;
+  }
+  
+  &__subtitle {
+    font-size: $font-size-base;
+    color: $color-text-secondary;
+    line-height: $line-height-relaxed;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GRID LAYOUTS
+// ─────────────────────────────────────────────────────────────────────────────
+
+.grid {
+  &--auto {
+    @include grid-auto;
+  }
+  
+  &--responsive {
+    @include grid-responsive;
+  }
+  
+  &--2-col {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: $spacing-lg;
+    
+    @include respond-md {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  &--3-col {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: $spacing-lg;
+    
+    @include respond-sm {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    @include respond-lg {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  
+  &--4-col {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: $spacing-lg;
+    
+    @include respond-sm {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    @include respond-lg {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ADMIN LAYOUT
+// ─────────────────────────────────────────────────────────────────────────────
+
+.admin-layout {
+  min-height: 100vh;
+  background-color: $color-background;
+  
+  &__container {
+    @include container;
+    padding-top: $spacing-xl;
+    padding-bottom: $spacing-xl;
+  }
+  
+  &__header {
+    @include flex-between;
+    margin-bottom: $spacing-xl;
+    flex-wrap: wrap;
+    gap: $spacing-md;
+  }
+  
+  &__title {
+    @include heading-secondary;
+  }
+  
+  &__tabs {
+    @include flex-start;
+    gap: $spacing-sm;
+    flex-wrap: wrap;
+  }
+  
+  &__content {
+    margin-top: $spacing-xl;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RESPONSIVE UTILITIES
+// ─────────────────────────────────────────────────────────────────────────────
+
+.hide-mobile {
+  display: none;
+  
+  @include respond-md {
+    display: block;
+  }
+}
+
+.hide-desktop {
+  display: block;
+  
+  @include respond-md {
+    display: none;
+  }
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}

@@ -1,0 +1,287 @@
+// ════════════════════════════════════════════════════════════════════════════
+// RESPONSIVE BREAKPOINTS & UTILITIES
+// ════════════════════════════════════════════════════════════════════════════
+
+@import 'variables';
+@import 'mixins';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MOBILE-FIRST RESPONSIVE UTILITIES
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Typography Scaling
+h1, .h1 {
+  font-size: $font-size-3xl;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  line-height: $line-height-tight;
+  
+  @include respond-md {
+    font-size: $font-size-4xl;
+  }
+  
+  @include respond-lg {
+    font-size: $font-size-5xl;
+  }
+}
+
+h2, .h2 {
+  font-size: $font-size-2xl;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  line-height: $line-height-tight;
+  
+  @include respond-md {
+    font-size: $font-size-3xl;
+  }
+}
+
+h3, .h3 {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  line-height: $line-height-normal;
+  
+  @include respond-md {
+    font-size: $font-size-2xl;
+  }
+}
+
+h4, .h4 {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  line-height: $line-height-normal;
+}
+
+h5, .h5 {
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  line-height: $line-height-normal;
+}
+
+h6, .h6 {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  line-height: $line-height-normal;
+}
+
+// Paragraph
+p {
+  color: $color-text-secondary;
+  line-height: $line-height-relaxed;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SPACING UTILITIES
+// ─────────────────────────────────────────────────────────────────────────────
+
+.space-y-sm > * + * {
+  margin-top: $spacing-sm;
+}
+
+.space-y-md > * + * {
+  margin-top: $spacing-md;
+}
+
+.space-y-lg > * + * {
+  margin-top: $spacing-lg;
+}
+
+.space-y-xl > * + * {
+  margin-top: $spacing-xl;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CONTAINER WIDTHS
+// ─────────────────────────────────────────────────────────────────────────────
+
+.container {
+  @include container;
+}
+
+.container-sm {
+  @include container;
+  max-width: $max-width-sm;
+}
+
+.container-md {
+  @include container;
+  max-width: $max-width-md;
+}
+
+.container-lg {
+  @include container;
+  max-width: $max-width-lg;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RESPONSIVE VISIBILITY
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Hide on mobile
+.hidden-xs {
+  display: none !important;
+  
+  @include respond-sm {
+    display: block !important;
+  }
+}
+
+// Show only on mobile
+.visible-xs {
+  display: block !important;
+  
+  @include respond-sm {
+    display: none !important;
+  }
+}
+
+// Hide on tablet
+.hidden-md {
+  @include respond-md {
+    display: none !important;
+  }
+}
+
+// Show only on tablet+
+.visible-md {
+  display: none !important;
+  
+  @include respond-md {
+    display: block !important;
+  }
+}
+
+// Hide on desktop
+.hidden-lg {
+  @include respond-lg {
+    display: none !important;
+  }
+}
+
+// Show only on desktop
+.visible-lg {
+  display: none !important;
+  
+  @include respond-lg {
+    display: block !important;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FLEX UTILITIES (Responsive)
+// ─────────────────────────────────────────────────────────────────────────────
+
+.flex-column-mobile {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+  
+  @include respond-md {
+    flex-direction: row;
+  }
+}
+
+.flex-wrap-mobile {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-md;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TEXT ALIGNMENT (Responsive)
+// ─────────────────────────────────────────────────────────────────────────────
+
+.text-center-mobile {
+  text-align: center;
+  
+  @include respond-md {
+    text-align: left;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TOUCH-FRIENDLY INTERACTIONS
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Ensure all interactive elements meet touch target minimum
+button,
+a,
+.interactive {
+  min-height: $touch-target-min;
+  min-width: $touch-target-min;
+}
+
+// Add more padding on mobile for better touch experience
+@media (max-width: ($breakpoint-md - 1)) {
+  .card,
+  .form__group,
+  .admin-table__cell {
+    padding: $spacing-md;
+  }
+  
+  .btn {
+    padding: $spacing-md $spacing-lg;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PRINT STYLES
+// ─────────────────────────────────────────────────────────────────────────────
+
+@media print {
+  // Hide unnecessary elements
+  .app-header,
+  .btn,
+  .admin-layout__tabs,
+  .form__actions {
+    display: none !important;
+  }
+  
+  // Adjust page layout
+  body {
+    background-color: white;
+  }
+  
+  .card {
+    border: 1px solid #000;
+    box-shadow: none;
+    page-break-inside: avoid;
+  }
+  
+  // Expand to full width
+  .container {
+    max-width: 100%;
+    padding: 0;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LANDSCAPE MODE (Mobile)
+// ─────────────────────────────────────────────────────────────────────────────
+
+@media (orientation: landscape) and (max-height: 600px) {
+  .hero {
+    padding-top: $spacing-lg;
+    padding-bottom: $spacing-lg;
+  }
+  
+  .hero__title {
+    font-size: $font-size-2xl;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// HIGH-DPI DISPLAYS
+// ─────────────────────────────────────────────────────────────────────────────
+
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  // Enhance border visibility on retina displays
+  .card,
+  .form__input {
+    border-width: 0.5px;
+  }
+}
