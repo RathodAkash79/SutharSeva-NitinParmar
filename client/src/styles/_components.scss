@@ -55,6 +55,40 @@
   }
 }
 
+// Alternative class names for flexibility
+.btn-primary {
+  @include button-primary;
+}
+
+.btn-secondary {
+  @include button-base;
+  background-color: $color-surface;
+  color: $color-text-secondary;
+  border: $border-width solid $color-border;
+  
+  &:hover:not(:disabled) {
+    border-color: $color-primary;
+    background-color: $color-background;
+  }
+}
+
+.btn-success {
+  @include button-success;
+}
+
+.btn-danger {
+  @include button-danger;
+}
+
+.btn-outline {
+  @include button-outline;
+}
+
+.btn-ghost {
+  @include button-ghost;
+}
+
+
 // ─────────────────────────────────────────────────────────────────────────────
 // CARDS
 // ─────────────────────────────────────────────────────────────────────────────
@@ -535,5 +569,136 @@
     background-color: rgba($color-danger, 0.1);
     border-color: $color-danger;
     color: $color-danger-dark;
+  }
+}
+// ─────────────────────────────────────────────────────────────────────────────
+// BASE INPUT CLASS
+// ─────────────────────────────────────────────────────────────────────────────
+
+.input {
+  @include input-base;
+  
+  &--error {
+    @include input-error;
+  }
+  
+  &--large {
+    padding: $spacing-md;
+    font-size: $font-size-lg;
+    min-height: $touch-target-comfortable;
+  }
+  
+  &--small {
+    padding: $spacing-xs $spacing-sm;
+    font-size: $font-size-sm;
+    min-height: 36px;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MODAL & OVERLAY SYSTEM
+// ─────────────────────────────────────────────────────────────────────────────
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: $z-modal-backdrop;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-md;
+  overflow-y: auto;
+  animation: fadeIn $transition-fast;
+  
+  // Prevent background scroll
+  &.is-open {
+    overflow: hidden;
+  }
+}
+
+.modal {
+  @include card-base;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  margin: auto;
+  animation: slideUp $transition-base;
+  box-shadow: $shadow-xl;
+  position: relative;
+  
+  @include respond-md {
+    max-width: $max-width-md;
+  }
+  
+  &--large {
+    @include respond-md {
+      max-width: $max-width-lg;
+    }
+  }
+  
+  &--small {
+    @include respond-md {
+      max-width: $max-width-sm;
+    }
+  }
+  
+  &__header {
+    @include flex-between;
+    margin-bottom: $spacing-lg;
+    padding-bottom: $spacing-md;
+    border-bottom: $border-width solid $color-border;
+  }
+  
+  &__title {
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+    color: $color-primary-dark;
+  }
+  
+  &__close {
+    @include button-ghost;
+    padding: $spacing-xs;
+    border-radius: $border-radius-full;
+    min-width: auto;
+    
+    &:hover {
+      background-color: $color-background;
+    }
+  }
+  
+  &__body {
+    margin-bottom: $spacing-lg;
+  }
+  
+  &__footer {
+    @include flex-end;
+    gap: $spacing-md;
+    padding-top: $spacing-md;
+    border-top: $border-width solid $color-border;
+  }
+}
+
+// Animations
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
   }
 }
