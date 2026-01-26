@@ -29,6 +29,7 @@
     left: 0;
     bottom: 0;
     width: 256px;
+    flex-shrink: 0;
     background-color: $color-surface;
     border-right: $border-width solid $color-border;
     z-index: $z-sticky;
@@ -55,6 +56,7 @@
   &__content {
     flex: 1;
     min-height: 100vh;
+    min-width: 0;
     margin-left: 256px;
     transition: margin-left $transition-base;
 
@@ -100,6 +102,7 @@
   display: flex;
   min-height: 100vh;
   padding-top: 64px; // offset header
+  min-width: 0;
 }
 
 .admin-body .layout__sidebar {
@@ -110,6 +113,7 @@
 .admin-main {
   flex: 1;
   min-height: calc(100vh - 64px);
+  min-width: 0;
   background-color: $color-background;
   transition: margin-left $transition-base;
 
@@ -155,6 +159,7 @@
   width: 100%;
   max-width: 100%;
   margin: 0 auto;
+  min-width: 0;
   
   &--centered {
     max-width: $max-width-xl;
@@ -452,10 +457,24 @@
       text-decoration: none;
       border-radius: $border-radius-md;
       transition: all $transition-base;
+      color: $color-text-secondary;
+      font-weight: $font-weight-medium;
       
       span {
         overflow: hidden;
         text-overflow: ellipsis;
+      }
+
+      &:hover {
+        background-color: $color-background;
+        color: $color-primary-dark;
+      }
+
+      &.active,
+      &[aria-current="page"] {
+        background-color: $color-primary-lightest;
+        color: $color-primary-dark;
+        font-weight: $font-weight-semibold;
       }
     }
   }

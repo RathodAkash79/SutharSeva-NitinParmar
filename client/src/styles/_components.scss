@@ -313,7 +313,9 @@
     gap: $spacing-xs;
     border-bottom: $border-width-thick solid $color-border;
     overflow-x: auto;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
   }
   
   &__tab {

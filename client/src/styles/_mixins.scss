@@ -215,10 +215,12 @@
 
 @mixin input-base {
   width: 100%;
+  box-sizing: border-box;
   padding: $spacing-sm $spacing-md;
   min-height: $touch-target-min;
   font-size: $font-size-base;
   line-height: $line-height-normal;
+  font-family: inherit;
   color: $color-text-primary;
   background-color: $color-surface;
   border: $border-width solid $color-border;

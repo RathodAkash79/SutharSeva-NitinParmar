@@ -153,7 +153,7 @@ export default function Admin() {
 
       {/* Tabs */}
       <section className="px-lg">
-        <div className="flex gap-sm mb-md">
+        <div className="flex flex-wrap items-center gap-sm mb-md">
           <button
             className={`px-4 py-2 rounded-lg font-semibold ${activeTab === "projects" ? "bg-primary text-white" : "border border-border text-secondary"}`}
             onClick={() => setActiveTab("projects")}
