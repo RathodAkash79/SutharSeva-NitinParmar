@@ -34,7 +34,7 @@ export function SystemHealthProbe({ enabled = false, verbose = false }: SystemHe
 
     const checkApi = async () => {
       try {
-        const response = await fetch(apiUrl("/health"), {
+        const response = await fetch(apiUrl("/api/health"), {
           method: "HEAD",
           signal: controller.signal,
         });

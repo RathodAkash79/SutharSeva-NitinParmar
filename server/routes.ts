@@ -97,11 +97,11 @@ export async function registerRoutes(
         } catch (cloudinaryError) {
           console.error("Cloudinary upload error:", cloudinaryError);
           // Fall back to local storage
-          url = await fallbackLocalUpload(req.file);
+          url = await fallbackLocalUpload(req.file, req);
         }
       } else {
         console.warn("Cloudinary credentials not set, using local storage fallback");
-        url = await fallbackLocalUpload(req.file);
+        url = await fallbackLocalUpload(req.file, req);
       }
 
       // Clean up temp file
@@ -120,7 +120,7 @@ export async function registerRoutes(
 }
 
 // Fallback: serve uploaded files from local storage
-async function fallbackLocalUpload(file: any): Promise<string> {
+async function fallbackLocalUpload(file: any, req: Request): Promise<string> {
   try {
     const uploadDir = "uploads/public";
     if (!fs.existsSync(uploadDir)) {
@@ -134,8 +134,9 @@ async function fallbackLocalUpload(file: any): Promise<string> {
     // Copy file to public uploads directory
     fs.copyFileSync(file.path, destPath);
 
-    // Return a URL path that can be served
-    return `/uploads/public/${fileName}`;
+    // Return an absolute URL that can be served
+    const baseUrl = process.env.PUBLIC_BASE_URL || `${req.protocol}://${req.get("host")}`;
+    return `${baseUrl}/uploads/public/${fileName}`;
   } catch (err) {
     console.error("Fallback upload error:", err);
     throw new Error("Local storage fallback failed");

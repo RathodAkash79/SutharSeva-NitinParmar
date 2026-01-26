@@ -3,8 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Upload, Trash2 } from "lucide-react";
 import { subscribeToProjects, WorkProject } from "@/lib/firebase";
-import { apiUrl } from "@/lib/api";
-import { db } from "@/lib/firebase";
+import { apiUrl, resolveApiAssetUrl } from "@/lib/api";
+import { db, auth } from "@/lib/firebase";
 import {
   collection,
   updateDoc,
@@ -76,21 +76,28 @@ export default function AdminPhotos() {
 
     setUploading(true);
     try {
-      // Upload to server for cloudinary
-      const formData = new FormData();
-      formData.append("file", imageFile);
+      const idToken = await auth.currentUser?.getIdToken();
+      if (!idToken) throw new Error("Authentication token not available");
+
+      const payload = new FormData();
+      payload.append("image", imageFile);
+      payload.append("category", selectedCategory);
 
       const uploadResponse = await fetch(apiUrl("/api/upload"), {
         method: "POST",
-        body: formData,
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: payload,
       });
 
       if (!uploadResponse.ok) {
-        throw new Error("અપલોડ નિષ્ફળ");
+        const errorText = await uploadResponse.text();
+        throw new Error(errorText || "અપલોડ નિષ્ફળ");
       }
 
       const uploadedData = await uploadResponse.json();
-      const imageUrl = uploadedData.secure_url;
+      const imageUrl = uploadedData.secure_url || uploadedData.url;
 
       // Update Firestore with the new photo
       const projectRef = doc(db, "projects", selectedProject.id);
@@ -247,7 +254,7 @@ export default function AdminPhotos() {
               {selectedProject.photos.map((photo, idx) => (
                 <div key={idx} className="relative card card--hover" style={{ aspectRatio: "1/1", overflow: "hidden" }}>
                   <img
-                    src={photo.url}
+                    src={resolveApiAssetUrl(photo.url)}
                     alt={`Photo ${idx + 1}`}
                     className="w-full h-full"
                     style={{ objectFit: "cover" }}

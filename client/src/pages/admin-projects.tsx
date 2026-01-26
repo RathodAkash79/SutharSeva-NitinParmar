@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Modal } from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
 import { Plus, Trash2, Edit2, Upload, X } from "lucide-react";
 import { subscribeToProjects, loadProjects, WorkProject } from "@/lib/firebase";
 import { db, auth } from "@/lib/firebase";
-import { apiUrl } from "@/lib/api";
+import { apiUrl, resolveApiAssetUrl } from "@/lib/api";
 import {
   collection,
   addDoc,
@@ -52,15 +53,9 @@ export default function AdminProjects() {
   ];
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
+    const file = e.target.files?.[0] || null;
+    setImageFile(file);
+    setImagePreview(file ? URL.createObjectURL(file) : "");
   };
 
   const handleUploadPhoto = async (projectId: string) => {
@@ -71,26 +66,24 @@ export default function AdminProjects() {
 
     setUploading(true);
     try {
-      const formDataUpload = new FormData();
-      formDataUpload.append("image", imageFile);
-
       const idToken = await auth.currentUser?.getIdToken();
-      if (!idToken) {
-        throw new Error("Authentication token not available");
-      }
+      if (!idToken) throw new Error("Authentication token not available");
+
+      const payload = new FormData();
+      payload.append("image", imageFile);
+      payload.append("category", selectedPhotoCategory);
 
       const uploadResponse = await fetch(apiUrl("/api/upload"), {
         method: "POST",
         headers: {
           Authorization: `Bearer ${idToken}`,
         },
-        body: formDataUpload,
+        body: payload,
       });
 
       if (!uploadResponse.ok) {
         const errorText = await uploadResponse.text();
-        console.error("Upload failed:", uploadResponse.status, errorText);
-        throw new Error(`અપલોડ નિષ્ફળ: ${uploadResponse.status}`);
+        throw new Error(errorText || `Upload failed (${uploadResponse.status})`);
       }
 
       const uploadedData = await uploadResponse.json();
@@ -281,12 +274,16 @@ export default function AdminProjects() {
       </div>
 
       {/* Form */}
-      {showForm && (
-        <div className="bg-white rounded-xl p-6 border border-border shadow-sm">
-          <h3 className="text-xl font-bold text-primary-dark mb-4">
-            {editingId ? "પ્રોજેક્ટ સંપાદિત કરો" : "નવું પ્રોજેક્ટ ઉમેરો"}
-          </h3>
-          <form onSubmit={handleSubmit} className="space-y-4">
+      <Modal
+        open={showForm}
+        title={editingId ? "પ્રોજેક્ટ સંપાદિત કરો" : "નવું પ્રોજેક્ટ ઉમેરો"}
+        size="large"
+        onClose={() => {
+          setShowForm(false);
+          setEditingId(null);
+        }}
+      >
+        <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-semibold text-secondary mb-2">
                 પ્રોજેક્ટ નામ
@@ -388,9 +385,8 @@ export default function AdminProjects() {
                 રદ કરો
               </Button>
             </div>
-          </form>
-        </div>
-      )}
+        </form>
+      </Modal>
 
       {/* Projects List */}
       <div className="space-y-4">
@@ -519,8 +515,8 @@ export default function AdminProjects() {
                   <div className="grid grid-cols-3 gap-2">
                     {project.photos!.map((photo, idx) => (
                       <div key={idx} className="relative group">
-                        <img
-                          src={photo.url}
+                          <img
+                            src={resolveApiAssetUrl(photo.url)}
                           alt={`Photo ${idx + 1}`}
                           className="w-full aspect-square object-cover rounded-lg"
                         />

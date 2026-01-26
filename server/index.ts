@@ -2,8 +2,10 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes.js";
 import { createServer } from "http";
 import cors from "cors";
+import path from "path";
 
 const app = express();
+app.set("trust proxy", 1);
 const httpServer = createServer(app);
 
 declare module "http" {
@@ -18,10 +20,28 @@ app.get("/", (req, res) => {
 });
 
 // CORS configuration for frontend
-app.use(cors({
-  origin: process.env.FRONTEND_URL || "http://localhost:5173",
-  credentials: true,
-}));
+const rawOrigins = process.env.FRONTEND_URLS || process.env.FRONTEND_URL || "";
+const allowedOrigins = rawOrigins
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+const allowAnyOrigin = allowedOrigins.length === 0;
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (allowAnyOrigin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(new Error("CORS blocked: origin not allowed"));
+    },
+    credentials: true,
+  }),
+);
+
+// Serve uploaded files (local fallback)
+const uploadsPath = path.resolve("uploads");
+app.use("/uploads", express.static(uploadsPath));
 
 // Body parsing with raw body capture for webhooks
 app.use(

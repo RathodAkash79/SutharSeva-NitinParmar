@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { Input } from "@/components/ui/input";
 import { Search, MapPin, Tag } from "lucide-react";
 import { subscribeToProjects, WorkProject } from "@/lib/firebase";
+import { resolveApiAssetUrl } from "@/lib/api";
 
 export default function WorkGallery() {
   const [projects, setProjects] = useState<WorkProject[]>([]);
@@ -110,7 +111,7 @@ export default function WorkGallery() {
       const matchingPhoto = (project.photos || []).find(
         (photo) => getPhotoType(photo) === categoryName
       );
-      if (matchingPhoto) return matchingPhoto.url;
+      if (matchingPhoto) return resolveApiAssetUrl(matchingPhoto.url);
     }
 
     // Fallback to normal behavior
@@ -118,7 +119,7 @@ export default function WorkGallery() {
       return project.images[0];
     }
     if (project.photos && project.photos.length > 0) {
-      return project.photos[0].url;
+      return resolveApiAssetUrl(project.photos[0].url);
     }
     return "https://images.unsplash.com/photo-1533090161767-e6ffed986c88?w=500&q=80";
   };
@@ -146,7 +147,7 @@ export default function WorkGallery() {
       if (!photo || !photo.url) return;
       const type = getPhotoType(photo);
       if (!grouped[type]) grouped[type] = [];
-      grouped[type].push(photo.url);
+      grouped[type].push(resolveApiAssetUrl(photo.url));
     });
 
     if (Object.keys(grouped).length === 0) {
