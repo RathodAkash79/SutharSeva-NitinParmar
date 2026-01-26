@@ -185,8 +185,8 @@ export default function AdminAttendance() {
           </button>
         </div>
 
-        {/* Calendar Grid: 10 columns, square blocks */}
-        <div className="grid gap-1 mb-4" style={{ gridTemplateColumns: "repeat(10, 1fr)" }}>
+        {/* Calendar Grid */}
+        <div className="calendar-grid">
           {days.map((day) => {
             const dateStr = `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
             const isSelected = dateStr === selectedDate;
@@ -196,15 +196,11 @@ export default function AdminAttendance() {
               <button
                 key={dateStr}
                 onClick={() => setSelectedDate(dateStr)}
-                className={`aspect-square relative flex flex-col items-center justify-center rounded-lg text-sm font-semibold transition border ${
-                  isSelected
-                    ? "bg-primary text-white border-primary"
-                    : "bg-white text-secondary border-border"
-                } ${count > 0 && !isSelected ? "hover:bg-background" : ""}`}
+                className={`date-cell ${isSelected ? "selected" : ""} ${count > 0 && !isSelected ? "has-data" : ""}`}
               >
                 <span>{day}</span>
                 {count > 0 && (
-                  <span className="absolute top-1 right-1 inline-flex items-center justify-center text-[10px] px-1 rounded-full bg-success text-white">
+                  <span className="date-cell__badge">
                     {count}
                   </span>
                 )}

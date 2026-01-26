@@ -439,6 +439,60 @@
   }
 }
 
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  width: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.date-cell {
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border-radius: 50%;
+  border: $border-width solid $color-border;
+  background-color: $color-surface;
+  color: $color-text-secondary;
+  position: relative;
+  transition: all $transition-base;
+
+  &:hover {
+    background-color: $color-background;
+  }
+
+  &.selected {
+    background-color: $primary-brown;
+    color: $color-text-on-primary;
+    border-color: $primary-brown;
+  }
+
+  &.has-data:not(.selected) {
+    border-color: $color-success;
+  }
+
+  &__badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 9999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    background-color: $color-success;
+    color: $color-text-on-success;
+  }
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // WORKER LIST
 // ─────────────────────────────────────────────────────────────────────────────
@@ -536,7 +590,7 @@
   
   &--warning {
     background-color: rgba($color-warning, 0.1);
-    color: darken($color-warning, 20%);
+    color: mix(black, $color-warning, 20%);
   }
 }
 
@@ -552,7 +606,7 @@
   &--info {
     background-color: rgba($color-info, 0.1);
     border-color: $color-info;
-    color: darken($color-info, 20%);
+    color: mix(black, $color-info, 20%);
   }
   
   &--success {
@@ -564,7 +618,7 @@
   &--warning {
     background-color: rgba($color-warning, 0.1);
     border-color: $color-warning;
-    color: darken($color-warning, 20%);
+    color: mix(black, $color-warning, 20%);
   }
   
   &--danger {
@@ -607,13 +661,14 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(20, 12, 8, 0.55);
+  backdrop-filter: blur(6px);
   z-index: $z-modal-backdrop;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: $spacing-md;
-  overflow-y: auto;
+  padding: $spacing-lg;
+  overflow: hidden;
   animation: fadeIn $transition-fast;
   
   // Prevent background scroll
@@ -624,10 +679,11 @@
 
 .modal {
   @include card-base;
-  max-width: 90vw;
-  max-height: 80vh;
+  width: 90vw;
+  max-width: 960px;
+  max-height: calc(100vh - (#{$spacing-lg} * 2));
   overflow: hidden;
-  margin: auto;
+  margin: 0 auto;
   animation: slideUp $transition-base;
   box-shadow: $shadow-xl;
   position: relative;
@@ -636,7 +692,9 @@
   flex-direction: column;
   
   @include respond-md {
-    max-width: $max-width-md;
+    width: 100%;
+    min-width: 600px;
+    max-width: $max-width-lg;
   }
   
   &--large {
@@ -683,7 +741,7 @@
     flex: 1;
     overflow-y: auto;
     margin-bottom: $spacing-lg;
-    padding-right: $spacing-sm;
+    padding-right: 0;
   }
   
   &__footer {

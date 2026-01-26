@@ -216,7 +216,7 @@
 @mixin input-base {
   width: 100%;
   box-sizing: border-box;
-  padding: $spacing-sm $spacing-md;
+  padding: 12px;
   min-height: $touch-target-min;
   font-size: $font-size-base;
   line-height: $line-height-normal;

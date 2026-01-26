@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { collection, getDocs, limit, query, doc, getDoc, setDoc } from "firebase/firestore";
-import { apiUrl } from "@/lib/api";
+import { testApiHealth } from "@/lib/api";
 import { db, auth } from "@/lib/firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import AdminProjects from "./admin-projects";
@@ -266,11 +266,8 @@ function ConnectionStatusBar() {
 
     const checkApi = async (): Promise<StatusValue> => {
       try {
-        const response = await fetch(apiUrl("/api/health"), {
-          method: "GET",
-          signal: controller.signal,
-        });
-        return response.ok ? "ok" : "error";
+        const isHealthy = await testApiHealth();
+        return isHealthy ? "ok" : "error";
       } catch (error) {
         console.error("API health check failed", error);
         return "error";

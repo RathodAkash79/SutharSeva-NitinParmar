@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Modal } from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
 import { Plus, Trash2, Edit2 } from "lucide-react";
 import { db } from "@/lib/firebase";
@@ -35,6 +36,17 @@ export default function AdminWorkers() {
     dailyWage: "",
   });
   const [editingId, setEditingId] = useState<string | null>(null);
+
+  const updateWorkerRate = async (workerId: string, dailyRate: string) => {
+    const rateValue = Number.parseInt(dailyRate, 10);
+    if (!Number.isFinite(rateValue)) {
+      throw new Error("Invalid daily rate value");
+    }
+    const workerRef = doc(db, "workers", workerId);
+    await updateDoc(workerRef, {
+      dailyWage: rateValue,
+    });
+  };
 
   const specialities = [
     "સામાન્ય કારીગર",
@@ -80,6 +92,7 @@ export default function AdminWorkers() {
     }
 
     try {
+      const dailyRateValue = Number.parseInt(formData.dailyWage, 10) || 0;
       if (editingId) {
         // Update existing
         const workerRef = doc(db, "workers", editingId);
@@ -87,8 +100,8 @@ export default function AdminWorkers() {
           name: formData.name,
           phone: formData.phone,
           speciality: formData.speciality,
-          dailyWage: parseInt(formData.dailyWage) || 0,
         });
+        await updateWorkerRate(editingId, formData.dailyWage);
         alert("કારીગર અપડેટ થયો");
       } else {
         // Add new
@@ -96,7 +109,7 @@ export default function AdminWorkers() {
           name: formData.name,
           phone: formData.phone,
           speciality: formData.speciality,
-          dailyWage: parseInt(formData.dailyWage) || 0,
+          dailyWage: dailyRateValue,
           createdAt: Timestamp.now(),
         });
         alert("કારીગર ઉમેરવામાં આવ્યો");
@@ -171,12 +184,15 @@ export default function AdminWorkers() {
       </div>
 
       {/* Form */}
-      {showForm && (
-        <div className="bg-white rounded-xl p-6 border border-border shadow-sm">
-          <h3 className="text-xl font-bold text-primary-dark mb-4">
-            {editingId ? "કારીગર સંપાદિત કરો" : "નવો કારીગર ઉમેરો"}
-          </h3>
-          <form onSubmit={handleSubmit} className="space-y-4">
+      <Modal
+        open={showForm}
+        title={editingId ? "કારીગર સંપાદિત કરો" : "નવો કારીગર ઉમેરો"}
+        onClose={() => {
+          setShowForm(false);
+          setEditingId(null);
+        }}
+      >
+        <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-semibold text-secondary mb-2">
                 નામ
@@ -260,9 +276,8 @@ export default function AdminWorkers() {
                 રદ કરો
               </Button>
             </div>
-          </form>
-        </div>
-      )}
+        </form>
+      </Modal>
 
       {/* Workers List */}
       <div className="space-y-4">

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Switch, Route } from "wouter";
+import { Switch, Route, Link, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -27,6 +27,10 @@ function Router() {
 }
 
 function App() {
+  const [location] = useLocation();
+  const isAdmin = location.startsWith("/admin");
+  const shellClassName = isAdmin ? "app-shell" : "app-shell app-shell--public";
+
   useEffect(() => {
     // Test Firebase connection on app mount
     const testFirebaseConnection = async () => {
@@ -51,9 +55,39 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <div className="app">
+        <div className={shellClassName}>
           <Toaster />
-          <Router />
+          <header className="app-shell__header">
+            <div className="app-shell__header-inner">
+              <div className="app-shell__brand">
+                <span className="app-shell__brand-icon">🔨</span>
+                <div className="app-shell__brand-text">
+                  <span className="app-shell__brand-title">સુથાર સેવા</span>
+                  <span className="app-shell__brand-subtitle">Carpenter Management</span>
+                </div>
+              </div>
+              <nav className="app-shell__header-nav">
+                <Link href="/">Home</Link>
+                <Link href="/work-gallery">Gallery</Link>
+                <Link href="/admin">Admin</Link>
+              </nav>
+            </div>
+          </header>
+
+          <aside className="app-shell__sidebar">
+            <nav className="app-shell__sidebar-nav">
+              <Link href="/admin">Dashboard</Link>
+              <Link href="/admin/projects">Projects</Link>
+              <Link href="/admin/attendance">Attendance</Link>
+              <Link href="/admin/workers">Workers</Link>
+              <Link href="/admin/photos">Photos</Link>
+            </nav>
+          </aside>
+
+          <main className="app-shell__main">
+            <Router />
+          </main>
+
           <SystemHealthProbe enabled={false} />
         </div>
       </TooltipProvider>

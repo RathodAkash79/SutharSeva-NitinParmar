@@ -9,12 +9,18 @@
 // COLOR PALETTE
 // ─────────────────────────────────────────────────────────────────────────────
 
+// Brand aliases (Warm Wood & Cream)
+$primary-brown: #8b5a2b; // rich wood
+$bg-cream: #fff7ee;      // warm cream
+$text-dark: #4e342e;     // deep brown
+$spacing-unit: 0.5rem;
+
 // Primary - Brown (Carpenter/Wood Identity)
-$color-primary: #855e42;
-$color-primary-dark: #5d4037;
-$color-primary-light: #a1887f;
-$color-primary-lighter: #d7ccc8;
-$color-primary-lightest: #efebe9;
+$color-primary: $primary-brown;
+$color-primary-dark: #6d4422;
+$color-primary-light: #b07a4d;
+$color-primary-lighter: #ead8c5;
+$color-primary-lightest: #f7efe6;
 
 // Success/Action - Green (WhatsApp, Success)
 $color-success: #43a047;
@@ -27,17 +33,17 @@ $color-danger-dark: #c62828;
 $color-danger-light: #ef5350;
 
 // Neutral - Background & Text
-$color-background: #fdfbf7;
-$color-background-alt: #f5f5f5;
+$color-background: $bg-cream;
+$color-background-alt: #f3ede5;
 $color-surface: #ffffff;
 $color-border: #efebe9;
 $color-border-dark: #d7ccc8;
 
 // Text Colors
-$color-text-primary: #5d4037;
-$color-text-secondary: #795548;
-$color-text-tertiary: #6d4c41;
-$color-text-muted: #a1887f;
+$color-text-primary: $text-dark;
+$color-text-secondary: #6d4c41;
+$color-text-tertiary: #7a5a3a;
+$color-text-muted: #b08a6f;
 $color-text-on-primary: #ffffff;
 $color-text-on-success: #ffffff;
 $color-text-on-danger: #ffffff;
