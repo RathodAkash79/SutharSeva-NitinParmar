@@ -365,7 +365,6 @@ export default function AdminAttendance() {
         <div className="space-y-4">
           {workers.map((worker) => {
             const selectedWorkId = selectedWorkByWorker[worker.id];
-            const selectedWork = getWorkById(selectedWorkId);
             const present = attendance.find(
               (a) =>
                 a.workerId === worker.id &&
@@ -420,34 +419,27 @@ export default function AdminAttendance() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                  <div>
-                    <label className="block text-xs font-semibold text-secondary mb-1">
-                      કામ પસંદ કરો
-                    </label>
-                    <select
-                      value={selectedWorkId || ""}
-                      onChange={(e) =>
-                        setSelectedWorkByWorker((prev) => ({
-                          ...prev,
-                          [worker.id]: e.target.value,
-                        }))
-                      }
-                      className="w-full px-3 py-2 border border-border rounded-lg text-secondary"
-                    >
-                      <option value="">-- કામ પસંદ કરો --</option>
-                      {runningProjects.map((project) => (
-                        <option key={project.id} value={project.id}>
-                          {project.name} ({project.village})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="text-xs text-secondary flex flex-col justify-end">
-                    <span>પ્રોજેક્ટ શરૂ: {selectedWork?.startDate || "-"}</span>
-                    <span>અંત તારીખ: {selectedWork?.expectedEndDate || "-"}</span>
-                  </div>
+                <div>
+                  <label className="block text-xs font-semibold text-secondary mb-1">
+                    કામ પસંદ કરો
+                  </label>
+                  <select
+                    value={selectedWorkId || ""}
+                    onChange={(e) =>
+                      setSelectedWorkByWorker((prev) => ({
+                        ...prev,
+                        [worker.id]: e.target.value,
+                      }))
+                    }
+                    className="w-full px-3 py-2 border border-border rounded-lg text-secondary"
+                  >
+                    <option value="">-- કામ પસંદ કરો --</option>
+                    {runningProjects.map((project) => (
+                      <option key={project.id} value={project.id}>
+                        {project.name} ({project.village})
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2">

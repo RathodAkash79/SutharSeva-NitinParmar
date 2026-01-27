@@ -45,6 +45,9 @@ export default function AdminProjects() {
   const [savingCompletion, setSavingCompletion] = useState(false);
   const [majduriByProject, setMajduriByProject] = useState<Record<string, number>>({});
   const [visiblePhotosByProject, setVisiblePhotosByProject] = useState<Record<string, number>>({});
+  const [activePhotoProjectId, setActivePhotoProjectId] = useState<string | null>(null);
+  const [activePhotoIndex, setActivePhotoIndex] = useState(0);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
   const workTypeOptions = getWorkTypeOptions().map((option) => option.label);
   const workTypeOptionObjects = getWorkTypeOptions();
@@ -231,6 +234,57 @@ export default function AdminProjects() {
 
   const getVisiblePhotoCount = (projectId: string) =>
     visiblePhotosByProject[projectId] || 6;
+
+  const openPhotoViewer = (projectId: string, index: number) => {
+    setActivePhotoProjectId(projectId);
+    setActivePhotoIndex(index);
+  };
+
+  const activeProject = projects.find((project) => project.id === activePhotoProjectId);
+  const activePhotos = activeProject?.photos || [];
+  const activePhoto = activePhotos[activePhotoIndex];
+
+  const handleViewerDelete = async () => {
+    if (!activeProject) return;
+    await handleDeletePhoto(activeProject.id, activePhotoIndex);
+    if (activePhotos.length <= 1) {
+      closePhotoViewer();
+      return;
+    }
+    setActivePhotoIndex((prev) => Math.max(0, prev - 1));
+  };
+
+  const closePhotoViewer = () => {
+    setActivePhotoProjectId(null);
+  };
+
+  const showNextPhoto = (photos: WorkProject["photos"]) => {
+    if (!photos || photos.length === 0) return;
+    setActivePhotoIndex((prev) => (prev + 1) % photos.length);
+  };
+
+  const showPrevPhoto = (photos: WorkProject["photos"]) => {
+    if (!photos || photos.length === 0) return;
+    setActivePhotoIndex((prev) => (prev - 1 + photos.length) % photos.length);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    setTouchStartX(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = (photos: WorkProject["photos"], e: React.TouchEvent<HTMLDivElement>) => {
+    if (touchStartX === null) return;
+    const deltaX = e.changedTouches[0].clientX - touchStartX;
+    const swipeThreshold = 40;
+
+    if (deltaX > swipeThreshold) {
+      showPrevPhoto(photos);
+    } else if (deltaX < -swipeThreshold) {
+      showNextPhoto(photos);
+    }
+
+    setTouchStartX(null);
+  };
 
   const increaseVisiblePhotos = (projectId: string) => {
     setVisiblePhotosByProject((prev) => ({
@@ -774,7 +828,12 @@ export default function AdminProjects() {
                       <>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-4">
                           {project.photos!.slice(0, getVisiblePhotoCount(project.id)).map((photo, idx) => (
-                            <div key={idx} className="relative group">
+                            <button
+                              key={idx}
+                              type="button"
+                              className="relative group text-left"
+                              onClick={() => openPhotoViewer(project.id, idx)}
+                            >
                               <OptimizedImage
                                 src={resolveApiAssetUrl(photo.url)}
                                 alt={`Photo ${idx + 1}`}
@@ -784,17 +843,10 @@ export default function AdminProjects() {
                                 priority={idx < 2}
                                 widthCandidates={[200, 320, 480, 640]}
                               />
-                              <button
-                                onClick={() => handleDeletePhoto(project.id, idx)}
-                                className="absolute top-2 right-2 p-2 bg-white border border-border rounded-full shadow-sm hover:bg-background"
-                                aria-label="Delete photo"
-                              >
-                                <Trash2 className="w-4 h-4 text-danger" />
-                              </button>
                               <div className="absolute bottom-2 left-2 text-xs bg-black/60 text-white px-2 py-1 rounded">
                                 {getWorkTypeLabel((photo.workTypes && photo.workTypes[0]) || photo.workType || photo.type || photo.category || "ફોટો", true)}
                               </div>
-                            </div>
+                            </button>
                           ))}
                         </div>
                         {project.photos!.length > getVisiblePhotoCount(project.id) && (
@@ -855,6 +907,82 @@ export default function AdminProjects() {
           ))
         )}
       </div>
+
+      {activeProject && activePhoto && (
+        <div
+          className="modal-overlay modal-overlay--top"
+          onClick={(event) => {
+            if (event.target === event.currentTarget) {
+              closePhotoViewer();
+            }
+          }}
+        >
+          <div
+            className="modal modal--large"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={(event) => handleTouchEnd(activePhotos, event)}
+          >
+            <div className="modal__header">
+              <h3 className="modal__title">ફોટો પ્રિવ્યુ</h3>
+              <button
+                className="btn btn-outline btn--icon"
+                onClick={closePhotoViewer}
+                aria-label="Close photo preview"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="modal__body photo-viewer">
+              <div className="photo-viewer__frame">
+                <OptimizedImage
+                  src={resolveApiAssetUrl(activePhoto.url)}
+                  alt="Project photo preview"
+                  aspectRatio="4 / 3"
+                  sizes="100vw"
+                  loading="eager"
+                  priority
+                  objectFit="contain"
+                  widthCandidates={[640, 900, 1200, 1600, 2000]}
+                />
+                <div className="photo-viewer__tag">
+                  {getWorkTypeLabel(
+                    (activePhoto.workTypes && activePhoto.workTypes[0]) ||
+                      activePhoto.workType ||
+                      activePhoto.type ||
+                      activePhoto.category ||
+                      "ફોટો",
+                    true
+                  )}
+                </div>
+                <button
+                  className="photo-viewer__delete btn btn-danger"
+                  onClick={handleViewerDelete}
+                >
+                  Delete
+                </button>
+                {activePhotos.length > 1 && (
+                  <>
+                    <button
+                      className="photo-viewer__nav photo-viewer__nav--prev"
+                      onClick={() => showPrevPhoto(activePhotos)}
+                      aria-label="Previous photo"
+                    >
+                      ‹
+                    </button>
+                    <button
+                      className="photo-viewer__nav photo-viewer__nav--next"
+                      onClick={() => showNextPhoto(activePhotos)}
+                      aria-label="Next photo"
+                    >
+                      ›
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -481,6 +481,7 @@ export default function AdminWorkers() {
         open={showTransactions}
         title="Transaction History"
         size="large"
+        overlayClassName="modal-overlay--top"
         onClose={() => {
           setShowTransactions(false);
           setEditingNoteId(null);
@@ -659,17 +660,6 @@ export default function AdminWorkers() {
                   value={paymentNoteInput}
                   onChange={(e) => setPaymentNoteInput(e.target.value)}
                   placeholder="જેમ કે એડવાન્સ ચુકવણી"
-                  className="border-border"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-secondary mb-2">
-                  ચુકવણી તારીખ
-                </label>
-                <Input
-                  type="date"
-                  value={paymentDateInput}
-                  onChange={(e) => setPaymentDateInput(e.target.value)}
                   className="border-border"
                 />
               </div>

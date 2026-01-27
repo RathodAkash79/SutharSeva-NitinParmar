@@ -5,10 +5,11 @@ interface ModalProps {
   title: string;
   onClose: () => void;
   size?: "small" | "large";
+  overlayClassName?: string;
   children: React.ReactNode;
 }
 
-export function Modal({ open, title, onClose, size, children }: ModalProps) {
+export function Modal({ open, title, onClose, size, overlayClassName, children }: ModalProps) {
   useEffect(() => {
     if (!open) return;
     const originalOverflow = document.body.style.overflow;
@@ -23,7 +24,9 @@ export function Modal({ open, title, onClose, size, children }: ModalProps) {
   const sizeClass = size ? `modal--${size}` : "";
 
   return (
-    <div className="modal-overlay" onClick={(event) => {
+    <div
+      className={`modal-overlay ${overlayClassName || ""}`}
+      onClick={(event) => {
       if (event.target === event.currentTarget) {
         onClose();
       }

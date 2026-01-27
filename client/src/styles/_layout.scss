@@ -132,6 +132,16 @@
     "main";
 }
 
+.app-shell--navless {
+  grid-template-rows: 1fr;
+  grid-template-columns: 1fr;
+  grid-template-areas: "main";
+}
+
+.app-shell--navless .app-shell__main {
+  padding: $spacing-lg;
+}
+
 .app-shell--public .app-shell__sidebar {
   display: none;
 }
