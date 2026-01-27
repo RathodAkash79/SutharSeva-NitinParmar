@@ -5,8 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Plus, Trash2, Edit2, Upload, X } from "lucide-react";
 import { subscribeToProjects, WorkProject } from "@/lib/firebase";
 import { db, auth } from "@/lib/firebase";
-import { apiUrl, optimizeImageUrl, resolveApiAssetUrl } from "@/lib/api";
+import { apiUrl, resolveApiAssetUrl } from "@/lib/api";
 import { getWorkTypeLabel, getWorkTypeOptions, resolveWorkTypeId } from "@/lib/workTypes";
+import OptimizedImage from "@/components/system/OptimizedImage";
 import {
   collection,
   addDoc,
@@ -41,6 +42,7 @@ export default function AdminProjects() {
   const [finalIncome, setFinalIncome] = useState("");
   const [savingCompletion, setSavingCompletion] = useState(false);
   const [majduriByProject, setMajduriByProject] = useState<Record<string, number>>({});
+  const [visiblePhotosByProject, setVisiblePhotosByProject] = useState<Record<string, number>>({});
 
   const workTypeOptions = getWorkTypeOptions().map((option) => option.label);
   const workTypeOptionObjects = getWorkTypeOptions();
@@ -213,6 +215,16 @@ export default function AdminProjects() {
   }, []);
 
   const getMajduriForProject = (projectId: string) => majduriByProject[projectId] || 0;
+
+  const getVisiblePhotoCount = (projectId: string) =>
+    visiblePhotosByProject[projectId] || 6;
+
+  const increaseVisiblePhotos = (projectId: string) => {
+    setVisiblePhotosByProject((prev) => ({
+      ...prev,
+      [projectId]: (prev[projectId] || 6) + 6,
+    }));
+  };
 
   const handleWorkTypeToggle = (type: string) => {
     setFormData((prev) => ({
@@ -742,27 +754,43 @@ export default function AdminProjects() {
                     )}
 
                     {(project.photos || []).length > 0 && (
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-4">
-                        {project.photos!.map((photo, idx) => (
-                          <div key={idx} className="relative group">
-                            <img
-                              src={optimizeImageUrl(resolveApiAssetUrl(photo.url), { width: 480 })}
-                              alt={`Photo ${idx + 1}`}
-                              className="w-full aspect-square object-cover rounded-lg border border-border"
-                            />
-                            <button
-                              onClick={() => handleDeletePhoto(project.id, idx)}
-                              className="absolute top-2 right-2 p-2 bg-white border border-border rounded-full shadow-sm hover:bg-background"
-                              aria-label="Delete photo"
-                            >
-                              <Trash2 className="w-4 h-4 text-danger" />
-                            </button>
-                            <div className="absolute bottom-2 left-2 text-xs bg-black/60 text-white px-2 py-1 rounded">
-                              {getWorkTypeLabel((photo.workTypes && photo.workTypes[0]) || photo.workType || photo.type || photo.category || "ફોટો", true)}
+                      <>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-4">
+                          {project.photos!.slice(0, getVisiblePhotoCount(project.id)).map((photo, idx) => (
+                            <div key={idx} className="relative group">
+                              <OptimizedImage
+                                src={resolveApiAssetUrl(photo.url)}
+                                alt={`Photo ${idx + 1}`}
+                                aspectRatio="1 / 1"
+                                sizes="(max-width: 640px) 28vw, (max-width: 1024px) 20vw, 16vw"
+                                loading={idx < 4 ? "eager" : "lazy"}
+                                priority={idx < 2}
+                                widthCandidates={[200, 320, 480, 640]}
+                              />
+                              <button
+                                onClick={() => handleDeletePhoto(project.id, idx)}
+                                className="absolute top-2 right-2 p-2 bg-white border border-border rounded-full shadow-sm hover:bg-background"
+                                aria-label="Delete photo"
+                              >
+                                <Trash2 className="w-4 h-4 text-danger" />
+                              </button>
+                              <div className="absolute bottom-2 left-2 text-xs bg-black/60 text-white px-2 py-1 rounded">
+                                {getWorkTypeLabel((photo.workTypes && photo.workTypes[0]) || photo.workType || photo.type || photo.category || "ફોટો", true)}
+                              </div>
                             </div>
+                          ))}
+                        </div>
+                        {project.photos!.length > getVisiblePhotoCount(project.id) && (
+                          <div className="d-flex justify-center mt-md">
+                            <button
+                              className="btn btn-outline"
+                              onClick={() => increaseVisiblePhotos(project.id)}
+                            >
+                              વધુ જુઓ
+                            </button>
                           </div>
-                        ))}
-                      </div>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>

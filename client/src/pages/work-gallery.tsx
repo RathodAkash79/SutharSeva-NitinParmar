@@ -3,7 +3,8 @@ import { Link } from "wouter";
 import { Input } from "@/components/ui/input";
 import { Search, MapPin, Tag } from "lucide-react";
 import { subscribeToProjects, WorkProject } from "@/lib/firebase";
-import { optimizeImageUrl, resolveApiAssetUrl } from "@/lib/api";
+import { resolveApiAssetUrl } from "@/lib/api";
+import OptimizedImage from "@/components/system/OptimizedImage";
 import {
   getWorkTypeLabel,
   getWorkTypeOptions,
@@ -26,6 +27,7 @@ export default function WorkGallery() {
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [visibleCount, setVisibleCount] = useState(12);
 
   const categories = ["બધા", ...getWorkTypeOptions().map((option) => option.label)];
 
@@ -87,6 +89,7 @@ export default function WorkGallery() {
     }
 
     setFilteredProjects(filtered);
+    setVisibleCount(12);
   }, [projects, searchTerm, selectedCategory, selectedVillage]);
 
   const getProjectBadgeLabel = (project: WorkProject) => {
@@ -106,15 +109,15 @@ export default function WorkGallery() {
       const matchingPhoto = (project.photos || []).find((photo) =>
         getPhotoWorkTypeIds(photo).some((id) => matchesWorkTypeTerm(normalizedPreferred, id))
       );
-      if (matchingPhoto) return optimizeImageUrl(resolveApiAssetUrl(matchingPhoto.url), { width: 640 });
+      if (matchingPhoto) return resolveApiAssetUrl(matchingPhoto.url);
     }
 
     // Fallback to normal behavior
     if (project.images && project.images.length > 0) {
-      return optimizeImageUrl(resolveApiAssetUrl(project.images[0]), { width: 640 });
+      return resolveApiAssetUrl(project.images[0]);
     }
     if (project.photos && project.photos.length > 0) {
-      return optimizeImageUrl(resolveApiAssetUrl(project.photos[0].url), { width: 640 });
+      return resolveApiAssetUrl(project.photos[0].url);
     }
     return "https://images.unsplash.com/photo-1533090161767-e6ffed986c88?w=500&q=80";
   };
@@ -139,7 +142,7 @@ export default function WorkGallery() {
       uniqueTypeIds.forEach((typeId) => {
         const typeLabel = getWorkTypeLabel(typeId, true);
         if (!grouped[typeLabel]) grouped[typeLabel] = [];
-        grouped[typeLabel].push(optimizeImageUrl(resolveApiAssetUrl(photo.url), { width: 520 }));
+        grouped[typeLabel].push(resolveApiAssetUrl(photo.url));
       });
     });
 
@@ -161,13 +164,6 @@ export default function WorkGallery() {
 
   const getFlatImages = (project?: WorkProject | null) => {
     return getImagesGrouped(project).flatMap((group) => group.items.map((i) => i.url));
-  };
-
-  const preloadImage = (url?: string) => {
-    if (!url) return;
-    const img = new Image();
-    img.decoding = "async";
-    img.src = url;
   };
 
   const openWork = (project: WorkProject) => {
@@ -252,19 +248,6 @@ export default function WorkGallery() {
       document.body.style.overflow = "";
     };
   }, [selectedWork, isViewerOpen]);
-
-  useEffect(() => {
-    const items = filteredProjects.slice(0, 12);
-    items.forEach((project) => {
-      preloadImage(getMainImage(project, selectedCategory !== "બધા" ? selectedCategory : searchTerm));
-    });
-  }, [filteredProjects, selectedCategory, searchTerm]);
-
-  useEffect(() => {
-    if (!selectedWork) return;
-    const images = getFlatImages(selectedWork);
-    images.slice(0, 18).forEach((url) => preloadImage(url));
-  }, [selectedWork]);
 
   return (
     <div className="app">
@@ -366,54 +349,67 @@ export default function WorkGallery() {
               </p>
             </div>
           ) : (
-            <div className="grid grid--3-col gap-lg">
-              {filteredProjects.map((project) => (
-                <div
-                  key={project.id}
-                  className="card card--interactive"
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => openWork(project)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      openWork(project);
-                    }
-                  }}
-                >
-                  <div className="work-card__media" style={{ aspectRatio: "4 / 3" }}>
-                    <img
-                      src={getMainImage(project, selectedCategory !== "બધા" ? selectedCategory : searchTerm)}
-                      alt={project.name}
-                      className="work-card__image"
-                      loading="eager"
-                      decoding="async"
-                      fetchPriority="high"
-                    />
-                    {getProjectBadgeLabel(project) && (
-                      <div className="work-card__badge">{getProjectBadgeLabel(project)}</div>
-                    )}
-                  </div>
-
-                  <div className="mt-md">
-                    <h3 className="card__title mb-xs">{project.name}</h3>
-                    <div className="d-flex items-center gap-xs text-secondary text-sm mb-sm">
-                      <MapPin className="w-4 h-4" />
-                      {project.village}
+            <>
+              <div className="grid grid--3-col gap-lg">
+                {filteredProjects.slice(0, visibleCount).map((project, index) => (
+                  <div
+                    key={project.id}
+                    className="card card--interactive"
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => openWork(project)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        openWork(project);
+                      }
+                    }}
+                  >
+                    <div className="work-card__media" style={{ aspectRatio: "4 / 3" }}>
+                      <OptimizedImage
+                        src={getMainImage(project, selectedCategory !== "બધા" ? selectedCategory : searchTerm)}
+                        alt={project.name}
+                        aspectRatio="4 / 3"
+                        sizes="(max-width: 640px) 92vw, (max-width: 1024px) 48vw, 33vw"
+                        loading={index < 6 ? "eager" : "lazy"}
+                        priority={index < 3}
+                        widthCandidates={[320, 480, 640, 900]}
+                      />
+                      {getProjectBadgeLabel(project) && (
+                        <div className="work-card__badge">{getProjectBadgeLabel(project)}</div>
+                      )}
                     </div>
-                    {project.workTypes && project.workTypes.length > 0 && (
-                      <div className="d-flex flex-wrap gap-xs">
-                        {project.workTypes.map((type) => (
-                          <span key={type} className="badge badge--primary">
-                            <Tag className="w-3 h-3" /> {getWorkTypeLabel(type, true)}
-                          </span>
-                        ))}
+
+                    <div className="mt-md">
+                      <h3 className="card__title mb-xs">{project.name}</h3>
+                      <div className="d-flex items-center gap-xs text-secondary text-sm mb-sm">
+                        <MapPin className="w-4 h-4" />
+                        {project.village}
                       </div>
-                    )}
+                      {project.workTypes && project.workTypes.length > 0 && (
+                        <div className="d-flex flex-wrap gap-xs">
+                          {project.workTypes.map((type) => (
+                            <span key={type} className="badge badge--primary">
+                              <Tag className="w-3 h-3" /> {getWorkTypeLabel(type, true)}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
+                ))}
+              </div>
+              {filteredProjects.length > visibleCount && (
+                <div className="d-flex justify-center mt-lg">
+                  <button
+                    className="btn btn-outline"
+                    onClick={() => setVisibleCount((prev) => prev + 12)}
+                  >
+                    વધુ જુઓ
+                  </button>
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           )}
         </section>
       </main>
@@ -456,12 +452,13 @@ export default function WorkGallery() {
                         className="card card--hover work-card__media"
                         style={{ aspectRatio: "1 / 1" }}
                       >
-                        <img
+                        <OptimizedImage
                           src={item.url}
                           alt={`${selectedWork.name} ફોટો ${item.index + 1}`}
-                          className="work-card__image"
+                          aspectRatio="1 / 1"
+                          sizes="(max-width: 640px) 24vw, (max-width: 1024px) 20vw, 15vw"
                           loading="lazy"
-                          decoding="async"
+                          widthCandidates={[200, 320, 480]}
                         />
                       </button>
                     ))}
@@ -483,13 +480,15 @@ export default function WorkGallery() {
               </button>
             </div>
             <div className="modal__body" onClick={showNextPhoto}>
-              <img
-                src={optimizeImageUrl(getFlatImages(selectedWork)[activePhotoIndex], { width: 1400 })}
+              <OptimizedImage
+                src={getFlatImages(selectedWork)[activePhotoIndex]}
                 alt={`${selectedWork.name} ફોટો`}
-                className="w-full h-auto object-contain"
+                aspectRatio="16 / 9"
+                sizes="100vw"
                 loading="eager"
-                decoding="async"
-                style={{ maxHeight: "70vh" }}
+                priority
+                objectFit="contain"
+                widthCandidates={[640, 900, 1200, 1600, 2000]}
               />
             </div>
           </div>

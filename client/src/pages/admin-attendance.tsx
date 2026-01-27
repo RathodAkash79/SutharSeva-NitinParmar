@@ -152,7 +152,7 @@ export default function AdminAttendance() {
   useEffect(() => {
     const unsubscribe = onSnapshot(
       query(
-        collection(db, "workerPayments"),
+        collection(db, "payments"),
         where("date", "==", selectedDate)
       ),
       (snapshot) => {

@@ -3,9 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Upload, Trash2 } from "lucide-react";
 import { subscribeToProjects, WorkProject } from "@/lib/firebase";
-import { apiUrl, optimizeImageUrl, resolveApiAssetUrl } from "@/lib/api";
+import { apiUrl, resolveApiAssetUrl } from "@/lib/api";
 import { db, auth } from "@/lib/firebase";
 import { getWorkTypeLabel, getWorkTypeOptions, resolveWorkTypeId } from "@/lib/workTypes";
+import OptimizedImage from "@/components/system/OptimizedImage";
 import {
   collection,
   updateDoc,
@@ -21,6 +22,7 @@ export default function AdminPhotos() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>(["📦 કબાટ"]);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
+  const [visibleCount, setVisibleCount] = useState(12);
 
   const categories = getWorkTypeOptions();
 
@@ -46,6 +48,7 @@ export default function AdminPhotos() {
   useEffect(() => {
     const project = projects.find((p) => p.id === selectedProjectId);
     setSelectedProject(project || null);
+    setVisibleCount(12);
   }, [selectedProjectId, projects]);
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -279,13 +282,16 @@ export default function AdminPhotos() {
             </p>
           ) : (
             <div className="grid grid-cols-3 md:grid-cols-4 gap-md">
-              {selectedProject.photos.map((photo, idx) => (
+              {selectedProject.photos.slice(0, visibleCount).map((photo, idx) => (
                 <div key={idx} className="relative card card--hover" style={{ aspectRatio: "1/1", overflow: "hidden" }}>
-                  <img
-                    src={optimizeImageUrl(resolveApiAssetUrl(photo.url), { width: 480 })}
+                  <OptimizedImage
+                    src={resolveApiAssetUrl(photo.url)}
                     alt={`Photo ${idx + 1}`}
-                    className="w-full h-auto"
-                    style={{ objectFit: "cover" }}
+                    aspectRatio="1 / 1"
+                    sizes="(max-width: 640px) 28vw, (max-width: 1024px) 20vw, 15vw"
+                    loading={idx < 6 ? "eager" : "lazy"}
+                    priority={idx < 3}
+                    widthCandidates={[200, 320, 480, 640]}
                   />
                   <button
                     onClick={() => handleDeletePhoto(idx)}
@@ -311,6 +317,16 @@ export default function AdminPhotos() {
                 </div>
               ))}
             </div>
+            {selectedProject.photos.length > visibleCount && (
+              <div className="d-flex justify-center mt-md">
+                <button
+                  className="btn btn-outline"
+                  onClick={() => setVisibleCount((prev) => prev + 12)}
+                >
+                  વધુ જુઓ
+                </button>
+              </div>
+            )}
           )}
         </div>
       )}

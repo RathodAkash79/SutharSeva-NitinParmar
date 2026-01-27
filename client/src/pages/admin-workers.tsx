@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
 import { Plus, Trash2, Edit2 } from "lucide-react";
-import { db, subscribeToProjects, WorkProject } from "@/lib/firebase";
+import { db } from "@/lib/firebase";
 import {
   collection,
   addDoc,
@@ -34,8 +34,6 @@ interface WorkerPayment {
   workerName: string;
   amount: number;
   date: string;
-  workId?: string;
-  workName?: string;
   note?: string;
   createdAt: Timestamp;
 }
@@ -63,7 +61,6 @@ export default function AdminWorkers() {
   const [paymentDateInput, setPaymentDateInput] = useState(
     new Date().toISOString().split("T")[0]
   );
-  const [paymentWorkId, setPaymentWorkId] = useState("");
   const [paymentNoteInput, setPaymentNoteInput] = useState("");
   const [detailRateInput, setDetailRateInput] = useState("");
   const [payments, setPayments] = useState<WorkerPayment[]>([]);
@@ -71,7 +68,6 @@ export default function AdminWorkers() {
   const [showTransactions, setShowTransactions] = useState(false);
   const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
   const [noteDraft, setNoteDraft] = useState("");
-  const [projects, setProjects] = useState<WorkProject[]>([]);
 
   const updateWorkerRate = async (workerId: string, dailyRate: string) => {
     const rateValue = Number.parseInt(dailyRate, 10);
@@ -120,14 +116,6 @@ export default function AdminWorkers() {
     return () => unsubscribe();
   }, []);
 
-  // Load projects for payment linking
-  useEffect(() => {
-    const unsubscribe = subscribeToProjects((loadedProjects) => {
-      setProjects(loadedProjects);
-    });
-
-    return () => unsubscribe();
-  }, []);
 
   const getWageMultiplier = (status: string) => {
     if (status === "half") return 0.5;
@@ -188,7 +176,7 @@ export default function AdminWorkers() {
     setPaymentsLoading(true);
 
     const paymentsQuery = query(
-      collection(db, "workerPayments"),
+      collection(db, "payments"),
       where("workerId", "==", detailWorker.id)
     );
 
@@ -202,8 +190,6 @@ export default function AdminWorkers() {
           workerName: data.workerName,
           amount: data.amount || 0,
           date: data.date || "",
-          workId: data.workId || "",
-          workName: data.workName || "",
           note: data.note || "",
           createdAt: data.createdAt || Timestamp.now(),
         });
@@ -226,7 +212,6 @@ export default function AdminWorkers() {
     setDetailRateInput(worker.dailyWage?.toString() || "");
     setPaymentAmountInput("");
     setPaymentDateInput(new Date().toISOString().split("T")[0]);
-    setPaymentWorkId("");
     setPaymentNoteInput("");
     await loadWorkerStats(worker, payments);
   };
@@ -258,23 +243,23 @@ export default function AdminWorkers() {
       alert("ચુકવણી રકમ દાખલ કરો");
       return;
     }
+    if (!paymentDateInput) {
+      alert("ચુકવણી તારીખ પસંદ કરો");
+      return;
+    }
 
     try {
-      const work = projects.find((project) => project.id === paymentWorkId);
-      await addDoc(collection(db, "workerPayments"), {
+      await addDoc(collection(db, "payments"), {
         workerId: detailWorker.id,
         workerName: detailWorker.name,
         amount: amountValue,
         date: paymentDateInput,
-        workId: paymentWorkId || "",
-        workName: work?.name || "",
         note: paymentNoteInput || "",
         createdAt: Timestamp.now(),
       });
 
       setPaymentAmountInput("");
       setPaymentNoteInput("");
-      setPaymentWorkId("");
       alert("ચુકવણી સાચવાઈ ગઈ");
     } catch (error) {
       console.error("Error saving worker payment:", error);
@@ -284,7 +269,7 @@ export default function AdminWorkers() {
 
   const handleSaveNote = async (paymentId: string) => {
     try {
-      await updateDoc(doc(db, "workerPayments", paymentId), {
+      await updateDoc(doc(db, "payments", paymentId), {
         note: noteDraft,
       });
       setEditingNoteId(null);
@@ -522,6 +507,7 @@ export default function AdminWorkers() {
                     </div>
                     <div className="text-xs text-secondary text-right">
                       <p>{payment.workName || "—"}</p>
+                                          <p>ચુકવણી</p>
                     </div>
                   </div>
 
@@ -585,7 +571,6 @@ export default function AdminWorkers() {
           setDetailWorker(null);
           setPaymentAmountInput("");
           setPaymentDateInput(new Date().toISOString().split("T")[0]);
-          setPaymentWorkId("");
           setPaymentNoteInput("");
           setDetailRateInput("");
           setDetailStats({ totalHajri: 0, totalEarned: 0, paidAmount: 0, remaining: 0 });
@@ -667,23 +652,6 @@ export default function AdminWorkers() {
               </div>
               <div>
                 <label className="block text-sm font-semibold text-secondary mb-2">
-                  કામ પસંદ કરો
-                </label>
-                <select
-                  value={paymentWorkId}
-                  onChange={(e) => setPaymentWorkId(e.target.value)}
-                  className="w-full px-3 py-2 border border-border rounded-lg text-secondary"
-                >
-                  <option value="">-- કામ પસંદ કરો --</option>
-                  {projects.map((project) => (
-                    <option key={project.id} value={project.id}>
-                      {project.name} ({project.village})
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-semibold text-secondary mb-2">
                   નોટ (વૈકલ્પિક)
                 </label>
                 <Input
@@ -691,6 +659,17 @@ export default function AdminWorkers() {
                   value={paymentNoteInput}
                   onChange={(e) => setPaymentNoteInput(e.target.value)}
                   placeholder="જેમ કે એડવાન્સ ચુકવણી"
+                  className="border-border"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-secondary mb-2">
+                  ચુકવણી તારીખ
+                </label>
+                <Input
+                  type="date"
+                  value={paymentDateInput}
+                  onChange={(e) => setPaymentDateInput(e.target.value)}
                   className="border-border"
                 />
               </div>
@@ -725,7 +704,6 @@ export default function AdminWorkers() {
                     setDetailWorker(null);
                     setPaymentAmountInput("");
                     setPaymentDateInput(new Date().toISOString().split("T")[0]);
-                    setPaymentWorkId("");
                     setPaymentNoteInput("");
                     setDetailRateInput("");
                     setDetailStats({ totalHajri: 0, totalEarned: 0, paidAmount: 0, remaining: 0 });

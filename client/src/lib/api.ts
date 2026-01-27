@@ -23,7 +23,13 @@ export function resolveApiAssetUrl(url: string): string {
   if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:")) {
     return url;
   }
-  if (!API_BASE_URL) return url;
+  if (!API_BASE_URL) {
+    if (typeof window !== "undefined") {
+      const normalizedPath = url.startsWith("/") ? url : `/${url}`;
+      return `${window.location.origin}${normalizedPath}`;
+    }
+    return url;
+  }
   const normalizedPath = url.startsWith("/") ? url : `/${url}`;
   return `${API_BASE_URL}${normalizedPath}`;
 }
@@ -33,8 +39,8 @@ export function optimizeImageUrl(
   options: { width?: number; quality?: number } = {}
 ): string {
   if (!url) return url;
-  const width = options.width || 800;
-  const quality = options.quality || 60;
+  const width = options.width || 900;
+  const quality = options.quality || 70;
 
   if (!url.includes("res.cloudinary.com") || !url.includes("/upload/")) {
     return url;

@@ -710,6 +710,45 @@
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// OPTIMIZED IMAGE
+// ─────────────────────────────────────────────────────────────────────────────
+
+.optimized-image {
+  position: relative;
+  width: 100%;
+  border-radius: $border-radius-lg;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  contain: layout paint;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: inherit;
+    background-size: cover;
+    background-position: center;
+    filter: blur(12px);
+    transform: scale(1.1);
+  }
+}
+
+.optimized-image__img {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity $transition-base;
+  image-rendering: auto;
+  display: block;
+
+  &.is-loaded {
+    opacity: 1;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // WORK CARD MEDIA
 // ─────────────────────────────────────────────────────────────────────────────
 
