@@ -3,15 +3,18 @@ import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
 import { Plus, Trash2, Edit2, Upload, X } from "lucide-react";
-import { subscribeToProjects, loadProjects, WorkProject } from "@/lib/firebase";
+import { subscribeToProjects, WorkProject } from "@/lib/firebase";
 import { db, auth } from "@/lib/firebase";
-import { apiUrl, resolveApiAssetUrl } from "@/lib/api";
+import { apiUrl, optimizeImageUrl, resolveApiAssetUrl } from "@/lib/api";
+import { getWorkTypeLabel, getWorkTypeOptions, resolveWorkTypeId } from "@/lib/workTypes";
 import {
   collection,
   addDoc,
   updateDoc,
   deleteDoc,
   doc,
+  onSnapshot,
+  query,
   Timestamp,
 } from "firebase/firestore";
 
@@ -23,34 +26,32 @@ export default function AdminProjects() {
   const [uploading, setUploading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
-  const [selectedPhotoCategory, setSelectedPhotoCategory] = useState("📦 કબાટ");
+  const [selectedPhotoCategories, setSelectedPhotoCategories] = useState<string[]>(["📦 કબાટ"]);
   const [formData, setFormData] = useState({
     name: "",
     village: "",
     workTypes: [] as string[],
     totalAmount: "",
     status: "Ongoing",
+    startDate: "",
+    expectedEndDate: "",
   });
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [completionProject, setCompletionProject] = useState<WorkProject | null>(null);
+  const [finalIncome, setFinalIncome] = useState("");
+  const [savingCompletion, setSavingCompletion] = useState(false);
+  const [majduriByProject, setMajduriByProject] = useState<Record<string, number>>({});
 
-  const workTypeOptions = [
-    "🚪 દરવાજા",
-    "🪟 બારી",
-    "🪑 ફર્નિચર",
-    "🧥 અલમારી",
-    "📦 કબાટ",
-    "🗄️ શો-કેસ",
-    "📺 TV યુનિટ",
-    "🛋️ સોફા",
-    "🛕 મંદિર",
-    "🛏️ પલંગ",
-    "📚 સ્ટડી ટેબલ",
-    "🪞 કાચ",
-    "💄 ડ્રેસિંગ ટેબલ",
-    "❄️ AC પેનલિંગ",
-    "🍳 રસોડું",
-    "✨ અન્ય",
-  ];
+  const workTypeOptions = getWorkTypeOptions().map((option) => option.label);
+  const workTypeOptionObjects = getWorkTypeOptions();
+
+  const handlePhotoCategoryToggle = (category: string) => {
+    setSelectedPhotoCategories((prev) =>
+      prev.includes(category)
+        ? prev.filter((item) => item !== category)
+        : [...prev, category]
+    );
+  };
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
@@ -64,6 +65,11 @@ export default function AdminProjects() {
       return;
     }
 
+    if (selectedPhotoCategories.length === 0) {
+      alert("કૃપા કરીને કામનો પ્રકાર પસંદ કરો");
+      return;
+    }
+
     setUploading(true);
     try {
       const idToken = await auth.currentUser?.getIdToken();
@@ -71,7 +77,7 @@ export default function AdminProjects() {
 
       const payload = new FormData();
       payload.append("image", imageFile);
-      payload.append("category", selectedPhotoCategory);
+      payload.append("category", selectedPhotoCategories[0]);
 
       const uploadResponse = await fetch(apiUrl("/api/upload"), {
         method: "POST",
@@ -100,10 +106,16 @@ export default function AdminProjects() {
       if (!project) throw new Error("પ્રોજેક્ટ મળ્યો નહીં");
 
       const projectRef = doc(db, "projects", projectId);
+      const workTypeIds = selectedPhotoCategories
+        .map((category) => resolveWorkTypeId(category) || "other")
+        .filter(Boolean);
       const newPhoto = {
         url: imageUrl,
-        category: selectedPhotoCategory,
-        type: selectedPhotoCategory,
+        // Store workType for consistent search + preview across UI
+        workTypes: workTypeIds,
+        workType: selectedPhotoCategories[0],
+        category: selectedPhotoCategories[0],
+        type: selectedPhotoCategories[0],
       };
 
       const currentPhotos = project.photos || [];
@@ -116,7 +128,7 @@ export default function AdminProjects() {
       setImageFile(null);
       setImagePreview("");
       setUploadingPhotoForId(null);
-      setSelectedPhotoCategory("📦 કબાટ");
+      setSelectedPhotoCategories(["📦 કબાટ"]);
     } catch (error: any) {
       console.error("❌ Upload error:", error);
       alert(`ભૂલ: ${error.message || "Upload failed"}`);
@@ -137,9 +149,34 @@ export default function AdminProjects() {
         (_, idx) => idx !== photoIndex
       );
 
+      setProjects((prev) =>
+        prev.map((p) =>
+          p.id === projectId ? { ...p, photos: updatedPhotos } : p
+        )
+      );
+
       await updateDoc(projectRef, {
         photos: updatedPhotos,
       });
+
+      const targetPhoto = (project.photos || [])[photoIndex];
+      if (targetPhoto?.url) {
+        try {
+          const idToken = await auth.currentUser?.getIdToken();
+          if (idToken) {
+            await fetch(apiUrl("/api/upload/delete"), {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${idToken}`,
+              },
+              body: JSON.stringify({ url: targetPhoto.url }),
+            });
+          }
+        } catch (error) {
+          console.warn("Image delete API failed:", error);
+        }
+      }
 
       alert("ફોટો હટાવવામાં આવ્યો");
     } catch (error) {
@@ -157,6 +194,25 @@ export default function AdminProjects() {
 
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    const attendanceQuery = query(collection(db, "attendance"));
+    const unsubscribe = onSnapshot(attendanceQuery, (snapshot) => {
+      const totals: Record<string, number> = {};
+      snapshot.forEach((docSnap) => {
+        const data = docSnap.data() as any;
+        const projectId = data.projectId as string | undefined;
+        const amount = typeof data.amount === "number" ? data.amount : 0;
+        if (!projectId) return;
+        totals[projectId] = (totals[projectId] || 0) + amount;
+      });
+      setMajduriByProject(totals);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const getMajduriForProject = (projectId: string) => majduriByProject[projectId] || 0;
 
   const handleWorkTypeToggle = (type: string) => {
     setFormData((prev) => ({
@@ -185,6 +241,8 @@ export default function AdminProjects() {
           workTypes: formData.workTypes,
           totalAmount: parseInt(formData.totalAmount) || 0,
           status: formData.status,
+          startDate: formData.startDate || "",
+          expectedEndDate: formData.expectedEndDate || "",
         });
         alert("પ્રોજેક્ટ અપડેટ થયો");
       } else {
@@ -195,6 +253,8 @@ export default function AdminProjects() {
           workTypes: formData.workTypes,
           totalAmount: parseInt(formData.totalAmount) || 0,
           status: formData.status,
+          startDate: formData.startDate || "",
+          expectedEndDate: formData.expectedEndDate || "",
           images: [],
           photos: [],
           createdAt: Timestamp.now(),
@@ -209,6 +269,8 @@ export default function AdminProjects() {
         workTypes: [],
         totalAmount: "",
         status: "Ongoing",
+        startDate: "",
+        expectedEndDate: "",
       });
       setEditingId(null);
       setShowForm(false);
@@ -225,6 +287,8 @@ export default function AdminProjects() {
       workTypes: project.workTypes,
       totalAmount: project.totalAmount.toString(),
       status: project.status,
+      startDate: project.startDate || "",
+      expectedEndDate: project.expectedEndDate || "",
     });
     setEditingId(project.id);
     setShowForm(true);
@@ -239,6 +303,32 @@ export default function AdminProjects() {
     } catch (error) {
       console.error("Error deleting project:", error);
       alert("ભૂલ આવી");
+    }
+  };
+
+  const handleCompleteProject = async () => {
+    if (!completionProject) return;
+    if (!finalIncome || isNaN(Number(finalIncome))) {
+      alert("કૃપા કરીને અંતિમ આવક દાખલ કરો");
+      return;
+    }
+
+    setSavingCompletion(true);
+    try {
+      const projectRef = doc(db, "projects", completionProject.id);
+      await updateDoc(projectRef, {
+        status: "Completed",
+        finalAmount: Number(finalIncome),
+        completedAt: Timestamp.now(),
+      });
+      alert("પ્રોજેક્ટ પૂર્ણ થયો તરીકે સાચવાયું");
+      setCompletionProject(null);
+      setFinalIncome("");
+    } catch (error) {
+      console.error("Error completing project:", error);
+      alert("ભૂલ આવી. ફરી પ્રયાસ કરો.");
+    } finally {
+      setSavingCompletion(false);
     }
   };
 
@@ -264,6 +354,8 @@ export default function AdminProjects() {
               workTypes: [],
               totalAmount: "",
               status: "Ongoing",
+              startDate: "",
+              expectedEndDate: "",
             });
           }}
           className="bg-primary text-white hover:bg-primary-dark"
@@ -283,7 +375,8 @@ export default function AdminProjects() {
           setEditingId(null);
         }}
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold text-secondary mb-2">
                 પ્રોજેક્ટ નામ
@@ -316,24 +409,30 @@ export default function AdminProjects() {
 
             <div>
               <label className="block text-sm font-semibold text-secondary mb-2">
-                કામના પ્રકાર (બહુવિધ પસંદ કરો)
+                શરૂ તારીખ
               </label>
-              <div className="grid grid-cols-2 gap-2">
-                {workTypeOptions.map((type) => (
-                  <label
-                    key={type}
-                    className="flex items-center gap-2 p-2 rounded border border-border cursor-pointer hover:bg-background"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={formData.workTypes.includes(type)}
-                      onChange={() => handleWorkTypeToggle(type)}
-                      className="w-4 h-4"
-                    />
-                    <span className="text-sm text-secondary">{type}</span>
-                  </label>
-                ))}
-              </div>
+              <Input
+                type="date"
+                value={formData.startDate}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, startDate: e.target.value }))
+                }
+                className="border-border"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-secondary mb-2">
+                અંદાજિત અંત તારીખ
+              </label>
+              <Input
+                type="date"
+                value={formData.expectedEndDate}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, expectedEndDate: e.target.value }))
+                }
+                className="border-border"
+              />
             </div>
 
             <div>
@@ -355,37 +454,106 @@ export default function AdminProjects() {
               <label className="block text-sm font-semibold text-secondary mb-2">
                 સ્થિતિ
               </label>
-              <select
-                value={formData.status}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, status: e.target.value as any }))
-                }
-                className="w-full px-3 py-2 border border-border rounded-lg text-secondary"
-              >
-                <option value="Ongoing">ચાલુ</option>
-                <option value="Completed">પૂર્ણ</option>
-              </select>
+              <div className="w-full px-3 py-2 border border-border rounded-lg text-secondary bg-background">
+                {formData.status === "Completed" ? "પૂર્ણ" : "ચાલુ"}
+              </div>
             </div>
+          </div>
 
-            <div className="flex gap-2">
-              <Button
-                type="submit"
-                className="bg-primary text-white hover:bg-primary-dark"
-              >
-                સાચવો
-              </Button>
-              <Button
-                type="button"
-                onClick={() => {
-                  setShowForm(false);
-                  setEditingId(null);
-                }}
-                className="bg-gray-200 text-secondary hover:bg-gray-300"
-              >
-                રદ કરો
-              </Button>
+          <div>
+            <label className="block text-sm font-semibold text-secondary mb-2">
+              કામના પ્રકાર (બહુવિધ પસંદ કરો)
+            </label>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+              {workTypeOptions.map((type) => (
+                <label
+                  key={type}
+                  className="flex items-center gap-2 p-2 rounded border border-border cursor-pointer hover:bg-background"
+                >
+                  <input
+                    type="checkbox"
+                    checked={formData.workTypes.includes(type)}
+                    onChange={() => handleWorkTypeToggle(type)}
+                    className="w-4 h-4"
+                  />
+                  <span className="text-sm text-secondary">{type}</span>
+                </label>
+              ))}
             </div>
+          </div>
+
+          <div className="flex flex-wrap gap-2 justify-end">
+            <Button
+              type="button"
+              onClick={() => {
+                setShowForm(false);
+                setEditingId(null);
+              }}
+              className="bg-gray-200 text-secondary hover:bg-gray-300"
+            >
+              રદ કરો
+            </Button>
+            <Button
+              type="submit"
+              className="bg-primary text-white hover:bg-primary-dark"
+            >
+              સાચવો
+            </Button>
+          </div>
         </form>
+      </Modal>
+
+      {/* Completion Modal */}
+      <Modal
+        open={!!completionProject}
+        title="પ્રોજેક્ટ પૂર્ણ કરો"
+        onClose={() => {
+          setCompletionProject(null);
+          setFinalIncome("");
+        }}
+      >
+        <div className="space-y-4">
+          <div className="rounded-lg bg-background border border-border p-4">
+            <p className="text-sm text-secondary">પ્રોજેક્ટ</p>
+            <p className="text-lg font-semibold text-primary-dark">
+              {completionProject?.name}
+            </p>
+            <p className="text-sm text-secondary">📍 {completionProject?.village}</p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-secondary mb-2">
+              અંતિમ આવક (ડિસ્કાઉન્ટ બાદ) ₹
+            </label>
+            <Input
+              type="number"
+              value={finalIncome}
+              onChange={(e) => setFinalIncome(e.target.value)}
+              placeholder="દા.ત. 125000"
+              className="border-border"
+            />
+          </div>
+
+          <div className="flex flex-wrap gap-2 justify-end">
+            <Button
+              type="button"
+              onClick={() => {
+                setCompletionProject(null);
+                setFinalIncome("");
+              }}
+              className="bg-gray-200 text-secondary hover:bg-gray-300"
+            >
+              રદ કરો
+            </Button>
+            <Button
+              onClick={handleCompleteProject}
+              disabled={savingCompletion}
+              className="bg-success text-white hover:bg-success-dark"
+            >
+              {savingCompletion ? "સાચવી રહ્યું છે..." : "પૂર્ણ કરો"}
+            </Button>
+          </div>
+        </div>
       </Modal>
 
       {/* Projects List */}
@@ -402,13 +570,25 @@ export default function AdminProjects() {
             >
               {/* Project Header */}
               <div className="p-4 border-b border-border">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-bold text-primary-dark mb-1">
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div className="flex-1 min-w-[220px]">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                          project.status === "Completed"
+                            ? "bg-[#e6f4ea] text-[#2f855a]"
+                            : "bg-[#fff7e6] text-[#b7791f]"
+                        }`}
+                      >
+                        {project.status === "Completed" ? "પૂર્ણ" : "ચાલુ"}
+                      </span>
+                      <p className="text-xs text-secondary">#{project.id.slice(0, 6)}</p>
+                    </div>
+                    <h3 className="text-xl font-bold text-primary-dark mb-1">
                       {project.name}
                     </h3>
                     <p className="text-sm text-secondary mb-2">📍 {project.village}</p>
-                    <div className="flex flex-wrap gap-2 mb-2">
+                    <div className="flex flex-wrap gap-2">
                       {project.workTypes?.map((type) => (
                         <span
                           key={type}
@@ -418,20 +598,32 @@ export default function AdminProjects() {
                         </span>
                       ))}
                     </div>
-                    <p className="text-sm font-semibold text-primary">
-                      ₹{project.totalAmount.toLocaleString("en-IN")}
-                    </p>
+                    <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-secondary">
+                      {project.startDate && <span>શરૂ: {project.startDate}</span>}
+                      {project.expectedEndDate && <span>અંત: {project.expectedEndDate}</span>}
+                    </div>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
+                    {project.status !== "Completed" && (
+                      <button
+                        onClick={() => {
+                          setCompletionProject(project);
+                          setFinalIncome(project.totalAmount.toString());
+                        }}
+                        className="px-3 py-2 rounded-lg bg-success text-white text-xs font-semibold hover:bg-success-dark"
+                      >
+                        પ્રોજેક્ટ પૂર્ણ કરો
+                      </button>
+                    )}
                     <button
                       onClick={() => handleEdit(project)}
-                      className="p-2 hover:bg-background rounded transition"
+                      className="p-2 border border-border rounded-lg hover:bg-background"
                     >
                       <Edit2 className="w-4 h-4 text-secondary" />
                     </button>
                     <button
                       onClick={() => handleDelete(project.id)}
-                      className="p-2 hover:bg-background rounded transition"
+                      className="p-2 border border-border rounded-lg hover:bg-background"
                     >
                       <Trash2 className="w-4 h-4 text-danger" />
                     </button>
@@ -439,103 +631,181 @@ export default function AdminProjects() {
                 </div>
               </div>
 
-              {/* Photo Upload Section */}
-              <div className="p-4 bg-background border-b border-border">
-                {uploadingPhotoForId === project.id ? (
-                  <div className="space-y-4">
-                    <h4 className="font-semibold text-secondary">ફોટો અપલોડ કરો</h4>
-
-                    {imagePreview && (
-                      <div className="relative w-full h-40 bg-border rounded-lg overflow-hidden">
-                        <img
-                          src={imagePreview}
-                          alt="Preview"
-                          className="w-full h-full object-contain"
-                        />
+              <div className="project-card__sections">
+                {/* Details + Photos */}
+                <div className="project-card__section project-card__section--primary">
+                  <div className="project-card__block">
+                    <h4 className="font-semibold text-primary-dark mb-3">કામની માહિતી</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-secondary">
+                      <div>
+                        <p className="text-xs text-muted">પ્રોજેક્ટ નામ</p>
+                        <p className="font-semibold text-primary-dark">{project.name}</p>
                       </div>
-                    )}
-
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageSelect}
-                      className="w-full px-3 py-2 border border-border rounded-lg"
-                    />
-
-                    <select
-                      value={selectedPhotoCategory}
-                      onChange={(e) => setSelectedPhotoCategory(e.target.value)}
-                      className="w-full px-3 py-2 border border-border rounded-lg text-secondary"
-                    >
-                      {workTypeOptions.map((cat) => (
-                        <option key={cat} value={cat}>
-                          {cat}
-                        </option>
-                      ))}
-                    </select>
-
-                    <div className="flex gap-2">
-                      <Button
-                        onClick={() => handleUploadPhoto(project.id)}
-                        disabled={!imageFile || uploading}
-                        className="flex-1 bg-primary text-white hover:bg-primary-dark"
-                      >
-                        <Upload className="w-4 h-4 mr-2" />
-                        {uploading ? "અપલોડ થઈ રહ્યું..." : "અપલોડ કરો"}
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          setUploadingPhotoForId(null);
-                          setImageFile(null);
-                          setImagePreview("");
-                        }}
-                        className="flex-1 bg-gray-200 text-secondary hover:bg-gray-300"
-                      >
-                        <X className="w-4 h-4" />
-                      </Button>
+                      <div>
+                        <p className="text-xs text-muted">ગામ</p>
+                        <p className="font-semibold text-primary-dark">{project.village}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted">શરૂ તારીખ</p>
+                        <p className="font-semibold text-primary-dark">{project.startDate || "-"}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted">અંત તારીખ</p>
+                        <p className="font-semibold text-primary-dark">{project.expectedEndDate || "-"}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted">કુલ મજૂરી</p>
+                        <p className="font-semibold text-primary-dark">
+                          ₹{getMajduriForProject(project.id).toLocaleString("en-IN")}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                ) : (
-                  <Button
-                    onClick={() => setUploadingPhotoForId(project.id)}
-                    className="w-full bg-success text-white hover:bg-success-dark"
-                  >
-                    <Upload className="w-4 h-4 mr-2" />
-                    ફોટો અપલોડ કરો ({(project.photos || []).length})
-                  </Button>
-                )}
-              </div>
 
-              {/* Photos Grid */}
-              {(project.photos || []).length > 0 && (
-                <div className="p-4">
-                  <h4 className="font-semibold text-secondary mb-3">
-                    ફોટો ({project.photos!.length})
-                  </h4>
-                  <div className="grid grid-cols-3 gap-2">
-                    {project.photos!.map((photo, idx) => (
-                      <div key={idx} className="relative group">
-                          <img
-                            src={resolveApiAssetUrl(photo.url)}
-                          alt={`Photo ${idx + 1}`}
-                          className="w-full aspect-square object-cover rounded-lg"
+                  <div className="project-card__block">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="font-semibold text-primary-dark">ફોટો</h4>
+                      <span className="text-xs text-secondary">{(project.photos || []).length} ફોટા</span>
+                    </div>
+
+                    {uploadingPhotoForId === project.id ? (
+                      <div className="space-y-4">
+                        {imagePreview && (
+                          <div className="relative w-full h-40 bg-border rounded-lg overflow-hidden">
+                            <img
+                              src={imagePreview}
+                              alt="Preview"
+                              className="w-full h-auto object-contain"
+                            />
+                          </div>
+                        )}
+
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageSelect}
+                          className="w-full px-3 py-2 border border-border rounded-lg"
                         />
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition rounded-lg flex items-center justify-center">
-                          <button
-                            onClick={() => handleDeletePhoto(project.id, idx)}
-                            className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+
+                        <div>
+                          <p className="text-sm font-semibold text-secondary mb-2">
+                            કામનો પ્રકાર (બહુવિધ પસંદ કરો)
+                          </p>
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                            {workTypeOptionObjects.map((cat) => (
+                              <label
+                                key={cat.id}
+                                className="flex items-center gap-2 p-2 rounded border border-border cursor-pointer hover:bg-background"
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={selectedPhotoCategories.includes(cat.label)}
+                                  onChange={() => handlePhotoCategoryToggle(cat.label)}
+                                  className="w-4 h-4"
+                                />
+                                <span className="text-sm text-secondary">{cat.label}</span>
+                              </label>
+                            ))}
+                          </div>
                         </div>
-                        <div className="absolute bottom-1 left-1 text-xs bg-black/60 text-white px-2 py-1 rounded">
-                          {photo.category?.replace(/^[^\s]*\s/, "") || "ફોટો"}
+
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={() => handleUploadPhoto(project.id)}
+                            disabled={!imageFile || uploading}
+                            className="flex-1 bg-primary text-white hover:bg-primary-dark"
+                          >
+                            <Upload className="w-4 h-4 mr-2" />
+                            {uploading ? "અપલોડ થઈ રહ્યું..." : "અપલોડ કરો"}
+                          </Button>
+                          <Button
+                            onClick={() => {
+                              setUploadingPhotoForId(null);
+                              setImageFile(null);
+                              setImagePreview("");
+                              setSelectedPhotoCategories(["📦 કબાટ"]);
+                            }}
+                            className="flex-1 bg-gray-200 text-secondary hover:bg-gray-300"
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
                         </div>
                       </div>
-                    ))}
+                    ) : (
+                      <Button
+                        onClick={() => setUploadingPhotoForId(project.id)}
+                        className="w-full bg-success text-white hover:bg-success-dark"
+                      >
+                        <Upload className="w-4 h-4 mr-2" />
+                        ફોટો અપલોડ કરો
+                      </Button>
+                    )}
+
+                    {(project.photos || []).length > 0 && (
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-4">
+                        {project.photos!.map((photo, idx) => (
+                          <div key={idx} className="relative group">
+                            <img
+                              src={optimizeImageUrl(resolveApiAssetUrl(photo.url), { width: 480 })}
+                              alt={`Photo ${idx + 1}`}
+                              className="w-full aspect-square object-cover rounded-lg border border-border"
+                            />
+                            <button
+                              onClick={() => handleDeletePhoto(project.id, idx)}
+                              className="absolute top-2 right-2 p-2 bg-white border border-border rounded-full shadow-sm hover:bg-background"
+                              aria-label="Delete photo"
+                            >
+                              <Trash2 className="w-4 h-4 text-danger" />
+                            </button>
+                            <div className="absolute bottom-2 left-2 text-xs bg-black/60 text-white px-2 py-1 rounded">
+                              {getWorkTypeLabel((photo.workTypes && photo.workTypes[0]) || photo.workType || photo.type || photo.category || "ફોટો", true)}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
-              )}
+
+                {/* Financial Summary */}
+                <div className="project-card__section project-card__section--finance">
+                  <h4 className="font-semibold text-primary-dark mb-4">ફાઇનાન્સ સંક્ષેપ</h4>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex items-center justify-between">
+                      <span className="text-secondary">કુલ અંદાજિત રકમ</span>
+                      <span className="font-semibold text-primary-dark">₹{project.totalAmount.toLocaleString("en-IN")}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-secondary">મજૂરી (હાજરી આધારે)</span>
+                      <span className="font-semibold text-primary-dark">₹{getMajduriForProject(project.id).toLocaleString("en-IN")}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-secondary">અંતિમ આવક</span>
+                      <span className="font-semibold text-primary-dark">
+                        {project.status === "Completed"
+                          ? `₹${(project.finalAmount || 0).toLocaleString("en-IN")}`
+                          : "₹0"}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between border-t border-border pt-3">
+                      <span className="text-secondary">નફો</span>
+                      <span
+                        className={`font-semibold ${
+                          project.status === "Completed"
+                            ? (project.finalAmount || 0) - getMajduriForProject(project.id) >= 0
+                              ? "text-success"
+                              : "text-danger"
+                            : "text-secondary"
+                        }`}
+                      >
+                        {project.status === "Completed"
+                          ? `₹${((project.finalAmount || 0) - getMajduriForProject(project.id)).toLocaleString("en-IN")}`
+                          : "—"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           ))
         )}

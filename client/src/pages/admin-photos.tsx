@@ -3,8 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Upload, Trash2 } from "lucide-react";
 import { subscribeToProjects, WorkProject } from "@/lib/firebase";
-import { apiUrl, resolveApiAssetUrl } from "@/lib/api";
+import { apiUrl, optimizeImageUrl, resolveApiAssetUrl } from "@/lib/api";
 import { db, auth } from "@/lib/firebase";
+import { getWorkTypeLabel, getWorkTypeOptions, resolveWorkTypeId } from "@/lib/workTypes";
 import {
   collection,
   updateDoc,
@@ -17,28 +18,19 @@ export default function AdminPhotos() {
   const [selectedProject, setSelectedProject] = useState<WorkProject | null>(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState("কাবাট");
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(["📦 કબાટ"]);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
 
-  const categories = [
-    "📦 કબાટ",
-    "🚪 દરવાજા",
-    "🪟 બારી",
-    "🪑 ફર્નિચર",
-    "🧥 અલમારી",
-    "🗄️ શો-કેસ",
-    "📺 TV યુનિટ",
-    "🛋️ સોફા",
-    "🛕 મંદિર",
-    "🛏️ પલંગ",
-    "📚 સ્ટડી ટેબલ",
-    "🪞 કાચ",
-    "💄 ડ્રેસિંગ ટેબલ",
-    "❄️ AC પેનલિંગ",
-    "🍳 રસોડું",
-    "✨ અન્ય",
-  ];
+  const categories = getWorkTypeOptions();
+
+  const handleCategoryToggle = (category: string) => {
+    setSelectedCategories((prev) =>
+      prev.includes(category)
+        ? prev.filter((item) => item !== category)
+        : [...prev, category]
+    );
+  };
 
   // Load projects
   useEffect(() => {
@@ -74,6 +66,11 @@ export default function AdminPhotos() {
       return;
     }
 
+    if (selectedCategories.length === 0) {
+      alert("કૃપા કરીને કામનો પ્રકાર પસંદ કરો");
+      return;
+    }
+
     setUploading(true);
     try {
       const idToken = await auth.currentUser?.getIdToken();
@@ -81,7 +78,7 @@ export default function AdminPhotos() {
 
       const payload = new FormData();
       payload.append("image", imageFile);
-      payload.append("category", selectedCategory);
+      payload.append("category", selectedCategories[0]);
 
       const uploadResponse = await fetch(apiUrl("/api/upload"), {
         method: "POST",
@@ -101,10 +98,16 @@ export default function AdminPhotos() {
 
       // Update Firestore with the new photo
       const projectRef = doc(db, "projects", selectedProject.id);
+      const workTypeIds = selectedCategories
+        .map((category) => resolveWorkTypeId(category) || "other")
+        .filter(Boolean);
       const newPhoto = {
         url: imageUrl,
-        category: selectedCategory,
-        type: selectedCategory,
+        // Store workType for consistent search + preview across UI
+        workTypes: workTypeIds,
+        workType: selectedCategories[0],
+        category: selectedCategories[0],
+        type: selectedCategories[0],
       };
 
       const currentPhotos = selectedProject.photos || [];
@@ -115,7 +118,7 @@ export default function AdminPhotos() {
       alert("ફોટો સફળતાથી અપલોડ થયો!");
       setImageFile(null);
       setImagePreview("");
-      setSelectedCategory("📦 કબાટ");
+      setSelectedCategories(["📦 કબાટ"]);
     } catch (error: any) {
       console.error("Upload error:", error);
       alert(`ભૂલ: ${error.message}`);
@@ -134,9 +137,32 @@ export default function AdminPhotos() {
         (_, idx) => idx !== photoIndex
       );
 
+      setSelectedProject((prev) =>
+        prev ? { ...prev, photos: updatedPhotos } : prev
+      );
+
       await updateDoc(projectRef, {
         photos: updatedPhotos,
       });
+
+      const targetPhoto = (selectedProject.photos || [])[photoIndex];
+      if (targetPhoto?.url) {
+        try {
+          const idToken = await auth.currentUser?.getIdToken();
+          if (idToken) {
+            await fetch(apiUrl("/api/upload/delete"), {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${idToken}`,
+              },
+              body: JSON.stringify({ url: targetPhoto.url }),
+            });
+          }
+        } catch (error) {
+          console.warn("Image delete API failed:", error);
+        }
+      }
 
       alert("ફોટો હટાવવામાં આવ્યો");
     } catch (error) {
@@ -185,7 +211,7 @@ export default function AdminPhotos() {
             {/* Image Preview */}
             {imagePreview && (
               <div className="card" style={{ minHeight: "200px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <img src={imagePreview} alt="Preview" className="w-full h-full" style={{ objectFit: "contain" }} />
+                <img src={imagePreview} alt="Preview" className="w-full h-auto" style={{ objectFit: "contain" }} />
               </div>
             )}
 
@@ -205,21 +231,23 @@ export default function AdminPhotos() {
 
             {/* Category Selection */}
             <div className="form__group">
-              <label className="form__label" htmlFor="category-select">
-                કામનો પ્રકાર
-              </label>
-              <select
-                id="category-select"
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="input"
-              >
+              <label className="form__label">કામનો પ્રકાર (બહુવિધ પસંદ કરો)</label>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                 {categories.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
+                  <label
+                    key={cat.id}
+                    className="flex items-center gap-2 p-2 rounded border border-border cursor-pointer hover:bg-background"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedCategories.includes(cat.label)}
+                      onChange={() => handleCategoryToggle(cat.label)}
+                      className="w-4 h-4"
+                    />
+                    <span className="text-sm text-secondary">{cat.label}</span>
+                  </label>
                 ))}
-              </select>
+              </div>
             </div>
 
             {/* Upload Button */}
@@ -254,9 +282,9 @@ export default function AdminPhotos() {
               {selectedProject.photos.map((photo, idx) => (
                 <div key={idx} className="relative card card--hover" style={{ aspectRatio: "1/1", overflow: "hidden" }}>
                   <img
-                    src={resolveApiAssetUrl(photo.url)}
+                    src={optimizeImageUrl(resolveApiAssetUrl(photo.url), { width: 480 })}
                     alt={`Photo ${idx + 1}`}
-                    className="w-full h-full"
+                    className="w-full h-auto"
                     style={{ objectFit: "cover" }}
                   />
                   <button
@@ -267,8 +295,18 @@ export default function AdminPhotos() {
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
-                  <div className="badge badge--primary" style={{ position: "absolute", bottom: "8px", left: "8px" }}>
-                    {photo.category}
+                  <div
+                    className="d-flex flex-wrap gap-xs"
+                    style={{ position: "absolute", bottom: "8px", left: "8px" }}
+                  >
+                    {(photo.workTypes && photo.workTypes.length > 0
+                      ? photo.workTypes
+                      : [photo.category || "અન્ય"]
+                    ).map((type) => (
+                      <span key={type} className="badge badge--primary">
+                        {getWorkTypeLabel(type, true)}
+                      </span>
+                    ))}
                   </div>
                 </div>
               ))}

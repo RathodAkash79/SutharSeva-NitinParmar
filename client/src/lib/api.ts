@@ -28,6 +28,30 @@ export function resolveApiAssetUrl(url: string): string {
   return `${API_BASE_URL}${normalizedPath}`;
 }
 
+export function optimizeImageUrl(
+  url: string,
+  options: { width?: number; quality?: number } = {}
+): string {
+  if (!url) return url;
+  const width = options.width || 800;
+  const quality = options.quality || 60;
+
+  if (!url.includes("res.cloudinary.com") || !url.includes("/upload/")) {
+    return url;
+  }
+
+  const [prefix, rest] = url.split("/upload/");
+  if (!rest) return url;
+
+  const firstSegment = rest.split("/")[0] || "";
+  if (firstSegment.startsWith("f_") || firstSegment.startsWith("q_") || firstSegment.startsWith("w_")) {
+    return url;
+  }
+
+  const transform = `f_auto,q_${quality},w_${width},c_limit`;
+  return `${prefix}/upload/${transform}/${rest}`;
+}
+
 // Test API connectivity (call once on app start)
 export async function testApiHealth(): Promise<boolean> {
   try {
@@ -40,7 +64,12 @@ export async function testApiHealth(): Promise<boolean> {
         Accept: "application/json",
       },
     });
-    const isOk = response.ok;
+    if (!response.ok) {
+      console.log("❌ API health check failed");
+      return false;
+    }
+    const data = await response.json().catch(() => null);
+    const isOk = !!data && data.status === "ok";
     console.log(isOk ? "✅ API is healthy" : "❌ API health check failed");
     return isOk;
   } catch (error) {

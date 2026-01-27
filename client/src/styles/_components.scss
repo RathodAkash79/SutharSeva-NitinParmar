@@ -304,6 +304,121 @@
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// WORK CARD MEDIA
+// ─────────────────────────────────────────────────────────────────────────────
+
+.work-card__media {
+  position: relative;
+  overflow: hidden;
+  border-radius: $border-radius-lg;
+  background-color: $color-background-alt;
+  padding: $spacing-sm;
+  aspect-ratio: 4 / 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.work-card__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: $border-radius-md;
+}
+
+.work-card__badge {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-xs;
+  max-width: 90%;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.badge--overlay {
+  background-color: rgba(0, 0, 0, 0.65);
+  color: $color-surface;
+}
+
+.photo-tile {
+  position: relative;
+  border-radius: $border-radius-lg;
+  overflow: hidden;
+  background-color: $color-background-alt;
+  padding: $spacing-xs;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.photo-tile__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: $border-radius-md;
+}
+
+.photo-tile__badge {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-xs;
+  max-width: 90%;
+  padding: $spacing-xs $spacing-sm;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  border-radius: $border-radius-md;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: $color-surface;
+  text-align: center;
+  pointer-events: none;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ADMIN PROJECT CARD
+// ─────────────────────────────────────────────────────────────────────────────
+
+.project-card {
+  background-color: $color-surface;
+  border-radius: $border-radius-xl;
+  border: $border-width solid $color-border;
+  box-shadow: $shadow-sm;
+  overflow: hidden;
+}
+
+.project-card__header {
+  padding: $spacing-md;
+  border-bottom: $border-width solid $color-border;
+}
+
+.project-card__body {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $spacing-md;
+  padding: $spacing-md;
+
+  @include respond-lg {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+.project-card__section {
+  background-color: $color-surface;
+  border-radius: $border-radius-lg;
+  border: $border-width solid $color-border;
+  padding: $spacing-md;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // TABS
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -592,6 +707,84 @@
     background-color: rgba($color-warning, 0.1);
     color: mix(black, $color-warning, 20%);
   }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// WORK CARD MEDIA
+// ─────────────────────────────────────────────────────────────────────────────
+
+.work-card__media {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-sm;
+  background-color: $color-background-alt;
+  border-radius: $border-radius-lg;
+  overflow: hidden;
+}
+
+.work-card__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.work-card__badge {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: $spacing-xs $spacing-md;
+  border-radius: $border-radius-full;
+  background-color: rgba(0, 0, 0, 0.55);
+  color: $color-surface;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  text-align: center;
+  max-width: 85%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PROJECT CARD SECTIONS
+// ─────────────────────────────────────────────────────────────────────────────
+
+.project-card__sections {
+  display: grid;
+  grid-template-columns: 1fr;
+  border-top: $border-width solid $color-border;
+
+  @include respond-lg {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+.project-card__section {
+  padding: $spacing-lg;
+}
+
+.project-card__section--finance {
+  border-top: $border-width solid $color-border;
+
+  @include respond-lg {
+    border-top: none;
+    border-left: $border-width solid $color-border;
+  }
+}
+
+.project-card__section--primary {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-lg;
+}
+
+.project-card__block + .project-card__block {
+  border-top: $border-width solid $color-border;
+  padding-top: $spacing-lg;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

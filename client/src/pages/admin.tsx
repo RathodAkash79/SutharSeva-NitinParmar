@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { collection, getDocs, limit, query, doc, getDoc, setDoc } from "firebase/firestore";
+import { collection, getDocs, limit, query, doc, getDoc, setDoc, onSnapshot } from "firebase/firestore";
 import { testApiHealth } from "@/lib/api";
-import { db, auth } from "@/lib/firebase";
+import { db, auth, WorkProject } from "@/lib/firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import AdminProjects from "./admin-projects";
 import AdminWorkers from "./admin-workers";
@@ -31,6 +31,8 @@ export default function Admin() {
   const [activeTab, setActiveTab] = useState<"projects" | "attendance" | "workers" | "rate">("attendance");
   const [rate, setRate] = useState("");
   const [savingRate, setSavingRate] = useState(false);
+  const [projects, setProjects] = useState<WorkProject[]>([]);
+  const [attendance, setAttendance] = useState<Array<{ date: string; amount?: number }>>([]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -63,6 +65,48 @@ export default function Admin() {
     return () => unsubscribe();
   }, []);
 
+  useEffect(() => {
+    const unsubscribeProjects = onSnapshot(collection(db, "projects"), (snapshot) => {
+      const loadedProjects: WorkProject[] = [];
+      snapshot.forEach((projectDoc) => {
+        const data = projectDoc.data() as any;
+        loadedProjects.push({
+          id: projectDoc.id,
+          name: data.name,
+          village: data.village,
+          workTypes: data.workTypes || [],
+          images: data.images || [],
+          photos: data.photos || [],
+          totalAmount: data.totalAmount || 0,
+          finalAmount: data.finalAmount || data.totalAmount || 0,
+          status: data.status || "Ongoing",
+          startDate: data.startDate || "",
+          expectedEndDate: data.expectedEndDate || "",
+          completedAt: data.completedAt || undefined,
+          createdAt: data.createdAt,
+        } as WorkProject);
+      });
+      setProjects(loadedProjects);
+    });
+
+    const unsubscribeAttendance = onSnapshot(collection(db, "attendance"), (snapshot) => {
+      const loadedAttendance: Array<{ date: string; amount?: number }> = [];
+      snapshot.forEach((attendanceDoc) => {
+        const data = attendanceDoc.data() as any;
+        loadedAttendance.push({
+          date: data.date,
+          amount: data.amount || 0,
+        });
+      });
+      setAttendance(loadedAttendance);
+    });
+
+    return () => {
+      unsubscribeProjects();
+      unsubscribeAttendance();
+    };
+  }, []);
+
   const handleLogout = async () => {
     try {
       await signOut(auth);
@@ -82,9 +126,9 @@ export default function Admin() {
 
     setSavingRate(true);
     try {
-      const rateDocRef = doc(db, "settings", "rate");
+      const rateDocRef = doc(db, "public", "rates");
       await setDoc(rateDocRef, {
-        pricePerSqFt: parseFloat(rate),
+        perFoot: parseFloat(rate),
         updatedAt: new Date(),
         updatedBy: authUser?.email || "unknown",
       });
@@ -117,6 +161,38 @@ export default function Admin() {
     );
   }
 
+  const getMonthKey = (date: Date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+  const formatMonth = (key: string) => {
+    const [year, month] = key.split("-");
+    const date = new Date(Number(year), Number(month) - 1, 1);
+    return date.toLocaleDateString("gu-IN", { month: "long", year: "numeric" });
+  };
+
+  const incomeByMonth = new Map<string, number>();
+  projects
+    .filter((project) => project.status === "Completed")
+    .forEach((project) => {
+      const dateSource = project.completedAt?.toDate?.() || project.createdAt?.toDate?.() || new Date();
+      const monthKey = getMonthKey(dateSource);
+      const amount = project.finalAmount || 0;
+      incomeByMonth.set(monthKey, (incomeByMonth.get(monthKey) || 0) + amount);
+    });
+
+  const majduriByMonth = new Map<string, number>();
+  attendance.forEach((entry) => {
+    if (!entry.date) return;
+    const monthKey = entry.date.slice(0, 7);
+    const amount = entry.amount || 0;
+    majduriByMonth.set(monthKey, (majduriByMonth.get(monthKey) || 0) + amount);
+  });
+
+  const allMonthKeys = Array.from(new Set([...incomeByMonth.keys(), ...majduriByMonth.keys()])).sort().reverse();
+  const currentMonthKey = getMonthKey(new Date());
+  const currentIncome = incomeByMonth.get(currentMonthKey) || 0;
+  const currentMajduri = majduriByMonth.get(currentMonthKey) || 0;
+  const hasCurrentIncome = currentIncome > 0;
+  const currentProfit = hasCurrentIncome ? currentIncome - currentMajduri : 0;
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
@@ -136,18 +212,72 @@ export default function Admin() {
       </header>
 
       {/* Dashboard summary */}
-      <section className="px-lg py-md flex gap-md overflow-x-auto">
-        <div className="bg-white rounded-xl p-lg border border-border shadow-sm min-w-[180px]">
-          <p className="text-secondary font-semibold text-sm mb-sm">આજની આવક</p>
-          <h3 className="text-3xl font-bold text-primary-dark">₹0</h3>
+      <section className="px-lg py-md flex flex-col gap-md">
+        <div className="flex gap-md overflow-x-auto">
+          <div className="bg-white rounded-xl p-lg border border-border shadow-sm min-w-[180px]">
+            <p className="text-secondary font-semibold text-sm mb-sm">માસિક આવક</p>
+            {hasCurrentIncome ? (
+              <h3 className="text-3xl font-bold text-primary-dark">₹{currentIncome.toLocaleString("en-IN")}</h3>
+            ) : (
+              <h3 className="text-3xl font-bold text-secondary">—</h3>
+            )}
+            <p className="text-xs text-secondary mt-2">{formatMonth(currentMonthKey)}</p>
+          </div>
+          <div className="bg-white rounded-xl p-lg border border-border shadow-sm min-w-[180px]">
+            <p className="text-secondary font-semibold text-sm mb-sm">માસિક મજૂરી</p>
+            <h3 className="text-3xl font-bold text-primary-dark">₹{currentMajduri.toLocaleString("en-IN")}</h3>
+            <p className="text-xs text-secondary mt-2">{formatMonth(currentMonthKey)}</p>
+          </div>
+          <div className="bg-white rounded-xl p-lg border border-border shadow-sm min-w-[180px]">
+            <p className="text-secondary font-semibold text-sm mb-sm">માસિક નફો</p>
+            {hasCurrentIncome ? (
+              <h3 className={`text-3xl font-bold ${currentProfit >= 0 ? "text-success" : "text-danger"}`}>
+                ₹{currentProfit.toLocaleString("en-IN")}
+              </h3>
+            ) : (
+              <h3 className="text-3xl font-bold text-secondary">—</h3>
+            )}
+            <p className="text-xs text-secondary mt-2">{formatMonth(currentMonthKey)}</p>
+          </div>
         </div>
-        <div className="bg-white rounded-xl p-lg border border-border shadow-sm min-w-[180px]">
-          <p className="text-secondary font-semibold text-sm mb-sm">કુલ આવક</p>
-          <h3 className="text-3xl font-bold text-primary-dark">₹0</h3>
-        </div>
-        <div className="bg-white rounded-xl p-lg border border-border shadow-sm min-w-[180px]">
-          <p className="text-secondary font-semibold text-sm mb-sm">બાકી રકમ</p>
-          <h3 className="text-3xl font-bold text-primary-dark">₹0</h3>
+
+        <div className="bg-white rounded-xl p-lg border border-border shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-bold text-primary-dark">માસિક સંક્ષેપ</h3>
+            <span className="text-xs text-secondary">Completed works only</span>
+          </div>
+          {allMonthKeys.length === 0 ? (
+            <p className="text-secondary">હજી કોઈ રેકોર્ડ નથી</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {allMonthKeys.map((monthKey) => {
+                const income = incomeByMonth.get(monthKey) || 0;
+                const majduri = majduriByMonth.get(monthKey) || 0;
+                const profit = income > 0 ? income - majduri : 0;
+                return (
+                  <div key={monthKey} className="border border-border rounded-lg p-4">
+                    <p className="font-semibold text-primary-dark mb-2">{formatMonth(monthKey)}</p>
+                    <div className="text-sm text-secondary space-y-1">
+                      <p>મજૂરી: ₹{majduri.toLocaleString("en-IN")}</p>
+                      {income > 0 ? (
+                        <>
+                          <p>આવક: ₹{income.toLocaleString("en-IN")}</p>
+                          <p className={profit >= 0 ? "text-success" : "text-danger"}>
+                            નફો: ₹{profit.toLocaleString("en-IN")}
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <p>આવક: —</p>
+                          <p className="text-secondary">નફો: —</p>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 
@@ -220,10 +350,10 @@ export default function Admin() {
                   <Button
                     onClick={async () => {
                       try {
-                        const rateDocRef = doc(db, "settings", "rate");
+                        const rateDocRef = doc(db, "public", "rates");
                         const rateDoc = await getDoc(rateDocRef);
                         if (rateDoc.exists()) {
-                          setRate(rateDoc.data().pricePerSqFt.toString());
+                          setRate(rateDoc.data().perFoot?.toString() || "");
                         } else {
                           setRate("");
                         }

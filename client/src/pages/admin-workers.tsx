@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
 import { Plus, Trash2, Edit2 } from "lucide-react";
-import { db } from "@/lib/firebase";
+import { db, subscribeToProjects, WorkProject } from "@/lib/firebase";
 import {
   collection,
   addDoc,
@@ -14,6 +14,8 @@ import {
   onSnapshot,
   Timestamp,
   DocumentData,
+  query,
+  where,
 } from "firebase/firestore";
 
 interface Worker {
@@ -22,6 +24,19 @@ interface Worker {
   phone: string;
   speciality: string;
   dailyWage: number;
+  paidAmount?: number;
+  createdAt: Timestamp;
+}
+
+interface WorkerPayment {
+  id: string;
+  workerId: string;
+  workerName: string;
+  amount: number;
+  date: string;
+  workId?: string;
+  workName?: string;
+  note?: string;
   createdAt: Timestamp;
 }
 
@@ -36,6 +51,27 @@ export default function AdminWorkers() {
     dailyWage: "",
   });
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [detailWorker, setDetailWorker] = useState<Worker | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailStats, setDetailStats] = useState({
+    totalHajri: 0,
+    totalEarned: 0,
+    paidAmount: 0,
+    remaining: 0,
+  });
+  const [paymentAmountInput, setPaymentAmountInput] = useState("");
+  const [paymentDateInput, setPaymentDateInput] = useState(
+    new Date().toISOString().split("T")[0]
+  );
+  const [paymentWorkId, setPaymentWorkId] = useState("");
+  const [paymentNoteInput, setPaymentNoteInput] = useState("");
+  const [detailRateInput, setDetailRateInput] = useState("");
+  const [payments, setPayments] = useState<WorkerPayment[]>([]);
+  const [paymentsLoading, setPaymentsLoading] = useState(false);
+  const [showTransactions, setShowTransactions] = useState(false);
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
+  const [noteDraft, setNoteDraft] = useState("");
+  const [projects, setProjects] = useState<WorkProject[]>([]);
 
   const updateWorkerRate = async (workerId: string, dailyRate: string) => {
     const rateValue = Number.parseInt(dailyRate, 10);
@@ -72,6 +108,7 @@ export default function AdminWorkers() {
             phone: data.phone,
             speciality: data.speciality,
             dailyWage: data.dailyWage || 0,
+            paidAmount: data.paidAmount || 0,
             createdAt: data.createdAt || Timestamp.now(),
           });
         });
@@ -82,6 +119,181 @@ export default function AdminWorkers() {
 
     return () => unsubscribe();
   }, []);
+
+  // Load projects for payment linking
+  useEffect(() => {
+    const unsubscribe = subscribeToProjects((loadedProjects) => {
+      setProjects(loadedProjects);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const getWageMultiplier = (status: string) => {
+    if (status === "half") return 0.5;
+    if (status === "night") return 1.5;
+    if (status === "absent") return 0;
+    return 1;
+  };
+
+  const formatDateForDisplay = (dateStr: string) => {
+    if (!dateStr) return "-";
+    const date = new Date(dateStr);
+    return Number.isNaN(date.getTime())
+      ? dateStr
+      : date.toLocaleDateString("gu-IN", { day: "numeric", month: "short", year: "numeric" });
+  };
+
+  const loadWorkerStats = async (worker: Worker, workerPayments: WorkerPayment[]) => {
+    setDetailLoading(true);
+    try {
+      const attendanceSnap = await getDocs(
+        query(collection(db, "attendance"), where("workerId", "==", worker.id))
+      );
+
+      let totalHajri = 0;
+      let totalEarned = 0;
+
+      attendanceSnap.forEach((attendanceDoc) => {
+        const data = attendanceDoc.data() as DocumentData;
+        const status = data.status || "absent";
+        const multiplier = getWageMultiplier(status);
+        totalHajri += multiplier;
+
+        if (typeof data.amount === "number") {
+          totalEarned += data.amount;
+        } else {
+          totalEarned += Math.round((worker.dailyWage || 0) * multiplier);
+        }
+      });
+
+      const legacyPaid = worker.paidAmount || 0;
+      const transactionPaid = workerPayments.reduce((sum, payment) => sum + (payment.amount || 0), 0);
+      const paidAmount = legacyPaid + transactionPaid;
+      setDetailStats({
+        totalHajri,
+        totalEarned,
+        paidAmount,
+        remaining: totalEarned - paidAmount,
+      });
+    } catch (error) {
+      console.error("Error loading worker stats:", error);
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!detailWorker) return;
+    setPaymentsLoading(true);
+
+    const paymentsQuery = query(
+      collection(db, "workerPayments"),
+      where("workerId", "==", detailWorker.id)
+    );
+
+    const unsubscribe = onSnapshot(paymentsQuery, (snapshot) => {
+      const loaded: WorkerPayment[] = [];
+      snapshot.forEach((docSnap) => {
+        const data = docSnap.data() as DocumentData;
+        loaded.push({
+          id: docSnap.id,
+          workerId: data.workerId,
+          workerName: data.workerName,
+          amount: data.amount || 0,
+          date: data.date || "",
+          workId: data.workId || "",
+          workName: data.workName || "",
+          note: data.note || "",
+          createdAt: data.createdAt || Timestamp.now(),
+        });
+      });
+      loaded.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+      setPayments(loaded);
+      setPaymentsLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [detailWorker?.id]);
+
+  useEffect(() => {
+    if (!detailWorker) return;
+    loadWorkerStats(detailWorker, payments);
+  }, [detailWorker, payments]);
+
+  const handleOpenWorkerDetail = async (worker: Worker) => {
+    setDetailWorker(worker);
+    setDetailRateInput(worker.dailyWage?.toString() || "");
+    setPaymentAmountInput("");
+    setPaymentDateInput(new Date().toISOString().split("T")[0]);
+    setPaymentWorkId("");
+    setPaymentNoteInput("");
+    await loadWorkerStats(worker, payments);
+  };
+
+  const handleSaveWorkerRate = async () => {
+    if (!detailWorker) return;
+    const rateValue = Number.parseInt(detailRateInput || "0", 10) || 0;
+
+    try {
+      const workerRef = doc(db, "workers", detailWorker.id);
+      await updateDoc(workerRef, {
+        dailyWage: rateValue,
+      });
+
+      setDetailWorker((prev) =>
+        prev ? { ...prev, dailyWage: rateValue } : prev
+      );
+      alert("દૈનિક દર સાચવાયો");
+    } catch (error) {
+      console.error("Error saving worker rate:", error);
+      alert("ભૂલ આવી. ફરી પ્રયાસ કરો.");
+    }
+  };
+
+  const handleSavePayment = async () => {
+    if (!detailWorker) return;
+    const amountValue = Number.parseFloat(paymentAmountInput || "0");
+    if (!Number.isFinite(amountValue) || amountValue === 0) {
+      alert("ચુકવણી રકમ દાખલ કરો");
+      return;
+    }
+
+    try {
+      const work = projects.find((project) => project.id === paymentWorkId);
+      await addDoc(collection(db, "workerPayments"), {
+        workerId: detailWorker.id,
+        workerName: detailWorker.name,
+        amount: amountValue,
+        date: paymentDateInput,
+        workId: paymentWorkId || "",
+        workName: work?.name || "",
+        note: paymentNoteInput || "",
+        createdAt: Timestamp.now(),
+      });
+
+      setPaymentAmountInput("");
+      setPaymentNoteInput("");
+      setPaymentWorkId("");
+      alert("ચુકવણી સાચવાઈ ગઈ");
+    } catch (error) {
+      console.error("Error saving worker payment:", error);
+      alert("ભૂલ આવી. ફરી પ્રયાસ કરો.");
+    }
+  };
+
+  const handleSaveNote = async (paymentId: string) => {
+    try {
+      await updateDoc(doc(db, "workerPayments", paymentId), {
+        note: noteDraft,
+      });
+      setEditingNoteId(null);
+      setNoteDraft("");
+    } catch (error) {
+      console.error("Error updating note:", error);
+      alert("નોટ અપડેટ કરવામાં ભૂલ આવી");
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -279,6 +491,255 @@ export default function AdminWorkers() {
         </form>
       </Modal>
 
+      {/* Transaction History Modal */}
+      <Modal
+        open={showTransactions}
+        title="Transaction History"
+        size="large"
+        onClose={() => {
+          setShowTransactions(false);
+          setEditingNoteId(null);
+          setNoteDraft("");
+        }}
+      >
+        <div className="space-y-4">
+          {paymentsLoading ? (
+            <p className="text-secondary">લોડ થઈ રહ્યું છે...</p>
+          ) : payments.length === 0 ? (
+            <p className="text-secondary">હજી કોઈ ટ્રાન્ઝેક્શન નથી</p>
+          ) : (
+            <div className="space-y-3">
+              {payments.map((payment) => (
+                <div key={payment.id} className="border border-border rounded-lg p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                      <p className="text-sm font-semibold text-primary-dark">
+                        ₹{payment.amount.toLocaleString("en-IN")}
+                      </p>
+                      <p className="text-xs text-secondary">
+                        {formatDateForDisplay(payment.date)}
+                      </p>
+                    </div>
+                    <div className="text-xs text-secondary text-right">
+                      <p>{payment.workName || "—"}</p>
+                    </div>
+                  </div>
+
+                  <div className="mt-3">
+                    {editingNoteId === payment.id ? (
+                      <div className="flex flex-col gap-2">
+                        <Input
+                          type="text"
+                          value={noteDraft}
+                          onChange={(e) => setNoteDraft(e.target.value)}
+                          className="border-border"
+                        />
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={() => handleSaveNote(payment.id)}
+                            className="bg-primary text-white hover:bg-primary-dark"
+                          >
+                            સાચવો
+                          </Button>
+                          <Button
+                            onClick={() => {
+                              setEditingNoteId(null);
+                              setNoteDraft("");
+                            }}
+                            className="bg-gray-200 text-secondary hover:bg-gray-300"
+                          >
+                            રદ કરો
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-sm text-secondary">
+                          {payment.note ? `નોટ: ${payment.note}` : "નોટ નથી"}
+                        </p>
+                        <button
+                          onClick={() => {
+                            setEditingNoteId(payment.id);
+                            setNoteDraft(payment.note || "");
+                          }}
+                          className="text-xs text-primary font-semibold"
+                        >
+                          {payment.note ? "નોટ ફેરફાર કરો" : "Add Note"}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </Modal>
+
+      {/* Worker Detail Modal */}
+      <Modal
+        open={!!detailWorker}
+        title="કારીગર વિગતો"
+        size="large"
+        onClose={() => {
+          setDetailWorker(null);
+          setPaymentAmountInput("");
+          setPaymentDateInput(new Date().toISOString().split("T")[0]);
+          setPaymentWorkId("");
+          setPaymentNoteInput("");
+          setDetailRateInput("");
+          setDetailStats({ totalHajri: 0, totalEarned: 0, paidAmount: 0, remaining: 0 });
+          setPayments([]);
+          setShowTransactions(false);
+        }}
+      >
+        {detailWorker && (
+          <div className="space-y-6">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <p className="text-sm text-secondary">નામ</p>
+                <p className="text-lg font-semibold text-primary-dark">{detailWorker.name}</p>
+                <p className="text-xs text-secondary">📱 {detailWorker.phone}</p>
+                <p className="text-xs text-secondary">🔧 {detailWorker.speciality}</p>
+              </div>
+              <div className="rounded-lg border border-border bg-background px-4 py-3">
+                <p className="text-xs text-secondary">હાલનો દર</p>
+                <p className="text-lg font-semibold text-primary-dark">₹{detailWorker.dailyWage}</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+              <div className="rounded-lg border border-border p-4">
+                <p className="text-xs text-secondary">કુલ હાજરી</p>
+                <p className="text-xl font-bold text-primary-dark">{detailLoading ? "..." : detailStats.totalHajri.toFixed(1)}</p>
+              </div>
+              <div className="rounded-lg border border-border p-4">
+                <p className="text-xs text-secondary">કુલ કમાણી</p>
+                <p className="text-xl font-bold text-primary-dark">₹{detailLoading ? "..." : detailStats.totalEarned.toLocaleString("en-IN")}</p>
+              </div>
+              <div className="rounded-lg border border-border p-4">
+                <p className="text-xs text-secondary">કુલ ચૂકવેલ</p>
+                <p className="text-xl font-bold text-primary-dark">
+                  ₹{detailLoading ? "..." : detailStats.paidAmount.toLocaleString("en-IN")}
+                </p>
+              </div>
+              <div className="rounded-lg border border-border p-4">
+                <p className="text-xs text-secondary">બાકી રકમ</p>
+                <p className={`text-xl font-bold ${detailStats.remaining >= 0 ? "text-danger" : "text-success"}`}>
+                  ₹{detailLoading ? "..." : detailStats.remaining.toLocaleString("en-IN")}
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-secondary mb-2">
+                  નવો દર (₹/દિવસ)
+                </label>
+                <Input
+                  type="number"
+                  value={detailRateInput}
+                  onChange={(e) => setDetailRateInput(e.target.value)}
+                  className="border-border"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-secondary mb-2">
+                  ચુકવણી રકમ (₹)
+                </label>
+                <Input
+                  type="number"
+                  value={paymentAmountInput}
+                  onChange={(e) => setPaymentAmountInput(e.target.value)}
+                  className="border-border"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-secondary mb-2">
+                  ચુકવણી તારીખ
+                </label>
+                <Input
+                  type="date"
+                  value={paymentDateInput}
+                  onChange={(e) => setPaymentDateInput(e.target.value)}
+                  className="border-border"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-secondary mb-2">
+                  કામ પસંદ કરો
+                </label>
+                <select
+                  value={paymentWorkId}
+                  onChange={(e) => setPaymentWorkId(e.target.value)}
+                  className="w-full px-3 py-2 border border-border rounded-lg text-secondary"
+                >
+                  <option value="">-- કામ પસંદ કરો --</option>
+                  {projects.map((project) => (
+                    <option key={project.id} value={project.id}>
+                      {project.name} ({project.village})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-semibold text-secondary mb-2">
+                  નોટ (વૈકલ્પિક)
+                </label>
+                <Input
+                  type="text"
+                  value={paymentNoteInput}
+                  onChange={(e) => setPaymentNoteInput(e.target.value)}
+                  placeholder="જેમ કે એડવાન્સ ચુકવણી"
+                  className="border-border"
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <Button
+                type="button"
+                onClick={() => setShowTransactions(true)}
+                className="border border-border text-secondary"
+              >
+                Transaction History
+              </Button>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  onClick={handleSaveWorkerRate}
+                  className="bg-primary text-white hover:bg-primary-dark"
+                >
+                  દર સાચવો
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleSavePayment}
+                  className="bg-success text-white hover:bg-success-dark"
+                >
+                  ચુકવણી સાચવો
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setDetailWorker(null);
+                    setPaymentAmountInput("");
+                    setPaymentDateInput(new Date().toISOString().split("T")[0]);
+                    setPaymentWorkId("");
+                    setPaymentNoteInput("");
+                    setDetailRateInput("");
+                    setDetailStats({ totalHajri: 0, totalEarned: 0, paidAmount: 0, remaining: 0 });
+                  }}
+                  className="bg-gray-200 text-secondary hover:bg-gray-300"
+                >
+                  બંધ કરો
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+      </Modal>
+
       {/* Workers List */}
       <div className="space-y-4">
         {workers.length === 0 ? (
@@ -305,6 +766,12 @@ export default function AdminWorkers() {
                   </p>
                 </div>
                 <div className="flex gap-2">
+                  <button
+                    onClick={() => handleOpenWorkerDetail(worker)}
+                    className="px-3 py-1 rounded-lg border border-border text-xs text-secondary hover:bg-background"
+                  >
+                    વિગતો
+                  </button>
                   <button
                     onClick={() => handleEdit(worker)}
                     className="p-2 hover:bg-background rounded transition"

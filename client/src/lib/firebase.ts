@@ -44,9 +44,18 @@ export interface WorkProject {
   village: string;
   workTypes: string[];
   images: string[];
-  photos: Array<{ url: string; category?: string; type?: string }>;
+  photos: Array<{
+    url: string;
+    workTypes?: string[];
+    workType?: string;
+    category?: string;
+    type?: string;
+  }>;
   totalAmount: number;
   finalAmount?: number;
+  startDate?: string;
+  expectedEndDate?: string;
+  completedAt?: Timestamp;
   status: "Ongoing" | "Completed";
   createdAt: Timestamp;
 }
@@ -76,7 +85,10 @@ export async function loadProjects(): Promise<WorkProject[]> {
         images: data.images || [],
         photos: data.photos || [],
         totalAmount: data.totalAmount || 0,
-        finalAmount: data.finalAmount || data.totalAmount || 0,
+        finalAmount: typeof data.finalAmount === "number" ? data.finalAmount : undefined,
+          startDate: data.startDate || "",
+          expectedEndDate: data.expectedEndDate || "",
+          completedAt: data.completedAt || undefined,
         status: data.status || "Ongoing",
         createdAt: data.createdAt || Timestamp.now(),
       } as WorkProject);
@@ -107,7 +119,10 @@ export function subscribeToProjects(
           images: data.images || [],
           photos: data.photos || [],
           totalAmount: data.totalAmount || 0,
-          finalAmount: data.finalAmount || data.totalAmount || 0,
+          finalAmount: typeof data.finalAmount === "number" ? data.finalAmount : undefined,
+            startDate: data.startDate || "",
+            expectedEndDate: data.expectedEndDate || "",
+            completedAt: data.completedAt || undefined,
           status: data.status || "Ongoing",
           createdAt: data.createdAt || Timestamp.now(),
         } as WorkProject);

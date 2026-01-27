@@ -3,7 +3,16 @@ import { Link } from "wouter";
 import { Input } from "@/components/ui/input";
 import { Search, MapPin, Tag } from "lucide-react";
 import { subscribeToProjects, WorkProject } from "@/lib/firebase";
-import { resolveApiAssetUrl } from "@/lib/api";
+import { optimizeImageUrl, resolveApiAssetUrl } from "@/lib/api";
+import {
+  getWorkTypeLabel,
+  getWorkTypeOptions,
+  getPhotoWorkTypeIds,
+  getProjectWorkTypeIds,
+  matchesWorkTypeTerm,
+  normalizeSearchText,
+  resolveWorkTypeId,
+} from "@/lib/workTypes";
 
 export default function WorkGallery() {
   const [projects, setProjects] = useState<WorkProject[]>([]);
@@ -18,25 +27,7 @@ export default function WorkGallery() {
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
-  const categories = [
-    "બધા",
-    "🚪 દરવાજા",
-    "🪟 બારી",
-    "🪑 ફર્નિચર",
-    "🧥 અલમારી",
-    "📦 કબાટ",
-    "🗄️ શો-કેસ",
-    "📺 TV યુનિટ",
-    "🛋️ સોફા",
-    "🛕 મંદિર",
-    "🛏️ પલંગ",
-    "📚 સ્ટડી ટેબલ",
-    "🪞 કાચ",
-    "💄 ડ્રેસિંગ ટેબલ",
-    "❄️ AC પેનલિંગ",
-    "🍳 રસોડું",
-    "✨ અન્ય",
-  ];
+  const categories = ["બધા", ...getWorkTypeOptions().map((option) => option.label)];
 
   // Load projects from Firebase
   useEffect(() => {
@@ -60,35 +51,33 @@ export default function WorkGallery() {
   useEffect(() => {
     let filtered = projects;
 
-    // Filter by search term - PHOTO TYPE PRIORITY
+    // Filter by search term - supports English, Gujarati, aliases, without emoji
     if (searchTerm.trim()) {
-      const term = searchTerm.toLowerCase().trim();
+      const term = normalizeSearchText(searchTerm);
       filtered = filtered.filter((p) => {
         const matchesPhotoType = (p.photos || []).some((photo) =>
-          getPhotoType(photo).toLowerCase().includes(term)
+          getPhotoWorkTypeIds(photo).some((id) => matchesWorkTypeTerm(term, id))
         );
 
-        const matchesWorkType = p.workTypes && p.workTypes.some((t) => t.toLowerCase().includes(term));
-        const matchesWorkName = p.name.toLowerCase().includes(term);
-        const matchesVillage = p.village.toLowerCase().includes(term);
+        const matchesWorkType = getProjectWorkTypeIds(p.workTypes || []).some((id) =>
+          matchesWorkTypeTerm(term, id)
+        );
+        const matchesWorkName = normalizeSearchText(p.name).includes(term);
+        const matchesVillage = normalizeSearchText(p.village).includes(term);
 
         return matchesPhotoType || matchesWorkType || matchesWorkName || matchesVillage;
       });
     }
 
-    // Filter by category - PHOTO TYPE FIRST
+    // Filter by category (work type)
     if (selectedCategory !== "બધા") {
-      const categoryName = getCategoryName(selectedCategory);
+      const selectedTypeId = resolveWorkTypeId(selectedCategory) || "other";
       filtered = filtered.filter((p) => {
-        const hasPhotoOfType = (p.photos || []).some(
-          (photo) => getPhotoType(photo) === categoryName
+        const hasPhotoOfType = (p.photos || []).some((photo) =>
+          getPhotoWorkTypeIds(photo).includes(selectedTypeId)
         );
-        const hasWorkType = p.workTypes && p.workTypes.includes(categoryName);
-        
-        // If photo type exists, IGNORE work type match
-        if (hasPhotoOfType) return true;
-        // Only check work type if no matching photo type
-        return hasWorkType;
+        const hasWorkType = getProjectWorkTypeIds(p.workTypes || []).includes(selectedTypeId);
+        return hasPhotoOfType || hasWorkType;
       });
     }
 
@@ -100,36 +89,35 @@ export default function WorkGallery() {
     setFilteredProjects(filtered);
   }, [projects, searchTerm, selectedCategory, selectedVillage]);
 
-  const getCategoryName = (category: string) => {
-    return category.replace(/^[^\s]*\s/, "");
+  const getProjectBadgeLabel = (project: WorkProject) => {
+    if (selectedCategory !== "બધા") {
+      return getWorkTypeLabel(selectedCategory, true);
+    }
+    if (project.workTypes && project.workTypes.length > 0) {
+      return getWorkTypeLabel(project.workTypes[0], true);
+    }
+    return "";
   };
 
   const getMainImage = (project: WorkProject, preferredType?: string) => {
-    // If a category is selected, try to show photo of that type first
-    if (preferredType && preferredType !== "બધા") {
-      const categoryName = getCategoryName(preferredType);
-      const matchingPhoto = (project.photos || []).find(
-        (photo) => getPhotoType(photo) === categoryName
+    // If a category or search term is provided, try to show photo of that type first
+    if (preferredType && preferredType.trim()) {
+      const normalizedPreferred = normalizeSearchText(preferredType);
+      const matchingPhoto = (project.photos || []).find((photo) =>
+        getPhotoWorkTypeIds(photo).some((id) => matchesWorkTypeTerm(normalizedPreferred, id))
       );
-      if (matchingPhoto) return resolveApiAssetUrl(matchingPhoto.url);
+      if (matchingPhoto) return optimizeImageUrl(resolveApiAssetUrl(matchingPhoto.url), { width: 640 });
     }
 
     // Fallback to normal behavior
     if (project.images && project.images.length > 0) {
-      return project.images[0];
+      return optimizeImageUrl(resolveApiAssetUrl(project.images[0]), { width: 640 });
     }
     if (project.photos && project.photos.length > 0) {
-      return resolveApiAssetUrl(project.photos[0].url);
+      return optimizeImageUrl(resolveApiAssetUrl(project.photos[0].url), { width: 640 });
     }
     return "https://images.unsplash.com/photo-1533090161767-e6ffed986c88?w=500&q=80";
   };
-
-  function getPhotoType(
-    photo: { url: string; category?: string; type?: string } | undefined
-  ) {
-    if (!photo) return "અન્ય";
-    return photo.type || photo.category || "અન્ય";
-  }
 
   const getImagesGrouped = (project?: WorkProject | null) => {
     if (!project) return [] as Array<{ type: string; items: Array<{ url: string; index: number }> }>;
@@ -145,9 +133,14 @@ export default function WorkGallery() {
 
     (project.photos || []).forEach((photo) => {
       if (!photo || !photo.url) return;
-      const type = getPhotoType(photo);
-      if (!grouped[type]) grouped[type] = [];
-      grouped[type].push(resolveApiAssetUrl(photo.url));
+      const typeIds = getPhotoWorkTypeIds(photo);
+      const safeTypeIds = typeIds.length ? typeIds : ["other"];
+      const uniqueTypeIds = Array.from(new Set(safeTypeIds));
+      uniqueTypeIds.forEach((typeId) => {
+        const typeLabel = getWorkTypeLabel(typeId, true);
+        if (!grouped[typeLabel]) grouped[typeLabel] = [];
+        grouped[typeLabel].push(optimizeImageUrl(resolveApiAssetUrl(photo.url), { width: 520 }));
+      });
     });
 
     if (Object.keys(grouped).length === 0) {
@@ -168,6 +161,13 @@ export default function WorkGallery() {
 
   const getFlatImages = (project?: WorkProject | null) => {
     return getImagesGrouped(project).flatMap((group) => group.items.map((i) => i.url));
+  };
+
+  const preloadImage = (url?: string) => {
+    if (!url) return;
+    const img = new Image();
+    img.decoding = "async";
+    img.src = url;
   };
 
   const openWork = (project: WorkProject) => {
@@ -252,6 +252,19 @@ export default function WorkGallery() {
       document.body.style.overflow = "";
     };
   }, [selectedWork, isViewerOpen]);
+
+  useEffect(() => {
+    const items = filteredProjects.slice(0, 12);
+    items.forEach((project) => {
+      preloadImage(getMainImage(project, selectedCategory !== "બધા" ? selectedCategory : searchTerm));
+    });
+  }, [filteredProjects, selectedCategory, searchTerm]);
+
+  useEffect(() => {
+    if (!selectedWork) return;
+    const images = getFlatImages(selectedWork);
+    images.slice(0, 18).forEach((url) => preloadImage(url));
+  }, [selectedWork]);
 
   return (
     <div className="app">
@@ -368,13 +381,18 @@ export default function WorkGallery() {
                     }
                   }}
                 >
-                  <div className="relative overflow-hidden rounded-lg" style={{ aspectRatio: "4 / 3" }}>
+                  <div className="work-card__media" style={{ aspectRatio: "4 / 3" }}>
                     <img
-                      src={getMainImage(project, selectedCategory)}
+                      src={getMainImage(project, selectedCategory !== "બધા" ? selectedCategory : searchTerm)}
                       alt={project.name}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
+                      className="work-card__image"
+                      loading="eager"
+                      decoding="async"
+                      fetchPriority="high"
                     />
+                    {getProjectBadgeLabel(project) && (
+                      <div className="work-card__badge">{getProjectBadgeLabel(project)}</div>
+                    )}
                   </div>
 
                   <div className="mt-md">
@@ -387,7 +405,7 @@ export default function WorkGallery() {
                       <div className="d-flex flex-wrap gap-xs">
                         {project.workTypes.map((type) => (
                           <span key={type} className="badge badge--primary">
-                            <Tag className="w-3 h-3" /> {type}
+                            <Tag className="w-3 h-3" /> {getWorkTypeLabel(type, true)}
                           </span>
                         ))}
                       </div>
@@ -435,14 +453,15 @@ export default function WorkGallery() {
                       <button
                         key={`${selectedWork.id}-${group.type}-${item.index}`}
                         onClick={() => openViewer(item.index)}
-                        className="card card--hover"
+                        className="card card--hover work-card__media"
                         style={{ aspectRatio: "1 / 1" }}
                       >
                         <img
                           src={item.url}
                           alt={`${selectedWork.name} ફોટો ${item.index + 1}`}
-                          className="w-full h-full object-cover"
+                          className="work-card__image"
                           loading="lazy"
+                          decoding="async"
                         />
                       </button>
                     ))}
@@ -465,10 +484,11 @@ export default function WorkGallery() {
             </div>
             <div className="modal__body" onClick={showNextPhoto}>
               <img
-                src={getFlatImages(selectedWork)[activePhotoIndex]}
+                src={optimizeImageUrl(getFlatImages(selectedWork)[activePhotoIndex], { width: 1400 })}
                 alt={`${selectedWork.name} ફોટો`}
-                className="w-full h-full object-contain"
-                loading="lazy"
+                className="w-full h-auto object-contain"
+                loading="eager"
+                decoding="async"
                 style={{ maxHeight: "70vh" }}
               />
             </div>
