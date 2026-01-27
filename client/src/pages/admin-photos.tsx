@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Upload, Trash2 } from "lucide-react";
 import { subscribeToProjects, WorkProject } from "@/lib/firebase";
 import { apiUrl, resolveApiAssetUrl } from "@/lib/api";
+import { compressImageFile } from "@/lib/imageUpload";
 import { db, auth } from "@/lib/firebase";
 import { getWorkTypeLabel, getWorkTypeOptions, resolveWorkTypeId } from "@/lib/workTypes";
 import OptimizedImage from "@/components/system/OptimizedImage";
@@ -22,6 +23,7 @@ export default function AdminPhotos() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>(["📦 કબાટ"]);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
+  const [compressing, setCompressing] = useState(false);
   const [visibleCount, setVisibleCount] = useState(12);
 
   const categories = getWorkTypeOptions();
@@ -51,15 +53,24 @@ export default function AdminPhotos() {
     setVisibleCount(12);
   }, [selectedProjectId, projects]);
 
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setImageFile(file);
+    if (!file) return;
+    setCompressing(true);
+    try {
+      const compressed = await compressImageFile(file, {
+        maxWidth: 1600,
+        maxHeight: 1600,
+        quality: 0.72,
+      });
+      setImageFile(compressed);
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(compressed);
+    } finally {
+      setCompressing(false);
     }
   };
 
@@ -256,12 +267,16 @@ export default function AdminPhotos() {
             {/* Upload Button */}
             <Button
               onClick={handleUpload}
-              disabled={!imageFile || uploading}
+              disabled={!imageFile || uploading || compressing}
               variant="success"
               className="btn--full-width"
             >
               <Upload className="w-4 h-4" />
-              {uploading ? "અપલોડ થઈ રહ્યું છે..." : "અપલોડ કરો"}
+              {compressing
+                ? "ફોટો તૈયાર થઈ રહ્યો છે..."
+                : uploading
+                ? "અપલોડ થઈ રહ્યું છે..."
+                : "અપલોડ કરો"}
             </Button>
           </div>
         </div>

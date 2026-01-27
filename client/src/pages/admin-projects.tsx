@@ -6,6 +6,7 @@ import { Plus, Trash2, Edit2, Upload, X } from "lucide-react";
 import { subscribeToProjects, WorkProject } from "@/lib/firebase";
 import { db, auth } from "@/lib/firebase";
 import { apiUrl, resolveApiAssetUrl } from "@/lib/api";
+import { compressImageFile } from "@/lib/imageUpload";
 import { getWorkTypeLabel, getWorkTypeOptions, resolveWorkTypeId } from "@/lib/workTypes";
 import OptimizedImage from "@/components/system/OptimizedImage";
 import {
@@ -27,6 +28,7 @@ export default function AdminProjects() {
   const [uploading, setUploading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
+  const [compressing, setCompressing] = useState(false);
   const [selectedPhotoCategories, setSelectedPhotoCategories] = useState<string[]>(["📦 કબાટ"]);
   const [formData, setFormData] = useState({
     name: "",
@@ -55,10 +57,21 @@ export default function AdminProjects() {
     );
   };
 
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
-    setImageFile(file);
-    setImagePreview(file ? URL.createObjectURL(file) : "");
+    if (!file) return;
+    setCompressing(true);
+    try {
+      const compressed = await compressImageFile(file, {
+        maxWidth: 1600,
+        maxHeight: 1600,
+        quality: 0.72,
+      });
+      setImageFile(compressed);
+      setImagePreview(URL.createObjectURL(compressed));
+    } finally {
+      setCompressing(false);
+    }
   };
 
   const handleUploadPhoto = async (projectId: string) => {
@@ -724,11 +737,15 @@ export default function AdminProjects() {
                         <div className="flex gap-2">
                           <Button
                             onClick={() => handleUploadPhoto(project.id)}
-                            disabled={!imageFile || uploading}
+                            disabled={!imageFile || uploading || compressing}
                             className="flex-1 bg-primary text-white hover:bg-primary-dark"
                           >
                             <Upload className="w-4 h-4 mr-2" />
-                            {uploading ? "અપલોડ થઈ રહ્યું..." : "અપલોડ કરો"}
+                            {compressing
+                              ? "ફોટો તૈયાર થઈ રહ્યો છે..."
+                              : uploading
+                              ? "અપલોડ થઈ રહ્યું..."
+                              : "અપલોડ કરો"}
                           </Button>
                           <Button
                             onClick={() => {
