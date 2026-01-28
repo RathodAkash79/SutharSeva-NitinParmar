@@ -54,8 +54,7 @@ export default function WorkGallery() {
   useEffect(() => {
     let filtered = projects.filter((p) => {
       const hasMedia = (p.photos || []).length > 0 || (p.images || []).length > 0;
-      const isCompleted = Boolean(p.expectedEndDate) || p.status === "Completed";
-      return hasMedia && isCompleted;
+      return hasMedia;
     });
 
     // Filter by search term - supports English, Gujarati, aliases, without emoji
