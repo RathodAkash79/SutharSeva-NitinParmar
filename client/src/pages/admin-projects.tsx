@@ -334,6 +334,7 @@ export default function AdminProjects() {
     }
 
     const derivedStatus = getDerivedStatus(formData.expectedEndDate);
+    const todayDate = new Date().toISOString().split("T")[0];
 
     try {
       if (editingId) {
@@ -360,7 +361,7 @@ export default function AdminProjects() {
           workTypes: formData.workTypes,
           totalAmount: resolvedTotalAmount,
           status: derivedStatus,
-          startDate: formData.startDate || "",
+          startDate: formData.startDate || todayDate,
           expectedEndDate: formData.expectedEndDate || "",
           images: [],
           photos: [],
@@ -459,6 +460,7 @@ export default function AdminProjects() {
   const computedAmount = hasFeet && currentRate > 0 ? Math.round(parsedFeet * currentRate) : 0;
   const displayAmount = computedAmount || parseInt(formData.totalAmount) || 0;
   const formDerivedStatus = getDerivedStatus(formData.expectedEndDate);
+  const todayDateForForm = new Date().toISOString().split("T")[0];
 
   if (loading) {
     return (
@@ -483,7 +485,7 @@ export default function AdminProjects() {
               totalFeet: "",
               totalAmount: "",
               status: "Ongoing",
-              startDate: "",
+              startDate: todayDateForForm,
               expectedEndDate: "",
             });
           }}
