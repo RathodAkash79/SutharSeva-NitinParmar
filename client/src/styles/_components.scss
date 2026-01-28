@@ -1073,6 +1073,13 @@
   z-index: $z-modal + 10;
 }
 
+.photo-lightbox__delete {
+  position: absolute;
+  top: $spacing-md;
+  left: $spacing-md;
+  z-index: $z-modal + 10;
+}
+
 .photo-viewer {
   display: flex;
   justify-content: center;

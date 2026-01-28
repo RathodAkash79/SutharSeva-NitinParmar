@@ -986,76 +986,73 @@ export default function AdminProjects() {
       </div>
 
       {activeProject && activePhoto && (
-        <div
-          className="modal-overlay modal-overlay--top"
-          onClick={(event) => {
-            if (event.target === event.currentTarget) {
+        <div className="photo-lightbox" onClick={closePhotoViewer}>
+          <button
+            className="btn btn-danger btn--icon photo-lightbox__delete"
+            onClick={(event) => {
+              event.stopPropagation();
+              handleViewerDelete();
+            }}
+            aria-label="Delete photo"
+          >
+            Delete
+          </button>
+          <button
+            className="btn btn-outline btn--icon photo-lightbox__close"
+            onClick={(event) => {
+              event.stopPropagation();
               closePhotoViewer();
-            }
-          }}
-        >
+            }}
+            aria-label="Close photo preview"
+          >
+            ✕
+          </button>
           <div
-            className="modal modal--large"
+            className="photo-lightbox__content"
+            onClick={(event) => event.stopPropagation()}
             onTouchStart={handleTouchStart}
             onTouchEnd={(event) => handleTouchEnd(activePhotos, event)}
           >
-            <div className="modal__header">
-              <h3 className="modal__title">ફોટો પ્રિવ્યુ</h3>
-              <button
-                className="btn btn-outline btn--icon"
-                onClick={closePhotoViewer}
-                aria-label="Close photo preview"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="modal__body photo-viewer">
-              <div className="photo-viewer__frame">
-                <OptimizedImage
-                  src={resolveApiAssetUrl(activePhoto.url)}
-                  alt="Project photo preview"
-                  aspectRatio="4 / 3"
-                  sizes="100vw"
-                  loading="eager"
-                  priority
-                  objectFit="contain"
-                  widthCandidates={[640, 900, 1200, 1600, 2000]}
-                />
-                <div className="photo-viewer__tag">
-                  {getWorkTypeLabel(
-                    (activePhoto.workTypes && activePhoto.workTypes[0]) ||
-                      activePhoto.workType ||
-                      activePhoto.type ||
-                      activePhoto.category ||
-                      "ફોટો",
-                    true
-                  )}
-                </div>
-                <button
-                  className="photo-viewer__delete btn btn-danger"
-                  onClick={handleViewerDelete}
-                >
-                  Delete
-                </button>
-                {activePhotos.length > 1 && (
-                  <>
-                    <button
-                      className="photo-viewer__nav photo-viewer__nav--prev"
-                      onClick={() => showPrevPhoto(activePhotos)}
-                      aria-label="Previous photo"
-                    >
-                      ‹
-                    </button>
-                    <button
-                      className="photo-viewer__nav photo-viewer__nav--next"
-                      onClick={() => showNextPhoto(activePhotos)}
-                      aria-label="Next photo"
-                    >
-                      ›
-                    </button>
-                  </>
+            <div className="photo-lightbox__frame">
+              <OptimizedImage
+                src={resolveApiAssetUrl(activePhoto.url)}
+                alt="Project photo preview"
+                sizes="100vw"
+                loading="eager"
+                priority
+                objectFit="contain"
+                widthCandidates={[640, 900, 1200, 1600, 2000]}
+                className="photo-lightbox__image"
+                imgClassName="photo-lightbox__img"
+              />
+              <div className="photo-viewer__tag">
+                {getWorkTypeLabel(
+                  (activePhoto.workTypes && activePhoto.workTypes[0]) ||
+                    activePhoto.workType ||
+                    activePhoto.type ||
+                    activePhoto.category ||
+                    "ફોટો",
+                  true
                 )}
               </div>
+              {activePhotos.length > 1 && (
+                <>
+                  <button
+                    className="photo-viewer__nav photo-viewer__nav--prev"
+                    onClick={() => showPrevPhoto(activePhotos)}
+                    aria-label="Previous photo"
+                  >
+                    ‹
+                  </button>
+                  <button
+                    className="photo-viewer__nav photo-viewer__nav--next"
+                    onClick={() => showNextPhoto(activePhotos)}
+                    aria-label="Next photo"
+                  >
+                    ›
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
