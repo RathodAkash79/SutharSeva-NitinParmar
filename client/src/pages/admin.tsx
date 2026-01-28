@@ -34,6 +34,9 @@ export default function Admin() {
   const [savingRate, setSavingRate] = useState(false);
   const [projects, setProjects] = useState<WorkProject[]>([]);
   const [attendance, setAttendance] = useState<Array<{ date: string; amount?: number }>>([]);
+  const [attendanceSelectedDate, setAttendanceSelectedDate] = useState(
+    new Date().toISOString().split("T")[0]
+  );
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -190,6 +193,10 @@ export default function Admin() {
   });
 
   const allMonthKeys = Array.from(new Set([...incomeByMonth.keys(), ...majduriByMonth.keys()])).sort().reverse();
+  const selectedMonthKey = attendanceSelectedDate
+    ? getMonthKey(new Date(`${attendanceSelectedDate}T00:00:00`))
+    : currentMonthKey;
+  const visibleMonthKeys = allMonthKeys.filter((key) => key === selectedMonthKey);
   const currentMonthKey = getMonthKey(new Date());
   const currentIncome = incomeByMonth.get(currentMonthKey) || 0;
   const currentMajduri = majduriByMonth.get(currentMonthKey) || 0;
@@ -286,7 +293,12 @@ export default function Admin() {
         {/* Tab content */}
         <div className="pb-lg">
           {activeTab === "projects" && <AdminProjects />}
-          {activeTab === "attendance" && <AdminAttendance />}
+          {activeTab === "attendance" && (
+            <AdminAttendance
+              selectedDate={attendanceSelectedDate}
+              onSelectedDateChange={setAttendanceSelectedDate}
+            />
+          )}
           {activeTab === "workers" && <AdminWorkers />}
           {activeTab === "rate" && (
             <div className="bg-white rounded-xl p-6 border border-border shadow-sm max-w-xl">
@@ -343,11 +355,11 @@ export default function Admin() {
             <h3 className="text-lg font-bold text-primary-dark">માસિક સંક્ષેપ</h3>
             <span className="text-xs text-secondary">Completed works only</span>
           </div>
-          {allMonthKeys.length === 0 ? (
+          {visibleMonthKeys.length === 0 ? (
             <p className="text-secondary">હજી કોઈ રેકોર્ડ નથી</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {allMonthKeys.map((monthKey) => {
+              {visibleMonthKeys.map((monthKey) => {
                 const income = incomeByMonth.get(monthKey) || 0;
                 const majduri = majduriByMonth.get(monthKey) || 0;
                 const profit = income > 0 ? income - majduri : 0;

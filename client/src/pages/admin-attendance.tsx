@@ -39,12 +39,20 @@ interface WorkerPayment {
   date: string;
 }
 
-export default function AdminAttendance() {
+type AdminAttendanceProps = {
+  selectedDate?: string;
+  onSelectedDateChange?: (date: string) => void;
+};
+
+export default function AdminAttendance({
+  selectedDate: controlledSelectedDate,
+  onSelectedDateChange,
+}: AdminAttendanceProps) {
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [attendance, setAttendance] = useState<Attendance[]>([]);
   const [projects, setProjects] = useState<WorkProject[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedDate, setSelectedDate] = useState<string>(
+  const [selectedDateState, setSelectedDateState] = useState<string>(
     new Date().toISOString().split("T")[0]
   );
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -72,6 +80,8 @@ export default function AdminAttendance() {
     return end ? date >= start && date <= end : date >= start;
   };
 
+  const selectedDate = controlledSelectedDate ?? selectedDateState;
+  const setSelectedDate = onSelectedDateChange ?? setSelectedDateState;
   const selectedDateObj = parseDateOnly(selectedDate);
   const availableProjects = projects.filter((project) => isProjectActiveOn(project, selectedDateObj));
   const runningProjects = availableProjects;
