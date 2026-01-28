@@ -51,6 +51,7 @@ export interface WorkProject {
     category?: string;
     type?: string;
   }>;
+  totalFeet?: number;
   totalAmount: number;
   finalAmount?: number;
   startDate?: string;
@@ -84,6 +85,7 @@ export async function loadProjects(): Promise<WorkProject[]> {
         workTypes: data.workTypes || [],
         images: data.images || [],
         photos: data.photos || [],
+        totalFeet: typeof data.totalFeet === "number" ? data.totalFeet : undefined,
         totalAmount: data.totalAmount || 0,
         finalAmount: typeof data.finalAmount === "number" ? data.finalAmount : undefined,
           startDate: data.startDate || "",
@@ -118,6 +120,7 @@ export function subscribeToProjects(
           workTypes: data.workTypes || [],
           images: data.images || [],
           photos: data.photos || [],
+          totalFeet: typeof data.totalFeet === "number" ? data.totalFeet : undefined,
           totalAmount: data.totalAmount || 0,
           finalAmount: typeof data.finalAmount === "number" ? data.finalAmount : undefined,
             startDate: data.startDate || "",

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
 import { Plus, Trash2, Edit2, Upload, X } from "lucide-react";
-import { subscribeToProjects, WorkProject } from "@/lib/firebase";
+import { subscribeToProjects, subscribeToRate, WorkProject } from "@/lib/firebase";
 import { db, auth } from "@/lib/firebase";
 import { apiUrl, resolveApiAssetUrl } from "@/lib/api";
 import { compressImageFile } from "@/lib/imageUpload";
@@ -34,6 +34,7 @@ export default function AdminProjects() {
     name: "",
     village: "",
     workTypes: [] as string[],
+    totalFeet: "",
     totalAmount: "",
     status: "Ongoing",
     startDate: "",
@@ -48,6 +49,7 @@ export default function AdminProjects() {
   const [activePhotoProjectId, setActivePhotoProjectId] = useState<string | null>(null);
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [currentRate, setCurrentRate] = useState(0);
 
   const workTypeOptions = getWorkTypeOptions().map((option) => option.label);
   const workTypeOptionObjects = getWorkTypeOptions();
@@ -218,6 +220,11 @@ export default function AdminProjects() {
   }, []);
 
   useEffect(() => {
+    const unsubscribe = subscribeToRate((rate) => setCurrentRate(rate));
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
     const attendanceQuery = query(collection(db, "attendance"));
     const unsubscribe = onSnapshot(attendanceQuery, (snapshot) => {
       const totals: Record<string, number> = {};
@@ -306,6 +313,8 @@ export default function AdminProjects() {
     }));
   };
 
+  const getDerivedStatus = (endDate: string) => (endDate ? "Completed" : "Ongoing");
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -314,34 +323,52 @@ export default function AdminProjects() {
       return;
     }
 
+    const parsedFeet = parseFloat(formData.totalFeet);
+    const hasFeet = Number.isFinite(parsedFeet) && parsedFeet > 0;
+    const computedAmount = hasFeet && currentRate > 0 ? Math.round(parsedFeet * currentRate) : 0;
+    const resolvedTotalAmount = computedAmount || parseInt(formData.totalAmount) || 0;
+
+    if (!resolvedTotalAmount) {
+      alert("કૃપા કરીને કુલ ફૂટ દાખલ કરો");
+      return;
+    }
+
+    const derivedStatus = getDerivedStatus(formData.expectedEndDate);
+
     try {
       if (editingId) {
         // Update existing
         const projectRef = doc(db, "projects", editingId);
-        await updateDoc(projectRef, {
+        const payload: Record<string, any> = {
           name: formData.name,
           village: formData.village,
           workTypes: formData.workTypes,
-          totalAmount: parseInt(formData.totalAmount) || 0,
-          status: formData.status,
+          totalAmount: resolvedTotalAmount,
+          status: derivedStatus,
           startDate: formData.startDate || "",
           expectedEndDate: formData.expectedEndDate || "",
-        });
+        };
+        if (hasFeet) payload.totalFeet = parsedFeet;
+
+        await updateDoc(projectRef, payload);
         alert("પ્રોજેક્ટ અપડેટ થયો");
       } else {
         // Add new
-        await addDoc(collection(db, "projects"), {
+        const payload: Record<string, any> = {
           name: formData.name,
           village: formData.village,
           workTypes: formData.workTypes,
-          totalAmount: parseInt(formData.totalAmount) || 0,
-          status: formData.status,
+          totalAmount: resolvedTotalAmount,
+          status: derivedStatus,
           startDate: formData.startDate || "",
           expectedEndDate: formData.expectedEndDate || "",
           images: [],
           photos: [],
           createdAt: Timestamp.now(),
-        });
+        };
+        if (hasFeet) payload.totalFeet = parsedFeet;
+
+        await addDoc(collection(db, "projects"), payload);
         alert("પ્રોજેક્ટ ઉમેરવામાં આવ્યો");
       }
 
@@ -350,6 +377,7 @@ export default function AdminProjects() {
         name: "",
         village: "",
         workTypes: [],
+        totalFeet: "",
         totalAmount: "",
         status: "Ongoing",
         startDate: "",
@@ -364,10 +392,18 @@ export default function AdminProjects() {
   };
 
   const handleEdit = (project: WorkProject) => {
+    const inferredFeet =
+      typeof project.totalFeet === "number"
+        ? project.totalFeet.toString()
+        : currentRate > 0 && project.totalAmount > 0
+          ? (project.totalAmount / currentRate).toFixed(2)
+          : "";
+
     setFormData({
       name: project.name,
       village: project.village,
       workTypes: project.workTypes,
+      totalFeet: inferredFeet,
       totalAmount: project.totalAmount.toString(),
       status: project.status,
       startDate: project.startDate || "",
@@ -396,11 +432,14 @@ export default function AdminProjects() {
       return;
     }
 
+    const today = new Date().toISOString().split("T")[0];
+    const resolvedEndDate = completionProject.expectedEndDate || today;
     setSavingCompletion(true);
     try {
       const projectRef = doc(db, "projects", completionProject.id);
       await updateDoc(projectRef, {
         status: "Completed",
+        expectedEndDate: resolvedEndDate,
         finalAmount: Number(finalIncome),
         completedAt: Timestamp.now(),
       });
@@ -414,6 +453,12 @@ export default function AdminProjects() {
       setSavingCompletion(false);
     }
   };
+
+  const parsedFeet = parseFloat(formData.totalFeet);
+  const hasFeet = Number.isFinite(parsedFeet) && parsedFeet > 0;
+  const computedAmount = hasFeet && currentRate > 0 ? Math.round(parsedFeet * currentRate) : 0;
+  const displayAmount = computedAmount || parseInt(formData.totalAmount) || 0;
+  const formDerivedStatus = getDerivedStatus(formData.expectedEndDate);
 
   if (loading) {
     return (
@@ -435,6 +480,7 @@ export default function AdminProjects() {
               name: "",
               village: "",
               workTypes: [],
+              totalFeet: "",
               totalAmount: "",
               status: "Ongoing",
               startDate: "",
@@ -506,7 +552,7 @@ export default function AdminProjects() {
 
             <div>
               <label className="block text-sm font-semibold text-secondary mb-2">
-                અંદાજિત અંત તારીખ
+                અંત તારીખ (વૈકલ્પિક)
               </label>
               <Input
                 type="date"
@@ -520,17 +566,32 @@ export default function AdminProjects() {
 
             <div>
               <label className="block text-sm font-semibold text-secondary mb-2">
-                કુલ રકમ (₹)
+                કુલ ફૂટ
               </label>
               <Input
                 type="number"
-                value={formData.totalAmount}
+                value={formData.totalFeet}
                 onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, totalAmount: e.target.value }))
+                  setFormData((prev) => ({ ...prev, totalFeet: e.target.value }))
                 }
-                placeholder="0"
+                placeholder="દા.ત. 120"
                 className="border-border"
               />
+              <p className="text-xs text-secondary mt-1">
+                વર્તમાન રેટ: ₹{currentRate.toLocaleString("en-IN")}/ફૂટ
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-secondary mb-2">
+                કુલ રકમ (રેટ મુજબ) ₹
+              </label>
+              <div className="w-full px-3 py-2 border border-border rounded-lg text-secondary bg-background">
+                ₹{displayAmount.toLocaleString("en-IN")}
+              </div>
+              {!currentRate && (
+                <p className="text-xs text-danger mt-1">રેટ સેટ નથી. એડમિન પેનલમાંથી રેટ સેટ કરો.</p>
+              )}
             </div>
 
             <div>
@@ -538,7 +599,7 @@ export default function AdminProjects() {
                 સ્થિતિ
               </label>
               <div className="w-full px-3 py-2 border border-border rounded-lg text-secondary bg-background">
-                {formData.status === "Completed" ? "પૂર્ણ" : "ચાલુ"}
+                {formDerivedStatus === "Completed" ? "પૂર્ણ" : "ચાલુ"}
               </div>
             </div>
           </div>

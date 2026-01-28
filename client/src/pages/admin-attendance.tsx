@@ -51,10 +51,33 @@ export default function AdminAttendance() {
   const [selectedWorkByWorker, setSelectedWorkByWorker] = useState<Record<string, string>>({});
   const [paymentsForDate, setPaymentsForDate] = useState<WorkerPayment[]>([]);
 
-  const runningProjects = projects.filter((project) => project.status !== "Completed");
+  const normalizeDate = (date: Date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const parseDateOnly = (value: string) => normalizeDate(new Date(`${value}T00:00:00`));
+
+  const getProjectStartDate = (project: WorkProject) => {
+    if (project.startDate) return parseDateOnly(project.startDate);
+    const created = project.createdAt?.toDate?.() || new Date();
+    return normalizeDate(created);
+  };
+
+  const getProjectEndDate = (project: WorkProject) => {
+    if (project.expectedEndDate) return parseDateOnly(project.expectedEndDate);
+    if (project.completedAt?.toDate) return normalizeDate(project.completedAt.toDate());
+    return null;
+  };
+
+  const isProjectActiveOn = (project: WorkProject, date: Date) => {
+    const start = getProjectStartDate(project);
+    const end = getProjectEndDate(project);
+    return end ? date >= start && date <= end : date >= start;
+  };
+
+  const selectedDateObj = parseDateOnly(selectedDate);
+  const availableProjects = projects.filter((project) => isProjectActiveOn(project, selectedDateObj));
+  const runningProjects = availableProjects;
 
   const getWorkById = (id?: string) =>
-    runningProjects.find((project) => project.id === id);
+    availableProjects.find((project) => project.id === id);
 
   const getWageMultiplier = (status: Attendance["status"]) => {
     if (status === "half") return 0.5;
@@ -91,17 +114,18 @@ export default function AdminAttendance() {
   }, []);
 
   useEffect(() => {
-    if (runningProjects.length === 0 || workers.length === 0) return;
+    if (availableProjects.length === 0 || workers.length === 0) return;
+    const availableIds = new Set(availableProjects.map((project) => project.id));
     setSelectedWorkByWorker((prev) => {
       const next = { ...prev };
       workers.forEach((worker) => {
-        if (!next[worker.id]) {
-          next[worker.id] = runningProjects[0].id;
+        if (!next[worker.id] || !availableIds.has(next[worker.id])) {
+          next[worker.id] = availableProjects[0].id;
         }
       });
       return next;
     });
-  }, [runningProjects.length, workers.length]);
+  }, [availableProjects, workers]);
 
   // Load attendance for selected date
   useEffect(() => {
@@ -434,7 +458,7 @@ export default function AdminAttendance() {
                     className="w-full px-3 py-2 border border-border rounded-lg text-secondary"
                   >
                     <option value="">-- કામ પસંદ કરો --</option>
-                    {runningProjects.map((project) => (
+                    {availableProjects.map((project) => (
                       <option key={project.id} value={project.id}>
                         {project.name} ({project.village})
                       </option>
@@ -477,17 +501,14 @@ export default function AdminAttendance() {
             {/* Work Info Section */}
             <div className="bg-white rounded-xl p-6 border border-border shadow-sm">
               <h3 className="text-lg font-bold text-primary-dark mb-3">કામ માહિતી</h3>
-              {runningProjects.length === 0 ? (
+              {availableProjects.length === 0 ? (
                 <p className="text-secondary">કોઈ ચાલુ કામ નથી</p>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {runningProjects.map((project) => {
-                    const start = project.startDate ? new Date(project.startDate) : project.createdAt.toDate();
-                    const end = project.expectedEndDate ? new Date(project.expectedEndDate) : undefined;
-                    const selected = new Date(selectedDate);
-                    const withinRange = end
-                      ? selected >= start && selected <= end
-                      : selected >= start;
+                  {availableProjects.map((project) => {
+                    const start = getProjectStartDate(project);
+                    const end = getProjectEndDate(project);
+                    const withinRange = isProjectActiveOn(project, selectedDateObj);
 
                     return (
                       <div key={project.id} className="border border-border rounded-lg p-4">

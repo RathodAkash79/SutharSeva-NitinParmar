@@ -51,7 +51,11 @@ export default function WorkGallery() {
 
   // Filter projects based on search, category, and village
   useEffect(() => {
-    let filtered = projects;
+    let filtered = projects.filter((p) => {
+      const hasMedia = (p.photos || []).length > 0 || (p.images || []).length > 0;
+      const isCompleted = Boolean(p.expectedEndDate) || p.status === "Completed";
+      return hasMedia && isCompleted;
+    });
 
     // Filter by search term - supports English, Gujarati, aliases, without emoji
     if (searchTerm.trim()) {
