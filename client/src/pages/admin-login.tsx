@@ -8,9 +8,7 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 // ALLOWED ADMIN EMAIL(S) - ONLY NITIN
 const ALLOWED_ADMIN_EMAILS = [
   "rathodakashr79@gmail.com",
-  "nitin@sutharseva.com",
-  "admin@sutharseva.com",
-  "nitin.parmar@sutharseva.com",
+  "parmarnitin4438@gmail.com",
 ];
 
 export default function AdminLogin() {
