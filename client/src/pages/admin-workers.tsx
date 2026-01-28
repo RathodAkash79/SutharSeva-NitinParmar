@@ -80,15 +80,7 @@ export default function AdminWorkers() {
     });
   };
 
-  const specialities = [
-    "સામાન્ય કારીગર",
-    "દરવાજા",
-    "કપાટ કાર્ય",
-    "પોલિશ",
-    "રંગ કાર્ય",
-    "વેલ્ડિંગ",
-    "હાર્ડવેર ઇન્સ્ટલેશન",
-  ];
+  const specialities = ["કારીગર", "મજૂર"];
 
   // Load workers
   useEffect(() => {
