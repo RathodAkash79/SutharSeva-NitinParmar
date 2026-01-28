@@ -7,20 +7,24 @@ import path from "path";
 import fs from "fs";
 
 // Cloudinary Configuration
-const hasCloudinaryUrl = Boolean(process.env.CLOUDINARY_URL);
-const hasCloudinaryKeys = Boolean(
-  process.env.CLOUDINARY_CLOUD_NAME &&
-    process.env.CLOUDINARY_API_KEY &&
-    process.env.CLOUDINARY_API_SECRET
-);
+const normalizeEnv = (value?: string) =>
+  value ? value.trim().replace(/^"(.*)"$/, "$1").replace(/^'(.*)'$/, "$1") : "";
+
+const cloudinaryUrl = normalizeEnv(process.env.CLOUDINARY_URL);
+const cloudName = normalizeEnv(process.env.CLOUDINARY_CLOUD_NAME);
+const cloudApiKey = normalizeEnv(process.env.CLOUDINARY_API_KEY);
+const cloudApiSecret = normalizeEnv(process.env.CLOUDINARY_API_SECRET);
+
+const hasCloudinaryUrl = Boolean(cloudinaryUrl);
+const hasCloudinaryKeys = Boolean(cloudName && cloudApiKey && cloudApiSecret);
 
 if (hasCloudinaryUrl) {
-  cloudinary.config({ cloudinary_url: process.env.CLOUDINARY_URL });
+  cloudinary.config({ cloudinary_url: cloudinaryUrl });
 } else if (hasCloudinaryKeys) {
   cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
+    cloud_name: cloudName,
+    api_key: cloudApiKey,
+    api_secret: cloudApiSecret,
   });
 } else {
   console.warn("Cloudinary is not configured. Uploads will fall back to local storage.");
@@ -110,8 +114,29 @@ export async function registerRoutes(
           }
         } catch (cloudinaryError) {
           console.error("Cloudinary upload error:", cloudinaryError);
-          // Fall back to local storage
-          url = await fallbackLocalUpload(req.file, req);
+          if (hasCloudinaryUrl && hasCloudinaryKeys) {
+            try {
+              cloudinary.config({
+                cloud_name: cloudName,
+                api_key: cloudApiKey,
+                api_secret: cloudApiSecret,
+              });
+              const retryResult = await cloudinary.uploader.upload(filePath, {
+                folder: "suthar_seva",
+                resource_type: "image",
+              });
+              url = retryResult?.secure_url || retryResult?.url;
+              if (!url) {
+                throw new Error("Cloudinary returned no URL after retry");
+              }
+            } catch (retryError) {
+              console.error("Cloudinary retry error:", retryError);
+              url = await fallbackLocalUpload(req.file, req);
+            }
+          } else {
+            // Fall back to local storage
+            url = await fallbackLocalUpload(req.file, req);
+          }
         }
       } else {
         console.warn("Cloudinary credentials not set, using local storage fallback");
