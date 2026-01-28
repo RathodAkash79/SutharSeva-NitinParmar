@@ -7,11 +7,24 @@ import path from "path";
 import fs from "fs";
 
 // Cloudinary Configuration
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
-});
+const hasCloudinaryUrl = Boolean(process.env.CLOUDINARY_URL);
+const hasCloudinaryKeys = Boolean(
+  process.env.CLOUDINARY_CLOUD_NAME &&
+    process.env.CLOUDINARY_API_KEY &&
+    process.env.CLOUDINARY_API_SECRET
+);
+
+if (hasCloudinaryUrl) {
+  cloudinary.config({ cloudinary_url: process.env.CLOUDINARY_URL });
+} else if (hasCloudinaryKeys) {
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+  });
+} else {
+  console.warn("Cloudinary is not configured. Uploads will fall back to local storage.");
+}
 
 const upload = multer({ 
   dest: "uploads/",
@@ -84,10 +97,11 @@ export async function registerRoutes(
       let url = "";
 
       // Try Cloudinary first
-      if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY) {
+      if (hasCloudinaryUrl || hasCloudinaryKeys) {
         try {
           const result = await cloudinary.uploader.upload(filePath, {
             folder: "suthar_seva",
+            resource_type: "image",
           });
 
           url = result?.secure_url || result?.url;

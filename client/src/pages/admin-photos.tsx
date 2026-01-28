@@ -110,6 +110,15 @@ export default function AdminPhotos() {
       const uploadedData = await uploadResponse.json();
       const imageUrl = uploadedData.secure_url || uploadedData.url;
 
+      if (!imageUrl) {
+        console.error("Upload response:", uploadedData);
+        throw new Error("Image URL not returned from server");
+      }
+
+      if (imageUrl.includes("/uploads/public/")) {
+        throw new Error("Upload did not persist to Cloudinary. Please check Cloudinary configuration.");
+      }
+
       // Update Firestore with the new photo
       const projectRef = doc(db, "projects", selectedProject.id);
       const workTypeIds = selectedCategories

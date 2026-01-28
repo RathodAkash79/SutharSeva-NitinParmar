@@ -118,6 +118,10 @@ export default function AdminProjects() {
         throw new Error("Image URL not returned from server");
       }
 
+      if (imageUrl.includes("/uploads/public/")) {
+        throw new Error("Upload did not persist to Cloudinary. Please check Cloudinary configuration.");
+      }
+
       console.log("✅ Image uploaded successfully:", imageUrl);
 
       const project = projects.find((p) => p.id === projectId);
