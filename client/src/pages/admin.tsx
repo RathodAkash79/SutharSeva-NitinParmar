@@ -6,6 +6,7 @@ import { onAuthStateChanged, signOut } from "firebase/auth";
 import AdminProjects from "./admin-projects";
 import AdminWorkers from "./admin-workers";
 import AdminAttendance from "./admin-attendance";
+import AdminWorkTypes from "./admin-work-types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -29,7 +30,7 @@ export default function Admin() {
   const [authUser, setAuthUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [authError, setAuthError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"projects" | "attendance" | "workers" | "rate">("attendance");
+  const [activeTab, setActiveTab] = useState<"projects" | "attendance" | "workers" | "rate" | "work-types">("attendance");
   const [rate, setRate] = useState("");
   const [savingRate, setSavingRate] = useState(false);
   const [projects, setProjects] = useState<WorkProject[]>([]);
@@ -192,12 +193,12 @@ export default function Admin() {
     majduriByMonth.set(monthKey, (majduriByMonth.get(monthKey) || 0) + amount);
   });
 
+  const currentMonthKey = getMonthKey(new Date());
   const allMonthKeys = Array.from(new Set([...incomeByMonth.keys(), ...majduriByMonth.keys()])).sort().reverse();
   const selectedMonthKey = attendanceSelectedDate
     ? getMonthKey(new Date(`${attendanceSelectedDate}T00:00:00`))
     : currentMonthKey;
   const visibleMonthKeys = allMonthKeys.filter((key) => key === selectedMonthKey);
-  const currentMonthKey = getMonthKey(new Date());
   const currentIncome = incomeByMonth.get(currentMonthKey) || 0;
   const currentMajduri = majduriByMonth.get(currentMonthKey) || 0;
   const hasCurrentIncome = currentIncome > 0;
@@ -280,6 +281,12 @@ export default function Admin() {
           >
             રેટ
           </button>
+          <button
+            className={`px-4 py-2 rounded-lg font-semibold ${activeTab === "work-types" ? "bg-primary text-white" : "border border-border text-secondary"}`}
+            onClick={() => setActiveTab("work-types")}
+          >
+            કામ પ્રકાર
+          </button>
           <div className="ml-auto">
             <button
               onClick={handleLogout}
@@ -346,49 +353,52 @@ export default function Admin() {
               </div>
             </div>
           )}
+          {activeTab === "work-types" && <AdminWorkTypes />}
         </div>
       </section>
 
-      <section className="px-lg pb-lg">
-        <div className="bg-white rounded-xl p-lg border border-border shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-bold text-primary-dark">માસિક સંક્ષેપ</h3>
-            <span className="text-xs text-secondary">Completed works only</span>
-          </div>
-          {visibleMonthKeys.length === 0 ? (
-            <p className="text-secondary">હજી કોઈ રેકોર્ડ નથી</p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {visibleMonthKeys.map((monthKey) => {
-                const income = incomeByMonth.get(monthKey) || 0;
-                const majduri = majduriByMonth.get(monthKey) || 0;
-                const profit = income > 0 ? income - majduri : 0;
-                return (
-                  <div key={monthKey} className="border border-border rounded-lg p-4">
-                    <p className="font-semibold text-primary-dark mb-2">{formatMonth(monthKey)}</p>
-                    <div className="text-sm text-secondary space-y-1">
-                      <p>મજૂરી: ₹{majduri.toLocaleString("en-IN")}</p>
-                      {income > 0 ? (
-                        <>
-                          <p>આવક: ₹{income.toLocaleString("en-IN")}</p>
-                          <p className={profit >= 0 ? "text-success" : "text-danger"}>
-                            નફો: ₹{profit.toLocaleString("en-IN")}
-                          </p>
-                        </>
-                      ) : (
-                        <>
-                          <p>આવક: —</p>
-                          <p className="text-secondary">નફો: —</p>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
+      {activeTab === "attendance" && (
+        <section className="px-lg pb-lg">
+          <div className="bg-white rounded-xl p-lg border border-border shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-primary-dark">માસિક સંક્ષેપ</h3>
+              <span className="text-xs text-secondary">Completed works only</span>
             </div>
-          )}
-        </div>
-      </section>
+            {visibleMonthKeys.length === 0 ? (
+              <p className="text-secondary">હજી કોઈ રેકોર્ડ નથી</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {visibleMonthKeys.map((monthKey) => {
+                  const income = incomeByMonth.get(monthKey) || 0;
+                  const majduri = majduriByMonth.get(monthKey) || 0;
+                  const profit = income > 0 ? income - majduri : 0;
+                  return (
+                    <div key={monthKey} className="border border-border rounded-lg p-4">
+                      <p className="font-semibold text-primary-dark mb-2">{formatMonth(monthKey)}</p>
+                      <div className="text-sm text-secondary space-y-1">
+                        <p>મજૂરી: ₹{majduri.toLocaleString("en-IN")}</p>
+                        {income > 0 ? (
+                          <>
+                            <p>આવક: ₹{income.toLocaleString("en-IN")}</p>
+                            <p className={profit >= 0 ? "text-success" : "text-danger"}>
+                              નફો: ₹{profit.toLocaleString("en-IN")}
+                            </p>
+                          </>
+                        ) : (
+                          <>
+                            <p>આવક: —</p>
+                            <p className="text-secondary">નફો: —</p>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </section>
+      )}
 
       <ConnectionStatusBar />
     </div>

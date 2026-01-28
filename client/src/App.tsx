@@ -11,6 +11,7 @@ import WorkGallery from "@/pages/work-gallery";
 import Admin from "@/pages/admin";
 import AdminLogin from "@/pages/admin-login";
 import { db } from "@/lib/firebase";
+import { startWorkTypeSync } from "@/lib/workTypes";
 import { collection, getDocs, query, limit } from "firebase/firestore";
 
 function Router() {
@@ -30,6 +31,8 @@ function App() {
   const shellClassName = "app-shell app-shell--navless";
 
   useEffect(() => {
+    const unsubscribeWorkTypes = startWorkTypeSync();
+
     // Test Firebase connection on app mount
     const testFirebaseConnection = async () => {
       try {
@@ -48,6 +51,9 @@ function App() {
     };
 
     testFirebaseConnection();
+    return () => {
+      unsubscribeWorkTypes?.();
+    };
   }, []);
 
   return (

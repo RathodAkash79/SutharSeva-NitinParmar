@@ -6,7 +6,8 @@ import { subscribeToProjects, WorkProject } from "@/lib/firebase";
 import { apiUrl, resolveApiAssetUrl } from "@/lib/api";
 import { compressImageFile } from "@/lib/imageUpload";
 import { db, auth } from "@/lib/firebase";
-import { getWorkTypeLabel, getWorkTypeOptions, resolveWorkTypeId } from "@/lib/workTypes";
+import { getWorkTypeLabel, resolveWorkTypeId } from "@/lib/workTypes";
+import { useWorkTypes } from "@/hooks/use-work-types";
 import OptimizedImage from "@/components/system/OptimizedImage";
 import {
   collection,
@@ -26,7 +27,16 @@ export default function AdminPhotos() {
   const [compressing, setCompressing] = useState(false);
   const [visibleCount, setVisibleCount] = useState(12);
 
-  const categories = getWorkTypeOptions();
+  const { options: categories } = useWorkTypes();
+
+  useEffect(() => {
+    if (categories.length === 0) return;
+    setSelectedCategories((prev) => {
+      const filtered = prev.filter((item) => categories.some((option) => option.label === item));
+      if (filtered.length > 0) return filtered;
+      return [categories[0].label];
+    });
+  }, [categories]);
 
   const handleCategoryToggle = (category: string) => {
     setSelectedCategories((prev) =>

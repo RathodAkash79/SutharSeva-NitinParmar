@@ -7,7 +7,8 @@ import { subscribeToProjects, subscribeToRate, WorkProject } from "@/lib/firebas
 import { db, auth } from "@/lib/firebase";
 import { apiUrl, resolveApiAssetUrl } from "@/lib/api";
 import { compressImageFile } from "@/lib/imageUpload";
-import { getWorkTypeLabel, getWorkTypeOptions, resolveWorkTypeId } from "@/lib/workTypes";
+import { getWorkTypeLabel, resolveWorkTypeId } from "@/lib/workTypes";
+import { useWorkTypes } from "@/hooks/use-work-types";
 import OptimizedImage from "@/components/system/OptimizedImage";
 import {
   collection,
@@ -51,8 +52,17 @@ export default function AdminProjects() {
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const [currentRate, setCurrentRate] = useState(0);
 
-  const workTypeOptions = getWorkTypeOptions().map((option) => option.label);
-  const workTypeOptionObjects = getWorkTypeOptions();
+  const { options: workTypeOptionObjects } = useWorkTypes();
+  const workTypeOptions = workTypeOptionObjects.map((option) => option.label);
+
+  useEffect(() => {
+    if (workTypeOptions.length === 0) return;
+    setSelectedPhotoCategories((prev) => {
+      const filtered = prev.filter((item) => workTypeOptions.includes(item));
+      if (filtered.length > 0) return filtered;
+      return [workTypeOptions[0]];
+    });
+  }, [workTypeOptions]);
 
   const handlePhotoCategoryToggle = (category: string) => {
     setSelectedPhotoCategories((prev) =>

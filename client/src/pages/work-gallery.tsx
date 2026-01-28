@@ -7,13 +7,13 @@ import { resolveApiAssetUrl } from "@/lib/api";
 import OptimizedImage from "@/components/system/OptimizedImage";
 import {
   getWorkTypeLabel,
-  getWorkTypeOptions,
   getPhotoWorkTypeIds,
   getProjectWorkTypeIds,
   matchesWorkTypeTerm,
   normalizeSearchText,
   resolveWorkTypeId,
 } from "@/lib/workTypes";
+import { useWorkTypes } from "@/hooks/use-work-types";
 
 export default function WorkGallery() {
   const [projects, setProjects] = useState<WorkProject[]>([]);
@@ -29,7 +29,8 @@ export default function WorkGallery() {
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const [visibleCount, setVisibleCount] = useState(12);
 
-  const categories = ["બધા", ...getWorkTypeOptions().map((option) => option.label)];
+  const { options: workTypeOptions } = useWorkTypes();
+  const categories = ["બધા", ...workTypeOptions.map((option) => option.label)];
 
   // Load projects from Firebase
   useEffect(() => {
