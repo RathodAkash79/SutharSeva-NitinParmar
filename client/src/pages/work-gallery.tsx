@@ -475,24 +475,34 @@ export default function WorkGallery() {
       )}
 
       {isViewerOpen && selectedWork && (
-        <div className="modal-overlay" tabIndex={-1} onKeyDown={handleKeyDown}>
-          <div className="modal modal--large" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
-            <div className="modal__header">
-              <h3 className="modal__title">{selectedWork.name}</h3>
-              <button className="btn btn-outline btn--icon" onClick={closeViewer} aria-label="Close photo viewer">
-                ✕
-              </button>
-            </div>
-            <div className="modal__body" onClick={showNextPhoto}>
+        <div className="photo-lightbox" tabIndex={-1} onKeyDown={handleKeyDown} onClick={closeViewer}>
+          <button
+            className="btn btn-outline btn--icon photo-lightbox__close"
+            onClick={(e) => {
+              e.stopPropagation();
+              closeViewer();
+            }}
+            aria-label="Close photo viewer"
+          >
+            ✕
+          </button>
+          <div
+            className="photo-lightbox__content"
+            onClick={(e) => e.stopPropagation()}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
+            <div className="photo-lightbox__frame" onClick={showNextPhoto}>
               <OptimizedImage
                 src={getFlatImages(selectedWork)[activePhotoIndex]}
                 alt={`${selectedWork.name} ફોટો`}
-                aspectRatio="16 / 9"
                 sizes="100vw"
                 loading="eager"
                 priority
                 objectFit="contain"
                 widthCandidates={[640, 900, 1200, 1600, 2000]}
+                className="photo-lightbox__image"
+                imgClassName="photo-lightbox__img"
               />
             </div>
           </div>

@@ -5,7 +5,7 @@ interface OptimizedImageProps {
   publicId?: string;
   cloudName?: string;
   alt: string;
-  aspectRatio: string;
+  aspectRatio?: string;
   className?: string;
   imgClassName?: string;
   sizes?: string;
@@ -130,7 +130,11 @@ export default function OptimizedImage({
   return (
     <div
       className={`optimized-image ${className || ""}`}
-      style={{ aspectRatio, backgroundImage: `url(${lqipSrc})` }}
+      style={
+        aspectRatio
+          ? { aspectRatio, backgroundImage: `url(${lqipSrc})` }
+          : { backgroundImage: `url(${lqipSrc})` }
+      }
     >
       <img
         src={showFallback ? fallbackSrc : finalSrc}
