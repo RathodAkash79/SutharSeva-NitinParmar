@@ -260,8 +260,8 @@ export default function WorkGallery() {
         <div className="app-header__container">
           <Link href="/">
             <a className="app-header__logo">
-              <span className="app-header__logo-icon">🔨</span>
-              <span className="app-header__logo-text">સુથાર સેવા</span>
+              <img src="/logo.svg" alt="NP Carpentry" className="app-header__logo-icon" style={{ width: '44px', height: '44px' }} />
+              <span className="app-header__logo-text">NP Carpentry</span>
             </a>
           </Link>
           <div className="app-header__actions">
@@ -418,13 +418,27 @@ export default function WorkGallery() {
         </section>
       </main>
 
-      <footer className="section section--compact text-center">
+      <footer className="section section--compact text-center" style={{ position: "relative" }}>
         <div className="page page--centered">
           <h4 className="font-bold text-primary-dark text-lg mb-sm">નિતિનભાઈ પરમાર</h4>
           <p className="text-secondary font-medium mb-md">📱 મોબાઈલ: 8160911612</p>
           <a href="https://wa.me/918160911612" className="btn btn-success">
             💬 WhatsApp મેસેજ
           </a>
+          <Link href="/admin-login">
+            <a
+              aria-label="Admin access"
+              style={{
+                position: "absolute",
+                right: "12px",
+                bottom: "12px",
+                width: "12px",
+                height: "12px",
+                opacity: 0,
+                zIndex: 1,
+              }}
+            />
+          </Link>
         </div>
       </footer>
 

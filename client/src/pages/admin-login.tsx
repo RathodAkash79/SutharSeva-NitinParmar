@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +21,7 @@ export default function AdminLogin() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [isChecking, setIsChecking] = useState(true);
 
   const isAllowedAdmin = (userEmail: string): boolean => {
     return ALLOWED_ADMIN_EMAILS.some(
@@ -28,6 +29,22 @@ export default function AdminLogin() {
         userEmail.toLowerCase() === allowedEmail.toLowerCase()
     );
   };
+
+  // CHECK IF USER IS ALREADY LOGGED IN
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user && isAllowedAdmin(user.email || "")) {
+        // ALREADY LOGGED IN AS AUTHORIZED ADMIN - REDIRECT TO ADMIN PAGE
+        console.log(`✅ User already authenticated: ${user.email}`);
+        setLocation("/admin");
+      } else {
+        // NOT LOGGED IN OR NOT AUTHORIZED - SHOW LOGIN PAGE
+        setIsChecking(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [setLocation]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,10 +104,21 @@ export default function AdminLogin() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+      {isChecking ? (
+        <div className="w-full max-w-md">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+            <p className="text-gray-700 font-medium">🔐 Checking authentication...</p>
+          </div>
+        </div>
+      ) : (
+        <div className="w-full max-w-md">
         {/* HEADER */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-2">🔨 સુથાર સેવા</h1>
+          <h1 className="text-4xl font-bold mb-2 flex items-center justify-center gap-3">
+            <img src="/logo.svg" alt="NP Carpentry" className="h-12 w-12" />
+            <span>NP Carpentry</span>
+          </h1>
           <h2 className="text-2xl font-semibold text-gray-800 mb-2">
             Admin Panel
           </h2>
@@ -163,7 +191,8 @@ export default function AdminLogin() {
         <div className="mt-6 text-center text-xs text-gray-600 border-t pt-4">
           <p>🔒 This panel is restricted to authorized administrators only.</p>
         </div>
-      </div>
+        </div>
+      )}
     </div>
   );
 }

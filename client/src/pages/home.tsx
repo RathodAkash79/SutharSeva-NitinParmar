@@ -43,8 +43,8 @@ export default function Home() {
           <div className="app-header__container">
             <Link href="/">
               <a className="app-header__logo">
-                <span className="app-header__logo-icon">🔨</span>
-                <span className="app-header__logo-text">સુથાર સેવા</span>
+                <img src="/logo.svg" alt="NP Carpentry" className="app-header__logo-icon" style={{ width: '44px', height: '44px' }} />
+                <span className="app-header__logo-text">NP Carpentry</span>
               </a>
             </Link>
             <div className="app-header__actions">

@@ -210,9 +210,9 @@ export default function Admin() {
       <header className="sticky top-0 z-30 bg-surface shadow-sm border-b border-border" style={{ backdropFilter: "blur(12px)" }}>
         <div className="px-lg py-md flex items-center justify-between">
           <div className="flex items-center gap-sm">
-            <span className="text-2xl">🔨</span>
+            <img src="/logo.svg" alt="NP Carpentry" className="h-9 w-9" />
             <div className="leading-tight">
-              <p className="text-sm font-semibold text-primary-dark">સુથાર સેવા</p>
+              <p className="text-sm font-semibold text-primary-dark">NP Carpentry</p>
               <p className="text-xs text-secondary">Admin Panel</p>
             </div>
           </div>
