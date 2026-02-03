@@ -40,6 +40,7 @@ export default function AdminProjects() {
     status: "Ongoing",
     startDate: "",
     expectedEndDate: "",
+    workSpecificRate: "",
   });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [completionProject, setCompletionProject] = useState<WorkProject | null>(null);
@@ -335,7 +336,13 @@ export default function AdminProjects() {
 
     const parsedFeet = parseFloat(formData.totalFeet);
     const hasFeet = Number.isFinite(parsedFeet) && parsedFeet > 0;
-    const computedAmount = hasFeet && currentRate > 0 ? Math.round(parsedFeet * currentRate) : 0;
+    
+    // Use work-specific rate if provided, otherwise use current global rate
+    const rateToUse = formData.workSpecificRate 
+      ? parseFloat(formData.workSpecificRate) 
+      : currentRate;
+    
+    const computedAmount = hasFeet && rateToUse > 0 ? Math.round(parsedFeet * rateToUse) : 0;
     const resolvedTotalAmount = computedAmount || parseInt(formData.totalAmount) || 0;
 
     if (!resolvedTotalAmount) {
@@ -360,6 +367,9 @@ export default function AdminProjects() {
           expectedEndDate: formData.expectedEndDate || "",
         };
         if (hasFeet) payload.totalFeet = parsedFeet;
+        if (formData.workSpecificRate) {
+          payload.workSpecificRate = parseFloat(formData.workSpecificRate);
+        }
 
         await updateDoc(projectRef, payload);
         alert("પ્રોજેક્ટ અપડેટ થયો");
@@ -378,6 +388,9 @@ export default function AdminProjects() {
           createdAt: Timestamp.now(),
         };
         if (hasFeet) payload.totalFeet = parsedFeet;
+        if (formData.workSpecificRate) {
+          payload.workSpecificRate = parseFloat(formData.workSpecificRate);
+        }
 
         await addDoc(collection(db, "projects"), payload);
         alert("પ્રોજેક્ટ ઉમેરવામાં આવ્યો");
@@ -393,6 +406,7 @@ export default function AdminProjects() {
         status: "Ongoing",
         startDate: "",
         expectedEndDate: "",
+        workSpecificRate: "",
       });
       setEditingId(null);
       setShowForm(false);
@@ -419,6 +433,7 @@ export default function AdminProjects() {
       status: project.status,
       startDate: project.startDate || "",
       expectedEndDate: project.expectedEndDate || "",
+      workSpecificRate: project.workSpecificRate ? project.workSpecificRate.toString() : "",
     });
     setEditingId(project.id);
     setShowForm(true);
@@ -438,10 +453,11 @@ export default function AdminProjects() {
 
   const handleCompleteProject = async () => {
     if (!completionProject) return;
-    if (!finalIncome || isNaN(Number(finalIncome))) {
-      alert("કૃપા કરીને અંતિમ આવક દાખલ કરો");
-      return;
-    }
+    
+    // Determine final income: use entered value if provided, otherwise use original totalAmount
+    const incomeToUse = finalIncome && !isNaN(Number(finalIncome)) 
+      ? Number(finalIncome) 
+      : completionProject.totalAmount;
 
     const today = new Date().toISOString().split("T")[0];
     const resolvedEndDate = completionProject.expectedEndDate || today;
@@ -451,7 +467,7 @@ export default function AdminProjects() {
       await updateDoc(projectRef, {
         status: "Completed",
         expectedEndDate: resolvedEndDate,
-        finalAmount: Number(finalIncome),
+        finalAmount: incomeToUse,
         completedAt: Timestamp.now(),
       });
       alert("પ્રોજેક્ટ પૂર્ણ થયો તરીકે સાચવાયું");
@@ -467,7 +483,13 @@ export default function AdminProjects() {
 
   const parsedFeet = parseFloat(formData.totalFeet);
   const hasFeet = Number.isFinite(parsedFeet) && parsedFeet > 0;
-  const computedAmount = hasFeet && currentRate > 0 ? Math.round(parsedFeet * currentRate) : 0;
+  
+  // Use work-specific rate if provided, otherwise use global rate
+  const rateToDisplay = formData.workSpecificRate 
+    ? parseFloat(formData.workSpecificRate) 
+    : currentRate;
+  
+  const computedAmount = hasFeet && rateToDisplay > 0 ? Math.round(parsedFeet * rateToDisplay) : 0;
   const displayAmount = computedAmount || parseInt(formData.totalAmount) || 0;
   const formDerivedStatus = getDerivedStatus(formData.expectedEndDate);
   const todayDateForForm = new Date().toISOString().split("T")[0];
@@ -596,6 +618,24 @@ export default function AdminProjects() {
 
             <div>
               <label className="block text-sm font-semibold text-secondary mb-2">
+                આ કામ માટે કસ્ટમ રેટ (વૈકલ્પિક) ₹/ફૂટ
+              </label>
+              <Input
+                type="number"
+                value={formData.workSpecificRate}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, workSpecificRate: e.target.value }))
+                }
+                placeholder="દા.ત. 150 (અથવા ખાલી રાખો - વર્તમાન રેટ આપશે)"
+                className="border-border"
+              />
+              <p className="text-xs text-secondary mt-1">
+                આ ફીલ્ડ આ કામ માટે શરણાર્થીય છે. બીજા કામમાં ઉપયોગ થશે નહીં.
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-secondary mb-2">
                 કુલ રકમ (રેટ મુજબ) ₹
               </label>
               <div className="w-full px-3 py-2 border border-border rounded-lg text-secondary bg-background">
@@ -679,7 +719,7 @@ export default function AdminProjects() {
 
           <div>
             <label className="block text-sm font-semibold text-secondary mb-2">
-              અંતિમ આવક (ડિસ્કાઉન્ટ બાદ) ₹
+              અંતિમ આવક (ડિસ્કાઉન્ટ બાદ) ₹ (વૈકલ્પિક)
             </label>
             <Input
               type="number"
@@ -688,6 +728,9 @@ export default function AdminProjects() {
               placeholder="દા.ત. 125000"
               className="border-border"
             />
+            <p className="text-xs text-secondary mt-1">
+              જો ખાલી રહે તો મૂળ રકમ આપશે: ₹{completionProject?.totalAmount.toLocaleString("en-IN")}
+            </p>
           </div>
 
           <div className="flex flex-wrap gap-2 justify-end">

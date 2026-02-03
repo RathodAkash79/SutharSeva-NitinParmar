@@ -54,6 +54,7 @@ export interface WorkProject {
   totalFeet?: number;
   totalAmount: number;
   finalAmount?: number;
+  workSpecificRate?: number; // Custom rate for this specific work only
   startDate?: string;
   expectedEndDate?: string;
   completedAt?: Timestamp;
